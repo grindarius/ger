@@ -1,0 +1,23 @@
+[package]
+name = "ger-from-row"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+doc = true
+doctest = false
+
+[[test]]
+name = "tests"
+path = "tests/progress.rs"
+
+[dependencies]
+anyhow = "1.0"
+proc-macro2 = "1.0"
+quote = "1"
+syn = { version = "1", features = ["full"] }
+
+[dev-dependencies]
+tokio-postgres = "0.7"
+trybuild = "1.0"
