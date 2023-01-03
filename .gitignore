@@ -1,0 +1,8 @@
+# rust ignore
+target/
+
+# ts-rs bindings
+bindings/
+
+# secrets
+.env.*
