@@ -5,6 +5,11 @@ use crate::openapi::security_addon::SecurityAddon;
     paths(
         crate::routes::hello::handler,
     ),
+    components(
+        schemas(
+            crate::errors::FormattedErrorResponse
+        )
+    ),
     modifiers(&SecurityAddon)
 )]
 pub struct ApiDoc;

@@ -4,7 +4,10 @@ use actix_web::{
 };
 use futures::future::LocalBoxFuture;
 
-use crate::{errors::HttpError, constants::{SWAGGER_API_KEY_NAME, SWAGGER_API_KEY}};
+use crate::{
+    constants::{SWAGGER_API_KEY, SWAGGER_API_KEY_NAME},
+    errors::HttpError,
+};
 
 pub struct ApiKeyMiddleware<S> {
     pub service: S,
