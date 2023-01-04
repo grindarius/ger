@@ -16,9 +16,11 @@ keywords = [
 actix-cors = "0"
 actix-files = "0"
 actix-web = { version = "4", features = ["rustls"] }
+anyhow = "1"
 argon2 = "0"
 deadpool-postgres = "0"
 dotenvy = "0"
+ger-from-row = { path = "../ger-from-row" }
 jsonwebtoken = { version = "8", features = ["use_pem"] }
 lazy_static = "1"
 rustls = "0"
@@ -26,5 +28,9 @@ rustls-pemfile = "1"
 serde = { version = "1", features = ["derive"] }
 time = { version = "0.3", features = ["local-offset"] }
 tokio-postgres = { version = "0", features = ["with-time-0_3"] }
+tracing = "0.1"
+tracing-actix-web = "0.7"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["json"] }
 utoipa = { version = "2", features = ["time", "actix_extras"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
