@@ -29,6 +29,12 @@ lazy_static! {
         DecodingKey::from_rsa_pem(&refresh_token_public_key.as_bytes())
             .expect("cannot create refresh token public key in constants.rs")
     };
+    pub static ref SWAGGER_API_KEY_NAME: String = dotenvy::var("GER_SWAGGER_API_KEY_NAME")
+        .expect("cannot load swagger api key name");
+    pub static ref SWAGGER_API_KEY: String = dotenvy::var("GER_SWAGGER_API_KEY")
+        .expect("cannot load swagger api key");
+    pub static ref ID_LENGTH: u8 = 32;
+    pub static ref FILE_NAME_LENGTH: u8 = 48;
 }
 
 #[derive(ger_from_row::FromRow, Serialize, Deserialize)]
