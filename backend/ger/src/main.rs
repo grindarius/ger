@@ -5,6 +5,10 @@ use deadpool_postgres::Config;
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 use tracing_actix_web::TracingLogger;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+use crate::openapi::apidoc::ApiDoc;
 
 mod constants;
 mod errors;
@@ -34,8 +38,7 @@ fn load_rustls_config() -> rustls::ServerConfig {
         .collect();
 
     if keys.is_empty() {
-        eprintln!("could not locate pkcs 8 private keys");
-        std::process::exit(1);
+        panic!("could not locate pkcs 8 private keys");
     }
 
     config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
@@ -76,10 +79,17 @@ async fn main() -> std::io::Result<()> {
     // https setup
     let rustls_config = load_rustls_config();
 
+    tracing::info!("starting https server at https://127.0.0.1:5155");
+    tracing::info!("starting swagger ui at https://127.0.0.1:5155/swagger-doc/");
+
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
             .route("/", web::get().to(crate::routes::hello::handler))
+            .service(
+                SwaggerUi::new("/swagger-doc/{_:.*}")
+                    .url("/openapi/openapi.json", ApiDoc::openapi()),
+            )
     })
     .bind_rustls(("127.0.0.1", 5155), rustls_config)
     .expect("cannot start https server")
