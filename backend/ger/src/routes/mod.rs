@@ -1,2 +1,1 @@
-mod auth;
-mod hello;
+pub mod hello;
