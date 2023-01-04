@@ -3,6 +3,8 @@ use utoipa::{
     Modify,
 };
 
+use crate::constants::SWAGGER_API_KEY_NAME;
+
 pub struct SecurityAddon;
 
 impl Modify for SecurityAddon {
@@ -10,9 +12,7 @@ impl Modify for SecurityAddon {
         let components = openapi.components.as_mut().unwrap();
         components.add_security_scheme(
             "api_key",
-            SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new(
-                "reeba_qwik_swagger_apikey",
-            ))),
+            SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new(SWAGGER_API_KEY_NAME.to_string()))),
         )
     }
 }

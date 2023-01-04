@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::future::LocalBoxFuture;
 
-use crate::errors::HttpError;
+use crate::{errors::HttpError, constants::{SWAGGER_API_KEY_NAME, SWAGGER_API_KEY}};
 
 pub struct ApiKeyMiddleware<S> {
     pub service: S,
@@ -36,15 +36,10 @@ where
             Box::pin(async { Ok(request.into_response(response)) })
         };
 
-        let swagger_api_key_name = dotenvy::var("REEBA_QWIK_SWAGGER_API_KEY_NAME")
-            .expect("cannot get swagger api key name");
-        let swagger_api_key =
-            dotenvy::var("REEBA_QWIK_SWAGGER_API_KEY").expect("cannot get swagger api key");
-
-        match request.headers().get(swagger_api_key_name) {
-            Some(key) if key != swagger_api_key.as_str() => {
+        match request.headers().get(SWAGGER_API_KEY_NAME.to_string()) {
+            Some(key) if key != SWAGGER_API_KEY.as_str() => {
                 if self.log_only {
-                    log::debug!("incorrect api provided")
+                    tracing::debug!("incorrect api provided")
                 } else {
                     return response(
                         request,
@@ -55,7 +50,7 @@ where
             }
             None => {
                 if self.log_only {
-                    log::debug!("missing api key")
+                    tracing::debug!("missing api key")
                 } else {
                     return response(
                         request,
@@ -69,14 +64,13 @@ where
         }
 
         if self.log_only {
-            log::debug!("performing operation")
+            tracing::debug!("performing operation")
         }
 
         let future = self.service.call(request);
 
         Box::pin(async move {
             let response = future.await?;
-
             Ok(response)
         })
     }
