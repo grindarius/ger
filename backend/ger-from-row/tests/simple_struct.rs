@@ -1,4 +1,4 @@
-use try_from_row_derive::*;
+use ger_from_row::*;
 
 #[derive(FromRow)]
 #[allow(dead_code)]
