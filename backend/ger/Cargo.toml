@@ -13,16 +13,18 @@ keywords = [
 ]
 
 [dependencies]
-actix-cors = "0.6"
-actix-files = "0.6"
+actix-cors = "0"
+actix-files = "0"
 actix-web = { version = "4", features = ["rustls"] }
-argon2 = "0.4.1"
-deadpool-postgres = "0.10"
-dotenvy = "0.15"
-jsonwebtoken = { version = "8.2.0", features = ["use_pem"] }
-rustls = "0.20"
-rustls-pemfile = "1.0"
+argon2 = "0"
+deadpool-postgres = "0"
+dotenvy = "0"
+jsonwebtoken = { version = "8", features = ["use_pem"] }
+lazy_static = "1"
+rustls = "0"
+rustls-pemfile = "1"
 serde = { version = "1", features = ["derive"] }
 time = { version = "0.3", features = ["local-offset"] }
-tokio-postgres = "0.7"
-utoipa = { version = "2.4.2", features = ["time", "actix_extras"] }
+tokio-postgres = { version = "0", features = ["with-time-0_3"] }
+utoipa = { version = "2", features = ["time", "actix_extras"] }
+utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
