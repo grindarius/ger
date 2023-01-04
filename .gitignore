@@ -6,3 +6,6 @@ bindings/
 
 # secrets
 .env.*
+
+# certificate for local testing
+backend/ger/cert/
