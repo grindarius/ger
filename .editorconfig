@@ -6,5 +6,8 @@ end_of_line = lf
 charset = utf-8
 indent_style = space
 
-[*.{rs, toml}]
+[*.{json, mjs, rs, toml}]
 indent_size = 4
+
+[*.yaml]
+indent_size = 2

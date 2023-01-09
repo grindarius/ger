@@ -1,0 +1,20 @@
+{
+    "name": "ger-sql-to-rust-struct",
+    "version": "1.0.0",
+    "description": "convert sql to rust structs",
+    "type": "module",
+    "exports": "./src/index.mjs",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "convert": "node src/index.mjs"
+    },
+    "keywords": [],
+    "author": "Bhattarapong Somwong",
+    "license": "MIT",
+    "dependencies": {
+        "pgsql-parser": "^13.4.1"
+    },
+    "devDependencies": {
+        "@types/node": "^18.11.18"
+    }
+}

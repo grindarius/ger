@@ -1,19 +1,22 @@
 use std::{fs::File, io::BufReader};
 
 use actix_web::{web, App, HttpServer};
-use deadpool_postgres::Config;
+use deadpool_postgres::{Config, ManagerConfig, RecyclingMethod, Runtime};
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
+use tokio_postgres::NoTls;
 use tracing_actix_web::TracingLogger;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::openapi::apidoc::ApiDoc;
+use crate::shared_app_data::SharedAppData;
 
 mod constants;
 mod errors;
 mod openapi;
 mod routes;
+mod shared_app_data;
 
 /// Load key file and certificates file for spinnning server up in https context
 fn load_rustls_config() -> rustls::ServerConfig {
@@ -44,12 +47,8 @@ fn load_rustls_config() -> rustls::ServerConfig {
     config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    // environment variables setup
-    dotenvy::from_filename(".env.local").expect("no environment variables file found");
-
-    // postgres related setup
+/// Load postgres config from environment variables
+fn load_postgres_config() -> Config {
     let postgres_username =
         dotenvy::var("GER_POSTGRES_USERNAME").expect("missing postgres username");
     let postgres_password =
@@ -69,6 +68,23 @@ async fn main() -> std::io::Result<()> {
             .expect("cannot convert postgres port to u16"),
     );
     postgres_config.dbname = Some(postgres_database_name);
+    postgres_config.manager = Some(ManagerConfig {
+        recycling_method: RecyclingMethod::Fast,
+    });
+
+    postgres_config
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    // environment variables setup
+    dotenvy::from_filename(".env.local").expect("no environment variables file found");
+
+    // postgres related setup
+    let postgres_config = load_postgres_config();
+    let pool = postgres_config
+        .create_pool(Some(Runtime::Tokio1), NoTls)
+        .expect("cannot create postgres pool from a given config");
 
     // logging setup
     let (non_blocking_writer, _guard) = tracing_appender::non_blocking(std::io::stdout());
@@ -84,6 +100,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(SharedAppData::new(pool.clone())))
             .wrap(TracingLogger::default())
             .route("/", web::get().to(crate::routes::hello::handler))
             .service(
