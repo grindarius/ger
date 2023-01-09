@@ -7,7 +7,8 @@ use crate::openapi::security_addon::SecurityAddon;
     ),
     components(
         schemas(
-            crate::errors::FormattedErrorResponse
+            crate::errors::FormattedErrorResponse,
+            crate::constants::GetServerInformationResponse
         )
     ),
     modifiers(&SecurityAddon)

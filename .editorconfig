@@ -3,11 +3,10 @@ root = true
 [*]
 insert_final_newline = true
 end_of_line = lf
-charset = utf-8
 indent_style = space
 
-[*.{json, mjs, rs, toml}]
+[*.{rs, toml}]
 indent_size = 4
 
-[*.yaml]
+[*.{tsx, ts, yaml, json, mjs}]
 indent_size = 2
