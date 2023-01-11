@@ -23,6 +23,7 @@ deadpool-postgres = "0.10"
 derive_more = "0"
 dotenvy = "0"
 futures = "0.3"
+geo-types = "0.7"
 ger-from-row = { path = "../ger-from-row" }
 jsonwebtoken = { version = "8", features = ["use_pem"] }
 lazy_static = "1"
@@ -31,7 +32,7 @@ rustls-pemfile = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 time = { version = "0.3", features = ["local-offset"] }
-tokio-postgres = { version = "0.7", features = ["with-time-0_3"] }
+tokio-postgres = { version = "0.7", features = ["with-time-0_3", "with-serde_json-1", "with-geo-types-0_7"] }
 tracing = "0.1"
 tracing-actix-web = "0.7"
 tracing-appender = "0.2"

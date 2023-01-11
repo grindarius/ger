@@ -707,6 +707,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "geo-types"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e26879b63ac36ca5492918dc16f8c1e604b0f70f884fffbd3533f89953ab1991"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "ger"
 version = "0.1.0"
 dependencies = [
@@ -719,6 +728,7 @@ dependencies = [
  "derive_more",
  "dotenvy",
  "futures",
+ "geo-types",
  "ger-from-row",
  "jsonwebtoken",
  "lazy_static",
@@ -1205,7 +1215,10 @@ checksum = "73d946ec7d256b04dfadc4e6a3292324e6f417124750fc5c0950f981b703a0f1"
 dependencies = [
  "bytes",
  "fallible-iterator",
+ "geo-types",
  "postgres-protocol",
+ "serde",
+ "serde_json",
  "time",
 ]
 
