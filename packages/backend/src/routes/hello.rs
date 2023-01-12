@@ -1,4 +1,4 @@
-use actix_web::{HttpResponse, Responder};
+use actix_web::HttpResponse;
 
 use crate::constants::GetServerInformationResponse;
 
@@ -14,6 +14,18 @@ use crate::constants::GetServerInformationResponse;
         )
     )
 )]
-pub async fn handler() -> impl Responder {
+pub async fn handler() -> HttpResponse {
     HttpResponse::Ok().json(GetServerInformationResponse::default())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::http::StatusCode;
+
+    #[actix_web::test]
+    async fn test_hello_ok() {
+        let resp = handler().await;
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
 }
