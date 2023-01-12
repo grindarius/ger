@@ -39,6 +39,61 @@ create table faculties (
     primary key (faculty_id)
 );
 
+create table users (
+    user_id text not null unique,
+    user_username text not null unique,
+    user_email text not null unique,
+    user_password text not null,
+    user_role t_user_role not null,
+    primary key (user_id)
+);
+
+-- students data
+create table students (
+    student_id text not null references users(user_id) unique,
+    student_representative_id text not null unique,
+    student_profile_image_path text not null default '',
+    student_nid text not null,
+    student_previous_school_name text not null,
+    student_previous_school_gpa real not null,
+    professor_id text not null,
+    -- what year is the student's first academic year in the university
+    first_academic_year_id text not null,
+    primary key (user_id),
+    foreign key (first_academic_year_id) references academic_years(academic_year_id),
+    foreign key (professor_id) references professors(professor_id)
+);
+
+create table student_names (
+    student_name_id text not null unique,
+    student_id text not null,
+    -- iso 639-1 language code
+    student_name_language text not null,
+    student_first_name text not null,
+    student_middle_name text not null,
+    student_last_name text not null,
+    primary key (student_name_id),
+    foreign key (student_id) references students(student_id)
+);
+
+create table professors (
+    professor_id text not null references users(user_id) unique,
+    professor_profile_image_path text not null default '',
+    primary key (professor_id)
+);
+
+create table professor_names (
+    professor_name_id text not null unique,
+    professor_id text not null,
+    -- iso 639-1 language code
+    professor_name_language text not null,
+    professor_first_name text not null,
+    professor_middle_name text not null,
+    professor_last_name text not null,
+    primary key (professor_name_id),
+    foreign key (professor_id) references professors(professor_id)
+);
+
 -- available curriculums for studying in the university, such as:
 -- - normal bachelor
 -- - special bachelor (saturdays and sundays)
@@ -208,57 +263,3 @@ create table student_scores (
     primary key (semester_id, subject_id, student_id, assignment_id)
 );
 
-create table professors (
-    professor_id text not null references users(user_id) unique,
-    professor_profile_image_path text not null default '',
-    primary key (professor_id)
-);
-
-create table professor_names (
-    professor_name_id text not null unique,
-    professor_id text not null,
-    -- iso 639-1 language code
-    professor_name_language text not null,
-    professor_first_name text not null,
-    professor_middle_name text not null,
-    professor_last_name text not null,
-    primary key (professor_name_id),
-    foreign key (professor_id) references professors(professor_id)
-);
-
-create table users (
-    user_id text not null unique,
-    user_username text not null unique,
-    user_email text not null unique,
-    user_password text not null,
-    user_role t_user_role not null,
-    primary key (user_id)
-);
-
--- students data
-create table students (
-    student_id text not null references users(user_id) unique,
-    student_representative_id text not null unique,
-    student_profile_image_path text not null default '',
-    student_nid text not null,
-    student_previous_school_name text not null,
-    student_previous_school_gpa real not null,
-    professor_id text not null,
-    -- what year is the student's first academic year in the university
-    first_academic_year_id text not null,
-    primary key (user_id),
-    foreign key (first_academic_year_id) references academic_years(academic_year_id),
-    foreign key (professor_id) references professors(professor_id)
-);
-
-create table student_names (
-    student_name_id text not null unique,
-    student_id text not null,
-    -- iso 639-1 language code
-    student_name_language text not null,
-    student_first_name text not null,
-    student_middle_name text not null,
-    student_last_name text not null,
-    primary key (student_name_id),
-    foreign key (student_id) references students(student_id)
-);
