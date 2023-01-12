@@ -1,6 +1,6 @@
 use std::{fs::File, io::BufReader};
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, HttpServer, ResponseError};
 use deadpool_postgres::{Config, ManagerConfig, RecyclingMethod, Runtime};
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -99,10 +99,71 @@ async fn main() -> std::io::Result<()> {
     tracing::info!("starting swagger ui at https://127.0.0.1:5155/swagger-doc/");
 
     HttpServer::new(move || {
+        let json_deserialize_config =
+            web::JsonConfig::default().error_handler(|error, _request| {
+                let error_message = Clone::clone(&error.to_string());
+                let status_code = Clone::clone(&error.status_code());
+
+                actix_web::error::InternalError::from_response(
+                    error,
+                    actix_web::HttpResponse::build(status_code).json(
+                        crate::errors::FormattedErrorResponse {
+                            status_code: status_code.as_u16(),
+                            error: "json deserialize error".to_string(),
+                            message: error_message,
+                        },
+                    ),
+                )
+                .into()
+            });
+
+        let path_deserialize_config =
+            web::PathConfig::default().error_handler(|error, _request| {
+                let error_message = Clone::clone(&error.to_string());
+                let status_code = Clone::clone(&error.status_code());
+
+                actix_web::error::InternalError::from_response(
+                    error,
+                    actix_web::HttpResponse::build(status_code).json(
+                        crate::errors::FormattedErrorResponse {
+                            status_code: status_code.as_u16(),
+                            error: "path deserialize error".to_string(),
+                            message: error_message,
+                        },
+                    ),
+                )
+                .into()
+            });
+
+        let query_deserialize_config =
+            web::QueryConfig::default().error_handler(|error, _request| {
+                let error_message = Clone::clone(&error.to_string());
+                let status_code = Clone::clone(&error.status_code());
+
+                actix_web::error::InternalError::from_response(
+                    error,
+                    actix_web::HttpResponse::build(status_code).json(
+                        crate::errors::FormattedErrorResponse {
+                            status_code: status_code.as_u16(),
+                            error: "query deserialize error".to_string(),
+                            message: error_message,
+                        },
+                    ),
+                )
+                .into()
+            });
+
         App::new()
             .app_data(web::Data::new(SharedAppData::new(pool.clone())))
+            .app_data(json_deserialize_config)
+            .app_data(path_deserialize_config)
+            .app_data(query_deserialize_config)
             .wrap(TracingLogger::default())
             .route("/", web::get().to(crate::routes::hello::handler))
+            .route(
+                "/auth/signin",
+                web::post().to(crate::routes::auth::signin::handler),
+            )
             .service(
                 SwaggerUi::new("/swagger-doc/{_:.*}")
                     .url("/openapi/openapi.json", ApiDoc::openapi()),
