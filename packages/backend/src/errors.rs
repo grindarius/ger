@@ -9,32 +9,18 @@ use utoipa::ToSchema;
 /// Error struct used to represent most catchable errors in the application
 #[derive(Debug, Display, Error)]
 pub enum HttpError {
-    #[display(fmt = "input validation error on field {}", field)]
-    InputValidationError { field: String },
-    #[display(fmt = "an internal server error occured, please try again later")]
-    InternalServerError,
-    #[display(fmt = "an error occured while hashing your password, please try again")]
-    PasswordHashError,
-    #[display(fmt = "{} is an empty field", field)]
-    InputFieldEmptyError { field: String },
-    #[display(fmt = "{} not found", query)]
-    EntityNotFoundError { query: String },
-    #[display(fmt = "database row deserialization error")]
-    RowDeserializeError,
-    #[display(fmt = "cannot parse password hash from the database")]
-    PasswordHashParseError,
-    #[display(fmt = "password does not match")]
-    PasswordIncorrectError,
-    #[display(fmt = "unauthorized, please refresh your tokens")]
+    #[display(fmt = "input field validation failed")]
+    InputValidationError,
+    #[display(fmt = "session timed out")]
     Unauthorized,
     #[display(fmt = "invalid swagger api key")]
     InvalidSwaggerAPIKey,
-    #[display(fmt = "invalid username format")]
-    InvalidUsernameFormat,
-    #[display(fmt = "invalid email format")]
-    InvalidEmailFormat,
-    #[display(fmt = "\"{}\" exists", name)]
-    Exists { name: String },
+    #[display(fmt = "internal server error")]
+    InternalServerError,
+    #[display(fmt = "user not found")]
+    UserNotFound,
+    #[display(fmt = "password is incorrect")]
+    IncorrectPassword,
 }
 
 /// Struct for formatting error into beautified json
@@ -48,19 +34,12 @@ pub struct FormattedErrorResponse {
 impl HttpError {
     fn name(&self) -> String {
         match self {
-            HttpError::InputValidationError { .. } => "validation error".to_string(),
-            HttpError::InternalServerError => "internal server error".to_string(),
-            HttpError::PasswordHashError => "password hash error".to_string(),
-            HttpError::InputFieldEmptyError { .. } => "field empty error".to_string(),
-            HttpError::EntityNotFoundError { .. } => "not found".to_string(),
-            HttpError::RowDeserializeError => "row deserialize error".to_string(),
-            HttpError::PasswordHashParseError => "password hash parse error".to_string(),
-            HttpError::PasswordIncorrectError => "password incorrect".to_string(),
+            HttpError::InputValidationError => "input validation error".to_string(),
             HttpError::Unauthorized => "unauthorized".to_string(),
-            HttpError::InvalidSwaggerAPIKey => "unauthorized".to_string(),
-            HttpError::InvalidUsernameFormat => "invalid username format".to_string(),
-            HttpError::InvalidEmailFormat => "invalid email format".to_string(),
-            HttpError::Exists { .. } => "username exists".to_string(),
+            HttpError::InvalidSwaggerAPIKey => "invalid swagger api key".to_string(),
+            HttpError::InternalServerError => "server error".to_string(),
+            HttpError::UserNotFound => "user not found".to_string(),
+            HttpError::IncorrectPassword => "incorrect password".to_string(),
         }
     }
 
@@ -76,19 +55,12 @@ impl HttpError {
 
     fn match_status_code(&self) -> StatusCode {
         match *self {
-            HttpError::InputValidationError { .. } => StatusCode::BAD_REQUEST,
-            HttpError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-            HttpError::PasswordHashError => StatusCode::INTERNAL_SERVER_ERROR,
-            HttpError::InputFieldEmptyError { .. } => StatusCode::BAD_REQUEST,
-            HttpError::EntityNotFoundError { .. } => StatusCode::NOT_FOUND,
-            HttpError::RowDeserializeError => StatusCode::INTERNAL_SERVER_ERROR,
-            HttpError::PasswordHashParseError => StatusCode::INTERNAL_SERVER_ERROR,
-            HttpError::PasswordIncorrectError => StatusCode::BAD_REQUEST,
+            HttpError::InputValidationError => StatusCode::BAD_REQUEST,
             HttpError::Unauthorized => StatusCode::UNAUTHORIZED,
             HttpError::InvalidSwaggerAPIKey => StatusCode::UNAUTHORIZED,
-            HttpError::InvalidUsernameFormat => StatusCode::BAD_REQUEST,
-            HttpError::InvalidEmailFormat => StatusCode::BAD_REQUEST,
-            HttpError::Exists { .. } => StatusCode::BAD_REQUEST,
+            HttpError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            HttpError::UserNotFound => StatusCode::NOT_FOUND,
+            HttpError::IncorrectPassword => StatusCode::BAD_REQUEST,
         }
     }
 }
