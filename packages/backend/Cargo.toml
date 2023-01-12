@@ -27,6 +27,7 @@ geo-types = "0.7"
 ger-from-row = { path = "../ger-from-row" }
 jsonwebtoken = { version = "8", features = ["use_pem"] }
 lazy_static = "1"
+nanoid = "0.4"
 rustls = "0.20"
 rustls-pemfile = "1"
 serde = { version = "1", features = ["derive"] }
