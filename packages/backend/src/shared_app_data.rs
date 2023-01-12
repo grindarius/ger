@@ -2,7 +2,7 @@ use deadpool_postgres::Pool;
 
 /// Data that is shared between each api calls.
 pub struct SharedAppData {
-    pool: Pool,
+    pub pool: Pool,
 }
 
 impl SharedAppData {
