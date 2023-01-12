@@ -36,9 +36,34 @@ lazy_static! {
         dotenvy::var("GER_SWAGGER_API_KEY_NAME").expect("cannot load swagger api key name");
     pub static ref SWAGGER_API_KEY: String =
         dotenvy::var("GER_SWAGGER_API_KEY").expect("cannot load swagger api key");
-    pub static ref ID_LENGTH: u8 = 32;
-    pub static ref FILE_NAME_LENGTH: u8 = 48;
     pub static ref JWT_TOKEN_AUDIENCE_NAME: String = "ger.com".to_string();
+}
+
+/// Length of id used in most primary keys.
+pub const ID_LENGTH: usize = 32;
+
+/// Length of id used in file names when user created.
+pub const FILE_NAME_LENGTH: u8 = 48;
+
+/// How long an access token can be valid for in minutes.
+pub const ACCESS_TOKEN_VALID_TIME_LENGTH: u32 = 15;
+
+/// How long a refresh token can be valid for in minutes.
+pub const REFRESH_TOKEN_VALID_TIME_LENGTH: u32 = 60 * 24 * 7;
+
+/// The name of header that carries access token
+pub const ACCESS_TOKEN_HEADER_NAME: &'static str = "x-access-token";
+
+/// The name of header that carries refresh token
+pub const REFRESH_TOKEN_HEADER_NAME: &'static str = "x-refresh-token";
+
+/// Get utc expires time from current time.
+pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
+    let current_time =
+        time::OffsetDateTime::now_utc() + time::Duration::minutes(valid_minutes as i64);
+
+    return usize::try_from(current_time.unix_timestamp())
+        .map_err(|_| HttpError::InternalServerError);
 }
 
 /// Possible roles of any users in the server
@@ -62,18 +87,13 @@ pub struct AccessTokenClaims {
     rle: Role,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct RefreshTokenClaims {
-    aud: String,
-    exp: usize,
-    iat: usize,
-    uid: String,
-    sid: String,
-}
-
 impl AccessTokenClaims {
-    /// Creates new access token claims with required parameters. The instantiation could fail from
-    pub fn try_new(
+    /// Creates new access token claims with required parameters.
+    ///
+    /// # Panics
+    ///
+    /// The instantiation could fail from converting offsetdatetime wrongly
+    pub fn new(
         user_id: String,
         user_role: Role,
         session_id: String,
@@ -91,6 +111,32 @@ impl AccessTokenClaims {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct RefreshTokenClaims {
+    aud: String,
+    exp: usize,
+    iat: usize,
+    uid: String,
+    sid: String,
+}
+
+impl RefreshTokenClaims {
+    pub fn new(
+        user_id: String,
+        session_id: String,
+        expires_timestamp: usize,
+    ) -> Result<Self, HttpError> {
+        Ok(Self {
+            aud: JWT_TOKEN_AUDIENCE_NAME.to_string(),
+            exp: expires_timestamp,
+            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp())
+                .map_err(|_| HttpError::InternalServerError)?,
+            uid: user_id,
+            sid: session_id,
+        })
+    }
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct GetServerInformationResponse {
     contributors: Vec<String>,
@@ -103,5 +149,24 @@ impl Default for GetServerInformationResponse {
             contributors: vec!["Bhattarpong Somwong".to_string()],
             contact: "numbbutt34685@gmail.com".to_string(),
         }
+    }
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct DefaultSuccessResponse {
+    message: String,
+}
+
+impl Default for DefaultSuccessResponse {
+    fn default() -> Self {
+        Self {
+            message: "completed".to_string(),
+        }
+    }
+}
+
+impl DefaultSuccessResponse {
+    pub fn new(message: String) -> Self {
+        Self { message }
     }
 }
