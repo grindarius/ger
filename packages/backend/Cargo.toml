@@ -38,5 +38,6 @@ tracing = "0.1"
 tracing-actix-web = "0.7"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["json"] }
+ts-rs = "6.1"
 utoipa = { version = "2", features = ["time", "actix_extras"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
