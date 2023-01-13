@@ -31,7 +31,7 @@ pub struct UserCredentials {
 
 /// Signs user into the website, returns access token and refresh token for user to login further.
 #[utoipa::path(
-    post, 
+    post,
     path = "/auth/signin",
     request_body = SigninBody,
     responses(
@@ -89,16 +89,16 @@ pub async fn handler(
         )
         .await
         .map_err(|_| HttpError::InternalServerError)?;
-    let result = client
+    let user = client
         .query_one(&statement, &[&body.username_or_email])
         .await
         .map_err(|_| HttpError::UserNotFound)?;
 
-    let deserialized_result =
-        UserCredentials::try_from(&result).map_err(|_| HttpError::InternalServerError)?;
+    let deserialized_user =
+        UserCredentials::try_from(&user).map_err(|_| HttpError::InternalServerError)?;
 
     let argon2 = Argon2::default();
-    let parsed_password = PasswordHash::new(deserialized_result.user_password.as_str())
+    let parsed_password = PasswordHash::new(deserialized_user.user_password.as_str())
         .map_err(|_| HttpError::InternalServerError)?;
 
     let password_result = argon2
@@ -113,16 +113,16 @@ pub async fn handler(
 
     let access_token_expires_timestamp = get_expires_timestamp(ACCESS_TOKEN_VALID_TIME_LENGTH)?;
     let access_token_claims = AccessTokenClaims::new(
-        Clone::clone(&deserialized_result.user_id),
-        deserialized_result.user_role,
+        Clone::clone(&deserialized_user.user_id),
+        deserialized_user.user_role,
         Clone::clone(&new_session_id),
         access_token_expires_timestamp,
     )?;
 
     let refresh_token_expires_timestamp = get_expires_timestamp(REFRESH_TOKEN_VALID_TIME_LENGTH)?;
     let refresh_token_claims = RefreshTokenClaims::new(
-        deserialized_result.user_id,
-        new_session_id,
+        Clone::clone(&deserialized_user.user_id),
+        Clone::clone(&new_session_id),
         refresh_token_expires_timestamp,
     )?;
 
@@ -133,6 +133,13 @@ pub async fn handler(
     let refresh_token =
         jsonwebtoken::encode(&HEADER, &refresh_token_claims, &REFRESH_TOKEN_ENCODING_KEY)
             .map_err(|_| HttpError::InternalServerError)?;
+
+    client
+        .execute(
+            "insert into user_sessions (user_session_id, user_session_user_id, user_session_refresh_token) values ($1, $2, $3)",
+            &[&new_session_id, &deserialized_user.user_id, &refresh_token])
+        .await
+        .map_err(|_| HttpError::InternalServerError)?;
 
     Ok(HttpResponse::Ok()
         .insert_header((ACCESS_TOKEN_HEADER_NAME, access_token))
