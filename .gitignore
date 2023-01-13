@@ -2,7 +2,7 @@
 target/
 
 # ts-rs bindings
-bindings/
+packages/backend/bindings
 
 # secrets
 .env.*
