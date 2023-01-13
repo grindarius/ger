@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gobeam/stringy"
 	pg_query "github.com/pganalyze/pg_query_go/v2"
@@ -124,6 +125,8 @@ func main() {
 
 		output += "}\n\n"
 	}
+
+	output = strings.TrimSuffix(output, "\n")
 
 	writeFileErr := os.WriteFile("../backend/src/database.rs", []byte(enumOutput+output), 0666)
 
