@@ -21,7 +21,7 @@ drop table buildings cascade;
 drop table rooms cascade;
 drop table students cascade;
 drop table subject_schedules cascade;
-drop table opening_subjects_in_semester cascade;
+drop table opening_subjects_in_semesters cascade;
 drop table opening_subjects_in_semester_professors cascade;
 drop table opening_subjects_in_semester_subject_capacities;
 drop table opening_subjects_in_semester_eligible_majors cascade;
@@ -31,6 +31,7 @@ drop table student_assignments cascade;
 drop table student_scores cascade;
 drop table professors cascade;
 drop table users cascade;
+drop table user_sessions cascade;
 
 -- available faculties in the university.
 create table faculties (
@@ -48,6 +49,14 @@ create table users (
     primary key (user_id)
 );
 
+create table user_sessions (
+    user_session_id text not null unique,
+    user_session_user_id text not null unique,
+    user_session_refresh_token text not null,
+    primary key user_session_id,
+    foreign key user_session_user_id references users(user_id)
+);
+
 -- students data
 create table students (
     student_id text not null references users(user_id) unique,
@@ -56,12 +65,14 @@ create table students (
     student_nid text not null,
     student_previous_school_name text not null,
     student_previous_school_gpa real not null,
+    major_id text not null,
     professor_id text not null,
     -- what year is the student's first academic year in the university
     first_academic_year_id text not null,
     primary key (user_id),
     foreign key (first_academic_year_id) references academic_years(academic_year_id),
-    foreign key (professor_id) references professors(professor_id)
+    foreign key (professor_id) references professors(professor_id),
+    foreign key (major_id) references majors(major_id)
 );
 
 create table student_names (
@@ -143,7 +154,6 @@ create table major_subjects (
 create table academic_years (
     academic_year_id text not null unique,
     academic_year_gregorian_year text not null unique default date_part('year', now())::text,
-    curriculum_id text not null,
     academic_year_start_timestamp timestamptz not null default now(),
     academic_year_end_timestamp timestamptz not null default now(),
     primary key (academic_year_id)
@@ -171,7 +181,7 @@ create table buildings (
 create table rooms (
     room_id text not null unique,
     building_id text not null,
-    building_name text not null,
+    room_name text not null,
     room_capacity int not null default 0,
     primary key (room_id),
     foreign key (building_id) references buildings(building_id)
@@ -200,7 +210,7 @@ create table subject_schedules (
 -- which subjects are opened for studying in each semester, this only stores the schedule
 -- and the room in which each schedule is stored, these can be tracked back to a subject
 -- and get the list of subjects in which they are open in the semester.
-create table opening_subjects_in_semester (
+create table opening_subjects_in_semesters (
     semester_id text not null references semesters(semester_id),
     subject_schedule_id text not null references subject_schedules(subject_schedule_id),
     room_id text not null references rooms(room_id),
@@ -262,4 +272,3 @@ create table student_scores (
     student_score real not null,
     primary key (semester_id, subject_id, student_id, assignment_id)
 );
-
