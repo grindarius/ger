@@ -13,6 +13,7 @@ use crate::openapi::apidoc::ApiDoc;
 use crate::shared_app_data::SharedAppData;
 
 mod constants;
+mod database;
 mod errors;
 mod openapi;
 mod routes;
@@ -99,6 +100,12 @@ async fn main() -> std::io::Result<()> {
     tracing::info!("starting swagger ui at https://127.0.0.1:5155/swagger-doc/");
 
     HttpServer::new(move || {
+        // cors config
+        let cors = actix_cors::Cors::default()
+            .allowed_origin("https://127.0.0.1")
+            .supports_credentials();
+
+        // deserializer errors config
         let json_deserialize_config =
             web::JsonConfig::default().error_handler(|error, _request| {
                 let error_message = Clone::clone(&error.to_string());
