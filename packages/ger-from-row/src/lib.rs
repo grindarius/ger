@@ -36,7 +36,7 @@ pub fn from_row(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 enum MacroAttribute {
-    Enum(String),
+    Enum(Option<String>),
     Field(String),
 }
 
@@ -67,13 +67,28 @@ fn parse_field_attribute(attrs: &Vec<syn::Attribute>) -> Option<MacroAttribute> 
                                         if nv.path.is_ident("num") {
                                             match nv.lit {
                                                 syn::Lit::Str(ref lit) => {
-                                                    return Some(MacroAttribute::Enum(lit.value()))
+                                                    return Some(MacroAttribute::Enum(Some(
+                                                        lit.value(),
+                                                    )))
                                                 }
                                                 _ => return None,
                                             }
                                         }
                                     }
-                                    _ => return None,
+                                    syn::Meta::Path(ref p) => {
+                                        println!("{:?}", p.segments);
+
+                                        if let Some(f) = p.segments.first() {
+                                            if f.ident.to_string() == "num" {
+                                                return Some(MacroAttribute::Enum(None));
+                                            }
+                                        }
+
+                                        return None;
+                                    }
+                                    _ => {
+                                        return None;
+                                    }
                                 },
                                 _ => return None,
                             }
@@ -104,20 +119,30 @@ fn implement_struct_try_from(
         let ty = &field.ty;
 
         let row_expr = format!(r##"{}"##, ident.unraw());
+        let ident_string = field.ident.as_ref().unwrap().to_string();
 
         // field with attributes
         if field.attrs.len() > 0 {
             if let Some(new_name) = parse_field_attribute(&field.attrs) {
                 match new_name {
+                    // #[fromrow(field = "some_name")]
                     crate::MacroAttribute::Field(f) => {
                         return quote::quote! {
                             #ident: row.try_get::<&str, #ty>(#f)?
                         };
                     }
-                    crate::MacroAttribute::Enum(e) => {
-                        return quote::quote! {
-                            #ident: #ty::try_from(row.try_get::<&str, ::std::string::String>(#e)?)?
-                        };
+                    crate::MacroAttribute::Enum(enum_rename) => {
+                        // #[fromrow(num = "some_name")]
+                        if let Some(rename) = enum_rename {
+                            return quote::quote! {
+                                #ident: #ty::try_from(row.try_get::<&str, ::std::string::String>(#rename)?)?
+                            };
+                        } else {
+                            // #[fromrow(num)]
+                            return quote::quote! {
+                                #ident: #ty::try_from(row.try_get::<&str, ::std::string::String>(#ident_string)?)?
+                            }
+                        }
                     }
                 }
             }
