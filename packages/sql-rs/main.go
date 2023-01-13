@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gobeam/stringy"
-	"github.com/pganalyze/pg_query_go/v2"
 	"log"
 	"os"
+
+	"github.com/gobeam/stringy"
+	pg_query "github.com/pganalyze/pg_query_go/v2"
 )
 
 type Column struct {
@@ -13,26 +14,30 @@ type Column struct {
 	columnType *pg_query.Node
 }
 
-func convertColumnType(kind *pg_query.Node) string {
+func convertColumnType(kind *pg_query.Node) (string, bool) {
 	switch kind.GetString_().GetStr() {
 	case "text":
-		return "String"
+		return "String", false
 	case "float4":
-		return "f64"
+		return "f64", false
 	case "int4":
-		return "i32"
+		return "i32", false
 	case "timestamptz":
-		return "time::OffsetDateTime"
+		return "time::OffsetDateTime", false
 	case "time":
-		return "time::Time"
+		return "time::Time", false
 	case "point":
-		return "geo_types::Point<f64>"
-	case "t_role":
-		return "Role"
+		return "geo_types::Point<f64>", false
+	case "boolean":
+		return "bool", false
+	case "bool":
+		return "bool", false
+	case "t_user_role":
+		return "Role", true
 	case "t_day_of_week":
-		return "DayOfWeek"
+		return "DayOfWeek", true
 	default:
-		return "what"
+		return "what", true
 	}
 }
 
@@ -63,12 +68,12 @@ func main() {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[2:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("enum %s {\n", enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub enum %s {\n", enumNameCamelCase)
 			} else if typeName[0].GetString_().GetStr() == "t_user_role" {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[len(typeName[0].GetString_().GetStr())-4:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("pub enum %s {\n", enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub enum %s {\n", enumNameCamelCase)
 			}
 
 			for _, enumValue := range statement.GetStmt().GetCreateEnumStmt().GetVals() {
@@ -104,10 +109,17 @@ func main() {
 	output := ""
 
 	for name, columns := range tables {
-		output += fmt.Sprintf("pub struct %s {\n", name)
+		output += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub struct %s {\n", name)
 
 		for _, col := range columns {
-			output += fmt.Sprintf("    pub %s: %s,\n", col.columnName, convertColumnType(col.columnType))
+			newType, isEnum := convertColumnType(col.columnType)
+
+			if isEnum {
+				output += fmt.Sprintf("    #[fromrow(num)]\n    pub %s: %s,\n", col.columnName, newType)
+				continue
+			}
+
+			output += fmt.Sprintf("    pub %s: %s,\n", col.columnName, newType)
 		}
 
 		output += "}\n\n"
