@@ -13,6 +13,3 @@ packages/backend/cert/
 # nodejs packages
 node_modules/
 dist/
-
-# generated cst file
-packages/ger-sql-to-rust-struct/cst.json
