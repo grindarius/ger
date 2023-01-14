@@ -164,39 +164,10 @@ create table subject_schedules (
     foreign key (subject_id) references subjects(subject_id)
 );
 
--- students data
-create table students (
-    student_id text not null references users(user_id) unique,
-    student_representative_id text not null unique,
-    student_profile_image_path text not null default '',
-    student_nid text not null,
-    student_previous_school_name text not null,
-    student_previous_school_gpa real not null,
-    major_id text not null,
-    professor_id text not null,
-    -- what year is the student's first academic year in the university
-    first_academic_year_id text not null,
-    primary key (user_id),
-    foreign key (first_academic_year_id) references academic_years(academic_year_id),
-    foreign key (professor_id) references professors(professor_id),
-    foreign key (major_id) references majors(major_id)
-);
-
-create table student_names (
-    student_name_id text not null unique,
-    student_id text not null,
-    -- iso 639-1 language code
-    student_name_language text not null,
-    student_first_name text not null,
-    student_middle_name text not null,
-    student_last_name text not null,
-    primary key (student_name_id),
-    foreign key (student_id) references students(student_id)
-);
-
 create table professors (
     professor_id text not null references users(user_id) unique,
     professor_profile_image_path text not null default '',
+    professor_birthdate date not null,
     primary key (professor_id)
 );
 
@@ -210,6 +181,34 @@ create table professor_names (
     professor_last_name text not null,
     primary key (professor_name_id),
     foreign key (professor_id) references professors(professor_id)
+);
+
+-- students data
+create table students (
+    student_id text not null references users(user_id) unique,
+    student_representative_id text not null unique,
+    student_profile_image_path text not null default '',
+    student_nid text not null,
+    student_birthdate date not null,
+    student_previous_school_name text not null,
+    student_previous_school_gpa real not null,
+    major_id text not null references majors(major_id),
+    professor_id text not null references professors(professor_id),
+    -- what year is the student's first academic year in the university
+    first_academic_year_id text not null references academic_years(academic_year_id),
+    primary key (student_id)
+);
+
+create table student_names (
+    student_name_id text not null unique,
+    student_id text not null,
+    -- iso 639-1 language code
+    student_name_language text not null,
+    student_first_name text not null,
+    student_middle_name text not null,
+    student_last_name text not null,
+    primary key (student_name_id),
+    foreign key (student_id) references students(student_id)
 );
 
 -- credit specifications for a major, this is how many credits you have to take
@@ -228,7 +227,7 @@ create table major_credit_specifications (
 create table major_subjects (
     major_credit_specification_id text not null references major_credit_specifications(major_credit_specification_id),
     subject_id text not null references subjects(subject_id),
-    primary key (major_subject_id, subject_id)
+    primary key (major_credit_specification_id, subject_id)
 );
 
 -- which subjects are opened for studying in each semester, this only stores the schedule
