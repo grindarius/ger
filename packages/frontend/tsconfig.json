@@ -21,6 +21,8 @@
   },
   "include": [
     "next.config.js",
+    "postcss.config.js",
+    "tailwindcss.config.js",
     ".eslintrc.cjs",
     "next-env.d.ts",
     "**/*.ts",
