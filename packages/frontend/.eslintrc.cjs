@@ -6,23 +6,28 @@ module.exports = {
     node: true
   },
   extends: [
-    'standard-with-typescript',
-    'plugin:qwik/recommended'
+    'next/core-web-vitals',
+    'standard-with-typescript'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json'],
+    project: [
+      './tsconfig.json'
+    ],
     ecmaVersion: 2021,
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true
     }
   },
-  plugins: ['simple-import-sort', 'unused-imports'],
+  plugins: [
+    'simple-import-sort',
+    'unused-imports'
+  ],
   rules: {
     '@typescript-eslint/no-unused-vars': ['error'],
-    '@typescript-eslint/consistent-type-imports': 'error',
+    '@typescript-eslint/consistent-type-imports': ['error'],
     'simple-import-sort/imports': [
       'error',
       {
