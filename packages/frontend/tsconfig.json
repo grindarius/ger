@@ -21,6 +21,6 @@
       "~/*": ["./src/*"]
     }
   },
-  "files": ["./.eslintrc.cjs", "./vite.config.ts"],
+  "files": [ "./postcss.config.js", "tailwind.config.js", "./adaptors/static/vite.config.ts", "./.eslintrc.cjs", "./vite.config.ts"],
   "include": ["src"]
 }
