@@ -1,3 +1,5 @@
+use std::future;
+
 use actix_web::{web, HttpResponse};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use serde::Deserialize;
@@ -17,15 +19,17 @@ use crate::{
 
 #[derive(Deserialize, ToSchema)]
 pub struct SigninBody {
-    pub username_or_email: String,
+    pub student_id_or_email_or_username: String,
     pub password: String,
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct UserCredentials {
+pub struct UserQuery {
+    student_representative_id: Option<String>,
     user_id: String,
+    user_username: String,
     user_password: String,
-    #[fromrow(num = "user_role")]
+    #[fromrow(num)]
     user_role: Role,
 }
 
@@ -63,7 +67,7 @@ pub async fn handler(
     body: web::Json<SigninBody>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
-    if body.username_or_email.is_empty() {
+    if body.student_id_or_email_or_username.is_empty() {
         return Err(HttpError::InputValidationError);
     }
 
@@ -77,28 +81,35 @@ pub async fn handler(
         .await
         .map_err(|_| HttpError::InternalServerError)?;
 
-    let statement = client
+    let get_user_statement = client
         .prepare_typed_cached(
-            r##"select
-                user_id,
-                user_password,
-                user_role,
+            r##"
+            select
+                students.student_representative_id,
+                users.user_id,
+                users.user_username,
+                users.user_password,
+                users.user_role
             from users
-            where user_username = $1 or user_email = $1"##,
+            left join students on users.user_id = students.student_id
+            where users.user_username = $1 or users.user_email = $1 or students.student_representative_id = $1"##,
             &[Type::TEXT],
         )
         .await
         .map_err(|_| HttpError::InternalServerError)?;
-    let user = client
-        .query_one(&statement, &[&body.username_or_email])
-        .await
-        .map_err(|_| HttpError::UserNotFound)?;
 
-    let deserialized_user =
-        UserCredentials::try_from(&user).map_err(|_| HttpError::InternalServerError)?;
+    let user = client
+        .query_one(
+            &get_user_statement,
+            &[&body.student_id_or_email_or_username],
+        )
+        .await
+        .map_err(|_| HttpError::InternalServerError)?;
+
+    let user = UserQuery::try_from(&user).map_err(|_| HttpError::InternalServerError)?;
 
     let argon2 = Argon2::default();
-    let parsed_password = PasswordHash::new(deserialized_user.user_password.as_str())
+    let parsed_password = PasswordHash::new(user.user_password.as_str())
         .map_err(|_| HttpError::InternalServerError)?;
 
     let password_result = argon2
@@ -113,15 +124,15 @@ pub async fn handler(
 
     let access_token_expires_timestamp = get_expires_timestamp(ACCESS_TOKEN_VALID_TIME_LENGTH)?;
     let access_token_claims = AccessTokenClaims::new(
-        Clone::clone(&deserialized_user.user_id),
-        deserialized_user.user_role,
+        Clone::clone(&user.user_id),
+        user.user_role,
         Clone::clone(&new_session_id),
         access_token_expires_timestamp,
     )?;
 
     let refresh_token_expires_timestamp = get_expires_timestamp(REFRESH_TOKEN_VALID_TIME_LENGTH)?;
     let refresh_token_claims = RefreshTokenClaims::new(
-        Clone::clone(&deserialized_user.user_id),
+        Clone::clone(&user.user_id),
         Clone::clone(&new_session_id),
         refresh_token_expires_timestamp,
     )?;
@@ -137,7 +148,7 @@ pub async fn handler(
     client
         .execute(
             "insert into user_sessions (user_session_id, user_session_user_id, user_session_refresh_token) values ($1, $2, $3)",
-            &[&new_session_id, &deserialized_user.user_id, &refresh_token])
+            &[&new_session_id, &user.user_id, &refresh_token])
         .await
         .map_err(|_| HttpError::InternalServerError)?;
 
