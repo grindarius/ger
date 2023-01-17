@@ -22,7 +22,7 @@ argon2 = "0.4"
 deadpool-postgres = "0.10"
 derive_more = "0"
 dotenvy = "0"
-futures = "0.3"
+futures-util = "0.3"
 geo-types = "0.7"
 ger-from-row = { path = "../ger-from-row" }
 jsonwebtoken = { version = "8", features = ["use_pem"] }

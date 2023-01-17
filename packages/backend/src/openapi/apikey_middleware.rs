@@ -2,7 +2,7 @@ use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse},
     HttpResponse,
 };
-use futures::future::LocalBoxFuture;
+use futures_util::future::LocalBoxFuture;
 
 use crate::{
     constants::{SWAGGER_API_KEY, SWAGGER_API_KEY_NAME},
