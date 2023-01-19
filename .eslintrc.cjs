@@ -9,11 +9,15 @@ module.exports = {
     'next/core-web-vitals',
     'standard-with-typescript'
   ],
+  ignorePatterns: [
+    '.eslintrc.cjs'
+  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: [
-      './tsconfig.json'
+      './packages/frontend/tsconfig.json',
+      './packages/faker/tsconfig.json',
     ],
     ecmaVersion: 2021,
     sourceType: 'module',
@@ -28,6 +32,10 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-unused-vars': ['error'],
     '@typescript-eslint/consistent-type-imports': ['error'],
+    '@typescript-eslint/array-type': ['error', {
+      default: 'generic',
+      readonly: 'generic'
+    }],
     'simple-import-sort/imports': [
       'error',
       {
