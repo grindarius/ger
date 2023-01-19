@@ -3,6 +3,7 @@
   "description": "faking reg spelled backwards",
   "version": "0.1.0",
   "type": "module",
+  "exports": "./dist/index.js",
   "private": true,
   "devDependencies": {
     "@faker-js/faker": "7.6",

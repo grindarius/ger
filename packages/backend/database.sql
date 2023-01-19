@@ -3,6 +3,8 @@
 -- extensions helping with searches.
 create extension if not exists pgroonga;
 
+set timezone to 'Asia/Bangkok';
+
 drop type t_day_of_week cascade;
 drop type t_user_role cascade;
 
@@ -79,6 +81,7 @@ create table academic_years (
     academic_year_gregorian_year int not null unique default date_part('year', now())::int,
     academic_year_start_timestamp timestamptz not null default now(),
     academic_year_end_timestamp timestamptz not null default now(),
+    academic_year_created_timestamp timestamptz not null default now(),
     primary key (academic_year_id)
 );
 
@@ -88,6 +91,7 @@ create table semesters (
     academic_year_id text not null,
     semester_start_timestamp timestamptz not null default now(),
     semester_end_timestamp timestamptz not null default now(),
+    semester_created_timestamp timestamptz not null default now(),
     primary key (semester_id),
     foreign key (academic_year_id) references academic_years(academic_year_id)
 );
