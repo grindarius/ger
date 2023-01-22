@@ -25,6 +25,8 @@ func convertColumnType(kind *pg_query.Node) (string, bool) {
 		return "i32", false
 	case "int2":
 		return "i16", false
+	case "date":
+		return "time::Date", false
 	case "timestamptz":
 		return "time::OffsetDateTime", false
 	case "time":
@@ -54,6 +56,8 @@ func convertColumnTypeTypescript(kind *pg_query.Node) (string, bool) {
 		return "number", false
 	case "int2":
 		return "number", false
+	case "date":
+		return "string", false
 	case "timestamptz":
 		return "string", false
 	case "time":
