@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -13,4 +14,7 @@ export function generateFaculties (amount = 6): Array<Faculties> {
       faculty_created_timestamp: faker.date.past(10).toISOString()
     }
   })
+}
+export async function saveFaculties (faculties: Array<Faculties>): Promise<void> {
+  await writeFile('../../../data/faculties.json', JSON.stringify(faculties))
 }

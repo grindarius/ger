@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -39,4 +40,7 @@ export function generateRooms (buildings: Array<Buildings>): Array<Rooms> {
       return roomsInTheFloor
     }).flat()
   }).flat()
+}
+export async function saveRooms (rooms: Array<Rooms>): Promise<void> {
+  await writeFile('../../../data/rooms.json', JSON.stringify(rooms))
 }

@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -28,4 +29,7 @@ export function generateProfessors (amount = 20): Array<[Users, Professors]> {
 
     return [user, professor]
   })
+}
+export async function saveProfessors (professors: Array<Professors>): Promise<void> {
+  await writeFile('../../../data/professors.json', JSON.stringify(professors))
 }

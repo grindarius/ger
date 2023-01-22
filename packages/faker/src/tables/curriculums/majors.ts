@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -17,4 +18,7 @@ export function generateMajors (curriculums: Array<Curriculums>, amountEach = 6)
       }
     })
   }).flat()
+}
+export async function saveMajors (majors: Array<Majors>): Promise<void> {
+  await writeFile('../../../data/majors.json', JSON.stringify(majors))
 }

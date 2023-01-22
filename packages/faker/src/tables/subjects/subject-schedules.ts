@@ -1,10 +1,11 @@
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
 import type { Subjects, SubjectSchedules } from '../../database.js'
-import { generateSubjectScheduleDays, NANOID_LENGTH } from '../../generals.js'
+import { DayOfWeek, generateSubjectScheduleDays, NANOID_LENGTH } from '../../generals.js'
 
 export function generateSubjectSchedules (subjects: Array<Subjects>, amountEach = 2): Array<SubjectSchedules> {
   return subjects.map(subject => {
@@ -18,10 +19,13 @@ export function generateSubjectSchedules (subjects: Array<Subjects>, amountEach 
       return {
         subject_schedule_id: nanoid(NANOID_LENGTH),
         subject_id: subject.subject_id,
-        subject_schedule_day_of_week: subjectDays[i],
+        subject_schedule_day_of_week: subjectDays[i] ?? DayOfWeek.Monday,
         subject_schedule_start_time_of_day: startTime,
         subject_schedule_end_time_of_day: endTime
       }
     })
   }).flat()
+}
+export async function saveSubjectSchedules (subjectSchedules: Array<SubjectSchedules>): Promise<void> {
+  await writeFile('../../../data/subject-schedules.json', JSON.stringify(subjectSchedules))
 }

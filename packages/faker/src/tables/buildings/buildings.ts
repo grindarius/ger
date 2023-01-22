@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -19,4 +20,8 @@ export function generateBuildings (amount: number = 12): Array<Buildings> {
 
     return building
   })
+}
+
+export async function saveBuildings (buildings: Array<Buildings>): Promise<void> {
+  await writeFile('../../../data/buildings.json', JSON.stringify(buildings, null, 2))
 }

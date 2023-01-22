@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -21,4 +22,7 @@ export function generateAdmins (amount: number = 20): Array<Users> {
 
     return user
   })
+}
+export async function saveAdmins (admins: Array<Users>): Promise<void> {
+  await writeFile('../../../data/admins.json', JSON.stringify(admins))
 }

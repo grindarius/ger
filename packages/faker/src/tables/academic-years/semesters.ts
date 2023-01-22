@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -30,4 +31,10 @@ export function generateSemesters (academicYears: Array<AcademicYears>): Array<S
 
     return semesters
   }).flat()
+}
+
+export async function saveSemesters (semesters: Array<Semesters>): Promise<void> {
+  await writeFile('../../../data/semesters.json', JSON.stringify(semesters, null, 2)).catch(e => {
+    console.error(e)
+  })
 }

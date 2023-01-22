@@ -1,0 +1,12 @@
+{
+  "save": {
+    "prefix": "save",
+    "body": [
+      "import { writeFile } from 'node:fs/promises'",
+      "export async function save${1} (${2}: Array<${1}>): Promise<void> {",
+      "  await writeFile('../../../data/${3}.json', JSON.stringify(${2}))",
+      "}"
+    ],
+    "description": ""
+  }
+}

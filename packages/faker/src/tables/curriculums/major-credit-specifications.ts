@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid'
+import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -17,4 +18,7 @@ export function generateMajorCreditSpecifications (majors: Array<Majors>, amount
       }
     })
   }).flat()
+}
+export async function saveMajorCreditSpecifications (majorCreditSpecifications: Array<MajorCreditSpecifications>): Promise<void> {
+  await writeFile('../../../data/major-credit-specifications.json', JSON.stringify(majorCreditSpecifications))
 }
