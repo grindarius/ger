@@ -1,5 +1,4 @@
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -37,14 +36,11 @@ export function generateStudents (
       student_birthdate: faker.date.past(30).toISOString(),
       student_previous_school_name: faker.company.name(),
       student_previous_school_gpa: faker.datatype.number({ min: 2, max: 4, precision: 0.01 }),
-      major_id: nanoid(NANOID_LENGTH),
+      major_id: faker.helpers.arrayElement(majors).major_id,
       professor_id: faker.helpers.arrayElement(professors).professor_id,
       first_academic_year_id: firstAcadYear.academic_year_id
     }
 
     return [user, student]
   })
-}
-export async function saveStudents (students: Array<Students>): Promise<void> {
-  await writeFile('../../../data/students.json', JSON.stringify(students))
 }

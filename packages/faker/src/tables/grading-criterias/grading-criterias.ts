@@ -1,9 +1,8 @@
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
-import type { GradingCriterias, Users } from '../../database.js'
+import type { Users } from '../../database.js'
 import { NANOID_LENGTH } from '../../generals.js'
 
 export interface GradingCriteria {
@@ -20,8 +19,4 @@ export function generateGradingCriterias (users: Array<Users>): Array<GradingCri
     grading_criteria_name: faker.commerce.productName(),
     grading_criteria_created_timestamp: faker.date.past(2).toISOString()
   }]
-}
-
-export async function saveGradingCriterias (gradingCriterias: Array<GradingCriterias>): Promise<void> {
-  await writeFile('../../../data/grading-criterias.json', JSON.stringify(gradingCriterias))
 }

@@ -1,5 +1,4 @@
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import type { GradingCriteriaGrades, GradingCriterias } from '../../database.js'
 import { NANOID_LENGTH } from '../../generals.js'
@@ -26,7 +25,4 @@ export function generateGradingCriteriaGrades (gradingCriterias: Array<GradingCr
       }
     })
   }).flat()
-}
-export async function saveGradingCriteriaGrades (gradingCriteriaGrades: Array<GradingCriteriaGrades>): Promise<void> {
-  await writeFile('../../../data/grading-criteria-grades.json', JSON.stringify(gradingCriteriaGrades))
 }

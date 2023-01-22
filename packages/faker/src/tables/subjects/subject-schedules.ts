@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -25,7 +24,4 @@ export function generateSubjectSchedules (subjects: Array<Subjects>, amountEach 
       }
     })
   }).flat()
-}
-export async function saveSubjectSchedules (subjectSchedules: Array<SubjectSchedules>): Promise<void> {
-  await writeFile('../../../data/subject-schedules.json', JSON.stringify(subjectSchedules))
 }

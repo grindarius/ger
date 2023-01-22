@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
@@ -11,7 +10,7 @@ export function generateSemesters (academicYears: Array<AcademicYears>): Array<S
   return academicYears.map(acadYear => {
     const howManySemesters = faker.datatype.number({
       min: 2,
-      max: 4
+      max: 3
     })
 
     const startDate = dayjs(acadYear.academic_year_start_timestamp)
@@ -31,10 +30,4 @@ export function generateSemesters (academicYears: Array<AcademicYears>): Array<S
 
     return semesters
   }).flat()
-}
-
-export async function saveSemesters (semesters: Array<Semesters>): Promise<void> {
-  await writeFile('../../../data/semesters.json', JSON.stringify(semesters, null, 2)).catch(e => {
-    console.error(e)
-  })
 }

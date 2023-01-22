@@ -1,6 +1,16 @@
+import { writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import type pg from 'pg'
+
 import { faker } from '@faker-js/faker'
 import type { Options } from '@node-rs/argon2'
 import { hash } from '@node-rs/argon2'
+
+import { logger } from './index.js'
+
+/* eslint-disable-next-line @typescript-eslint/naming-convention */
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export const NANOID_LENGTH = 32
 
@@ -112,3 +122,20 @@ const hashOptions: Options = {
 
 export const UNENCRYPTED_PASSWORD = 'aryastark'
 export const ENCRYPTED_PASSWORD = await hash(UNENCRYPTED_PASSWORD, hashOptions)
+
+export async function saveToFile<T> (contents: Array<T>, filename: string): Promise<void> {
+  await writeFile(resolve(__dirname, '..', 'data', filename), JSON.stringify(contents, null, 2))
+}
+
+export async function insert<T extends object> (contents: Array<T>, tableName: string, pool: pg.Pool): Promise<void> {
+  const columns = Object.keys(contents[0] ?? {})
+  const columnString = columns.join(', ')
+  const columnValues = columns.map((_, i) => '$' + (i + 1).toString()).join(', ')
+
+  for (const row of contents) {
+    const rowData = Object.values(row)
+
+    logger.info(`insert into "${tableName}" (${columnString}) values (${columnValues}) (${rowData.join(', ')})`)
+    await pool.query(`insert into "${tableName}" (${columnString}) values (${columnValues})`, rowData)
+  }
+}

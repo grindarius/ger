@@ -1,12 +1,11 @@
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
 import type { Users } from '../../database.js'
 import { ENCRYPTED_PASSWORD, NANOID_LENGTH, Role } from '../../generals.js'
 
-export function generateAdmins (amount: number = 20): Array<Users> {
+export function generateUsers (amount: number = 20): Array<Users> {
   return Array.from({ length: amount }, () => {
     const firstName = faker.name.firstName()
     const lastName = faker.name.lastName()
@@ -22,7 +21,4 @@ export function generateAdmins (amount: number = 20): Array<Users> {
 
     return user
   })
-}
-export async function saveAdmins (admins: Array<Users>): Promise<void> {
-  await writeFile('../../../data/admins.json', JSON.stringify(admins))
 }

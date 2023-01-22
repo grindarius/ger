@@ -1,9 +1,7 @@
 import { nanoid } from 'nanoid'
-import { writeFile } from 'node:fs/promises'
 
 import { faker } from '@faker-js/faker'
 
-import type { Subjects } from '../../database.js'
 import { NANOID_LENGTH } from '../../generals.js'
 
 export interface Subject {
@@ -24,8 +22,4 @@ export function generateSubjects (amount = 50): Array<Subject> {
       subject_created_timestamp: faker.date.past(8).toISOString()
     }
   })
-}
-
-export async function saveSubjects (subjects: Array<Subjects>): Promise<void> {
-  await writeFile('../../../data/subjects.json', JSON.stringify(subjects))
 }
