@@ -23,6 +23,8 @@ func convertColumnType(kind *pg_query.Node) (string, bool) {
 		return "f64", false
 	case "int4":
 		return "i32", false
+	case "int2":
+		return "i16", false
 	case "timestamptz":
 		return "time::OffsetDateTime", false
 	case "time":
@@ -39,6 +41,35 @@ func convertColumnType(kind *pg_query.Node) (string, bool) {
 		return "DayOfWeek", true
 	default:
 		return "what", true
+	}
+}
+
+func convertColumnTypeTypescript(kind *pg_query.Node) (string, bool) {
+	switch kind.GetString_().GetStr() {
+	case "text":
+		return "string", false
+	case "float4":
+		return "number", false
+	case "int4":
+		return "number", false
+	case "int2":
+		return "number", false
+	case "timestamptz":
+		return "string", false
+	case "time":
+		return "string", false
+	case "point":
+		return "Point", false
+	case "boolean":
+		return "boolean", false
+	case "bool":
+		return "boolean", false
+	case "t_user_role":
+		return "Role", false
+	case "t_day_of_week":
+		return "DayOfWeek", false
+	default:
+		return "what", false
 	}
 }
 
@@ -60,6 +91,7 @@ func main() {
 	tables := make(map[string][]Column)
 
 	enumOutput := ""
+	typescriptEnumOutput := "export interface Point {\n  x: number\n  y: number\n}\n\n"
 
 	for _, statement := range tree.Stmts {
 		if statement.GetStmt().GetCreateEnumStmt() != nil {
@@ -70,11 +102,13 @@ func main() {
 				enumNameCamelCase := enumName.CamelCase()
 
 				enumOutput += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub enum %s {\n", enumNameCamelCase)
+				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			} else if typeName[0].GetString_().GetStr() == "t_user_role" {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[len(typeName[0].GetString_().GetStr())-4:])
 				enumNameCamelCase := enumName.CamelCase()
 
 				enumOutput += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub enum %s {\n", enumNameCamelCase)
+				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			}
 
 			for _, enumValue := range statement.GetStmt().GetCreateEnumStmt().GetVals() {
@@ -82,9 +116,11 @@ func main() {
 				enumVariantCamelCase := enumVariant.CamelCase()
 
 				enumOutput += fmt.Sprintf("    %s,\n", enumVariantCamelCase)
+				typescriptEnumOutput += fmt.Sprintf("  %s,\n", enumVariantCamelCase)
 			}
 
 			enumOutput += "}\n\n"
+			typescriptEnumOutput += "}\n\n"
 		}
 
 		if statement.GetStmt().GetCreateStmt().GetRelation() != nil {
@@ -95,7 +131,6 @@ func main() {
 
 			for _, tableElement := range statement.GetStmt().GetCreateStmt().GetTableElts() {
 				if tableElement.GetColumnDef() != nil {
-
 					columnNames = append(columnNames, Column{
 						columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
 						columnName: tableElement.GetColumnDef().Colname,
@@ -108,12 +143,17 @@ func main() {
 	}
 
 	output := ""
+	typescriptOutput := ""
 
 	for name, columns := range tables {
 		output += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub struct %s {\n", name)
+		typescriptOutput += fmt.Sprintf("export interface %s {\n", name)
 
 		for _, col := range columns {
 			newType, isEnum := convertColumnType(col.columnType)
+			newTypescriptType, _ := convertColumnTypeTypescript(col.columnType)
+
+			typescriptOutput += fmt.Sprintf("  %s: %s\n", col.columnName, newTypescriptType)
 
 			if isEnum {
 				output += fmt.Sprintf("    #[fromrow(num)]\n    pub %s: %s,\n", col.columnName, newType)
@@ -124,14 +164,22 @@ func main() {
 		}
 
 		output += "}\n\n"
+		typescriptOutput += "}\n\n"
 	}
 
 	output = strings.TrimSuffix(output, "\n")
+	typescriptOutput = strings.TrimSuffix(typescriptOutput, "\n")
 
-	writeFileErr := os.WriteFile("../backend/src/database.rs", []byte(enumOutput+output), 0666)
+	err = os.WriteFile("../backend/src/database.rs", []byte(enumOutput+output), 0666)
 
-	if writeFileErr != nil {
-		log.Fatal(writeFileErr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.WriteFile("../faker/src/database.ts", []byte(typescriptEnumOutput+typescriptOutput), 0666)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Println("file saved successfully")

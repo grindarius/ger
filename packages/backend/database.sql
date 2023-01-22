@@ -1,7 +1,7 @@
 -- create database ger;
 
 -- extensions helping with searches.
-create extension if not exists pgroonga;
+-- create extension if not exists pgroonga;
 
 set timezone to 'Asia/Bangkok';
 
@@ -65,9 +65,10 @@ create table curriculums (
     foreign key (faculty_id) references faculties(faculty_id)
 );
 
--- -- majors in the faculty that you could take in the curriculum.
+-- majors in the faculty that you could take in the curriculum.
 create table majors (
     major_id text not null unique,
+    major_representative_id text not null unique,
     curriculum_id text not null,
     major_name text not null,
     major_created_timestamp timestamptz not null default now(),
@@ -78,7 +79,7 @@ create table majors (
 -- years in the academic year
 create table academic_years (
     academic_year_id text not null unique,
-    academic_year_gregorian_year int not null unique default date_part('year', now())::int,
+    academic_year_gregorian_year text not null unique default date_part('year', now()),
     academic_year_start_timestamp timestamptz not null default now(),
     academic_year_end_timestamp timestamptz not null default now(),
     academic_year_created_timestamp timestamptz not null default now(),
@@ -100,7 +101,8 @@ create table semesters (
 create table buildings (
     building_id text not null unique,
     building_name text not null,
-    building_cordinates point not null,
+    building_coordinates point not null,
+    building_created_timestamp timestamptz not null,
     primary key (building_id)
 );
 
@@ -110,6 +112,8 @@ create table rooms (
     building_id text not null,
     room_name text not null,
     room_capacity int not null default 0,
+    -- this is 1-indexed
+    room_floor smallint not null default 1,
     primary key (room_id),
     foreign key (building_id) references buildings(building_id)
 );
@@ -120,6 +124,7 @@ create table users (
     user_email text not null unique,
     user_password text not null,
     user_role t_user_role not null,
+    user_created_timestamp timestamptz not null default now(),
     primary key (user_id)
 );
 
@@ -135,8 +140,7 @@ create table grading_criterias (
     grading_criteria_id text not null unique,
     user_id text not null,
     grading_criteria_name text not null,
-    grading_criteria_description text not null,
-    grading_created_timestamp timestamptz not null,
+    grading_criteria_created_timestamp timestamptz not null,
     primary key (grading_criteria_id),
     foreign key (user_id) references users(user_id)
 );
@@ -145,19 +149,21 @@ create table grading_criteria_grades (
     grading_criteria_grade_id text not null unique,
     grading_criteria_id text not null,
     grading_criteria_grade_alphabet text not null,
-    grading_criteria_grade_minimum_score int not null
+    grading_criteria_grade_minimum_score int not null,
+    primary key (grading_criteria_grade_id),
+    foreign key (grading_criteriaid) references grading_criterias(grading_criteria_id)
 );
 
 -- subjects opened for studying in the university
 create table subjects (
     subject_id text not null unique,
     subject_name text not null,
+    subject_description text not null,
     subject_credit int not null,
-    subject_type text not null,
+    subject_created_timestamp timestamptz not null,
     primary key (subject_id)
 );
 
--- one subject could span many hours during the week so this is required
 create table subject_schedules (
     subject_schedule_id text not null unique,
     subject_id text not null,
@@ -222,6 +228,7 @@ create table major_credit_specifications (
     major_id text not null,
     major_credit_specification_name text not null,
     major_credit_specification_minimum_credit int not null,
+    major_credit_specification_created_timestamp timestamptz not null,
     primary key (major_credit_specification_id),
     foreign key (major_id) references majors(major_id)
 );
@@ -239,9 +246,12 @@ create table major_subjects (
 -- and get the list of subjects in which they are open in the semester.
 create table opening_subjects_in_semester_schedules (
     semester_id text not null references semesters(semester_id),
-    subject_schedule_id text not null references subject_schedules(subject_schedule_id),
+    subject_id text not null references subjects(subject_id),
     room_id text not null references rooms(room_id),
-    primary key (semester_id, subject_schedule_id, room_id)
+    day_of_week t_day_of_week not null,
+    start_time_of_day time not null,
+    end_time_of_day time not null,
+    primary key (semester_id, subject_id, room_id)
 );
 
 -- stores which subjects is taught by which professors.
@@ -256,6 +266,7 @@ create table opening_subjects_in_semester_professors (
 create table opening_subjects_in_semester_subject_descriptions (
     semester_id text not null references semesters(semester_id),
     subject_id text not null references subjects(subject_id),
+    grading_criteria_id text not null references grading_criterias(grading_criteria_id),
     subject_capacity int not null,
     is_grade_released boolean not null default false,
     primary key (semester_id, subject_id)
