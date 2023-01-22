@@ -151,7 +151,7 @@ create table grading_criteria_grades (
     grading_criteria_grade_alphabet text not null,
     grading_criteria_grade_minimum_score int not null,
     primary key (grading_criteria_grade_id),
-    foreign key (grading_criteriaid) references grading_criterias(grading_criteria_id)
+    foreign key (grading_criteria_id) references grading_criterias(grading_criteria_id)
 );
 
 -- subjects opened for studying in the university
