@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid'
 
 import { faker } from '@faker-js/faker'
 
-import { NANOID_LENGTH } from '../../generals.js'
 import type { Curriculums, Faculties } from '../../database.js'
+import { NANOID_LENGTH } from '../../generals.js'
 
 export function generateCurriculums (faculties: Array<Faculties>, amountEach = 6): Array<Curriculums> {
   return faculties.map(faculty => {

@@ -1,10 +1,9 @@
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
 
-import type { AcademicYears } from '../../database.js'
-
 import { faker } from '@faker-js/faker'
 
+import type { AcademicYears } from '../../database.js'
 import { NANOID_LENGTH } from '../../generals.js'
 
 export function generateAcademicYears (startYear: number, endYear: number): Array<AcademicYears> {

@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid'
 
 import { faker } from '@faker-js/faker'
 
-import { NANOID_LENGTH } from '../../generals.js'
 import type { Buildings, Rooms } from '../../database.js'
+import { NANOID_LENGTH } from '../../generals.js'
 
 export function generateRooms (buildings: Array<Buildings>): Array<Rooms> {
   return buildings.map(building => {

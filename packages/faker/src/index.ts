@@ -3,6 +3,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 import utc from 'dayjs/plugin/utc.js'
 import { config } from 'dotenv-flow'
 import { writeFile } from 'node:fs/promises'
+
 import { generateAcademicYears } from './tables/academic-years.js'
 import { generateBuildings } from './tables/buildings.js'
 import { generateRooms } from './tables/rooms.js'

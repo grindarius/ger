@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid'
 
 import { faker } from '@faker-js/faker'
 
-import { ENCRYPTED_PASSWORD, NANOID_LENGTH, nid, Role } from '../../generals.js'
 import type { AcademicYears, Majors, Professors, Students, Users } from '../../database.js'
+import { ENCRYPTED_PASSWORD, NANOID_LENGTH, nid, Role } from '../../generals.js'
 
 export function generateStudents (
   majors: Array<Majors>,

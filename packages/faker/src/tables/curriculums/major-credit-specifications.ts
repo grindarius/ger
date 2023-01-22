@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid'
 
 import { faker } from '@faker-js/faker'
 
-import { NANOID_LENGTH } from '../../generals.js'
 import type { MajorCreditSpecifications, Majors } from '../../database.js'
+import { NANOID_LENGTH } from '../../generals.js'
 
 export function generateMajorCreditSpecifications (majors: Array<Majors>, amountEach: 5): Array<MajorCreditSpecifications> {
   return majors.map(major => {

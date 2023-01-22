@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid'
 
 import { faker } from '@faker-js/faker'
 
-import { ENCRYPTED_PASSWORD, NANOID_LENGTH, Role } from '../../generals.js'
 import type { Users } from '../../database.js'
+import { ENCRYPTED_PASSWORD, NANOID_LENGTH, Role } from '../../generals.js'
 
 export function createAdmins (amount: number = 20): Array<Users> {
   return Array.from({ length: amount }, () => {
