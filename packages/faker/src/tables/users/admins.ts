@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker'
 import type { Users } from '../../database.js'
 import { ENCRYPTED_PASSWORD, NANOID_LENGTH, Role } from '../../generals.js'
 
-export function createAdmins (amount: number = 20): Array<Users> {
+export function generateAdmins (amount: number = 20): Array<Users> {
   return Array.from({ length: amount }, () => {
     const firstName = faker.name.firstName()
     const lastName = faker.name.lastName()
