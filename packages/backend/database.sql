@@ -1,7 +1,7 @@
 -- create database ger;
 
 -- extensions helping with searches.
--- create extension if not exists pgroonga;
+create extension if not exists pgroonga;
 
 set timezone to 'Asia/Bangkok';
 
@@ -136,6 +136,10 @@ create table user_sessions (
     foreign key (user_session_user_id) references users(user_id)
 );
 
+create index if not exists pgroonga_users_index on users using pgroonga (
+    user_username pgroonga_text_full_text_search_ops_v2
+);
+
 create table grading_criterias (
     grading_criteria_id text not null unique,
     user_id text not null,
@@ -162,6 +166,11 @@ create table subjects (
     subject_credit int not null,
     subject_created_timestamp timestamptz not null,
     primary key (subject_id)
+);
+
+create index if not exists pgroonga_subjects_index on subjects using pgroonga (
+    subject_name pgroonga_text_full_text_search_ops_v2,
+    subject_description pgroonga_text_full_text_search_ops_v2
 );
 
 create table subject_schedules (
@@ -193,6 +202,12 @@ create table professor_names (
     foreign key (professor_id) references professors(professor_id)
 );
 
+create index if not exists pgroonga_professor_names_index on professor_names using pgroonga (
+    professor_first_name pgroonga_text_full_text_search_ops_v2,
+    professor_middle_name pgroonga_text_full_text_search_ops_v2,
+    professor_last_name pgroonga_text_full_text_search_ops_v2
+);
+
 -- students data
 create table students (
     student_id text not null references users(user_id) unique,
@@ -219,6 +234,12 @@ create table student_names (
     student_last_name text not null,
     primary key (student_name_id),
     foreign key (student_id) references students(student_id)
+);
+
+create index if not exists pgroonga_student_names_index on student_names using pgroonga (
+    student_first_name pgroonga_text_full_text_search_ops_v2,
+    student_middle_name pgroonga_text_full_text_search_ops_v2,
+    student_last_name pgroonga_text_full_text_search_ops_v2
 );
 
 -- credit specifications for a major, this is how many credits you have to take
@@ -309,8 +330,12 @@ create table student_subject_comments (
     semester_id text not null references semesters(semester_id),
     subject_id text not null references subjects(subject_id),
     student_id text not null references students(student_id),
-    student_comment text not null,
+    student_comment text not null default '',
     primary key (semester_id, subject_id, student_id)
+);
+
+create index if not exists pgroonga_student_subject_comments_index on student_subject_comments using pgroonga (
+    student_comment pgroonga_text_full_text_search_ops_v2
 );
 
 create table student_assignments (
