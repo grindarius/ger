@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { ReactElement } from 'react'
 import React from 'react'
 
-export default function Sidebar ({ children }: { children: ReactElement }): JSX.Element {
+export default function Menu ({ children }: { children: ReactElement }): JSX.Element {
   return (
     <>
       <div className="navbar bg-base-100">
@@ -47,6 +47,15 @@ export default function Sidebar ({ children }: { children: ReactElement }): JSX.
           <ul className="menu p-4 w-80 bg-base-100 text-base-content">
             <li>
               <Link href="/signin">Signin</Link>
+            </li>
+            <li>
+              <Link href="/curriculums">Curriculums</Link>
+            </li>
+            <li>
+              <Link href="/forum">Forum</Link>
+            </li>
+            <li>
+              <Link href="/subjects">Subjects</Link>
             </li>
           </ul>
         </div>

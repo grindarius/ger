@@ -1,11 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import type { ReactElement } from 'react'
 
-import Menu from '@/components/menu'
-import type { NextPageWithLayout } from './_app'
-
-const Home: NextPageWithLayout = () => {
+export default function Home (): JSX.Element {
   return (
     <>
       <Head>
@@ -28,11 +24,3 @@ const Home: NextPageWithLayout = () => {
     </>
   )
 }
-
-Home.getLayout = function getLayout (content: ReactElement): JSX.Element {
-  return (
-    <Menu>{content}</Menu>
-  )
-}
-
-export default Home
