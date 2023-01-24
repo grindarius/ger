@@ -17,10 +17,20 @@ pub enum Role {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct OpeningSubjectsInSemesterProfessors {
-    pub semester_id: String,
-    pub subject_id: String,
-    pub professor_id: String,
+pub struct AcademicYears {
+    pub academic_year_id: String,
+    pub academic_year_gregorian_year: String,
+    pub academic_year_start_timestamp: time::OffsetDateTime,
+    pub academic_year_end_timestamp: time::OffsetDateTime,
+    pub academic_year_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct Buildings {
+    pub building_id: String,
+    pub building_name: String,
+    pub building_coordinates: geo_types::Point<f64>,
+    pub building_created_timestamp: time::OffsetDateTime,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -32,20 +42,61 @@ pub struct Curriculums {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct Professors {
-    pub professor_id: String,
-    pub professor_profile_image_path: String,
-    pub professor_birthdate: time::Date,
+pub struct Faculties {
+    pub faculty_id: String,
+    pub faculty_name: String,
+    pub faculty_created_timestamp: time::OffsetDateTime,
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct StudentNames {
-    pub student_name_id: String,
-    pub student_id: String,
-    pub student_name_language: String,
-    pub student_first_name: String,
-    pub student_middle_name: String,
-    pub student_last_name: String,
+pub struct ForumCategories {
+    pub forum_category_id: String,
+    pub forum_category_name: String,
+    pub forum_category_representative_id: String,
+    pub user_id: String,
+    pub forum_category_hex_color_code: String,
+    pub forum_category_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct ForumPostReplies {
+    pub forum_post_reply_id: String,
+    pub user_id: String,
+    pub forum_post_reply_content: String,
+    pub forum_post_reply_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct ForumPostViews {
+    pub forum_post_id: String,
+    pub user_id: String,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct ForumPosts {
+    pub forum_post_id: String,
+    pub forum_post_name: String,
+    pub forum_cagetory_id: String,
+    pub forum_post_content: String,
+    pub forum_post_created_timestamp: time::OffsetDateTime,
+    pub forum_post_is_categoric_announcement: bool,
+    pub forum_post_is_global_announcement: bool,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct GradingCriteriaGrades {
+    pub grading_criteria_grade_id: String,
+    pub grading_criteria_id: String,
+    pub grading_criteria_grade_alphabet: String,
+    pub grading_criteria_grade_minimum_score: i32,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct GradingCriterias {
+    pub grading_criteria_id: String,
+    pub user_id: String,
+    pub grading_criteria_name: String,
+    pub grading_criteria_created_timestamp: time::OffsetDateTime,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -64,58 +115,19 @@ pub struct MajorSubjects {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct StudentSubjectComments {
+pub struct Majors {
+    pub major_id: String,
+    pub major_representative_id: String,
+    pub curriculum_id: String,
+    pub major_name: String,
+    pub major_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct OpeningSubjectsInSemesterAdditionalEligibleStudents {
     pub semester_id: String,
     pub subject_id: String,
-    pub student_id: String,
-    pub student_comment: String,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct StudentAssignments {
-    pub student_assignment_id: String,
-    pub student_assignment_name: String,
-    pub subject_id: String,
-    pub semester_id: String,
-    pub student_assignment_full_score: f64,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct StudentScores {
-    pub semester_id: String,
-    pub subject_id: String,
-    pub student_id: String,
-    pub assignment_id: String,
-    pub student_score: f64,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Semesters {
-    pub semester_id: String,
-    pub academic_year_id: String,
-    pub semester_start_timestamp: time::OffsetDateTime,
-    pub semester_end_timestamp: time::OffsetDateTime,
-    pub semester_created_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Users {
-    pub user_id: String,
-    pub user_username: String,
-    pub user_email: String,
-    pub user_password: String,
-    #[fromrow(num)]
-    pub user_role: Role,
-    pub user_created_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Subjects {
-    pub subject_id: String,
-    pub subject_name: String,
-    pub subject_description: String,
-    pub subject_credit: i32,
-    pub subject_created_timestamp: time::OffsetDateTime,
+    pub additional_student_id: String,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -127,10 +139,21 @@ pub struct OpeningSubjectsInSemesterEligibleMajors {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct OpeningSubjectsInSemesterAdditionalEligibleStudents {
+pub struct OpeningSubjectsInSemesterProfessors {
     pub semester_id: String,
     pub subject_id: String,
-    pub additional_student_id: String,
+    pub professor_id: String,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct OpeningSubjectsInSemesterSchedules {
+    pub semester_id: String,
+    pub subject_id: String,
+    pub room_id: String,
+    #[fromrow(num)]
+    pub day_of_week: DayOfWeek,
+    pub start_time_of_day: time::Time,
+    pub end_time_of_day: time::Time,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -143,6 +166,84 @@ pub struct OpeningSubjectsInSemesterSubjectDescriptions {
 }
 
 #[derive(ger_from_row::FromRow)]
+pub struct ProfessorNames {
+    pub professor_name_id: String,
+    pub professor_id: String,
+    pub professor_name_language: String,
+    pub professor_first_name: String,
+    pub professor_middle_name: String,
+    pub professor_last_name: String,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct Professors {
+    pub professor_id: String,
+    pub professor_profile_image_path: String,
+    pub professor_birthdate: time::Date,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct Rooms {
+    pub room_id: String,
+    pub building_id: String,
+    pub room_name: String,
+    pub room_capacity: i32,
+    pub room_floor: i16,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct Semesters {
+    pub semester_id: String,
+    pub academic_year_id: String,
+    pub semester_start_timestamp: time::OffsetDateTime,
+    pub semester_end_timestamp: time::OffsetDateTime,
+    pub semester_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct StudentAssignments {
+    pub student_assignment_id: String,
+    pub student_assignment_name: String,
+    pub subject_id: String,
+    pub semester_id: String,
+    pub student_assignment_full_score: f64,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct StudentEnrollments {
+    pub semester_id: String,
+    pub subject_id: String,
+    pub student_id: String,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct StudentNames {
+    pub student_name_id: String,
+    pub student_id: String,
+    pub student_name_language: String,
+    pub student_first_name: String,
+    pub student_middle_name: String,
+    pub student_last_name: String,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct StudentScores {
+    pub semester_id: String,
+    pub subject_id: String,
+    pub student_id: String,
+    pub assignment_id: String,
+    pub student_score: f64,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct StudentSubjectComments {
+    pub semester_id: String,
+    pub subject_id: String,
+    pub student_id: String,
+    pub student_comment: String,
+}
+
+#[derive(ger_from_row::FromRow)]
 pub struct StudentTransactions {
     pub semester_id: String,
     pub student_id: String,
@@ -151,38 +252,6 @@ pub struct StudentTransactions {
     pub student_transaction_price: f64,
     pub student_transaction_created_timestamp: time::OffsetDateTime,
     pub student_transaction_finished_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Faculties {
-    pub faculty_id: String,
-    pub faculty_name: String,
-    pub faculty_created_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct UserSessions {
-    pub user_session_id: String,
-    pub user_session_user_id: String,
-    pub user_session_refresh_token: String,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct GradingCriterias {
-    pub grading_criteria_id: String,
-    pub user_id: String,
-    pub grading_criteria_name: String,
-    pub grading_criteria_created_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct ProfessorNames {
-    pub professor_name_id: String,
-    pub professor_id: String,
-    pub professor_name_language: String,
-    pub professor_first_name: String,
-    pub professor_middle_name: String,
-    pub professor_last_name: String,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -200,14 +269,6 @@ pub struct Students {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct GradingCriteriaGrades {
-    pub grading_criteria_grade_id: String,
-    pub grading_criteria_id: String,
-    pub grading_criteria_grade_alphabet: String,
-    pub grading_criteria_grade_minimum_score: i32,
-}
-
-#[derive(ger_from_row::FromRow)]
 pub struct SubjectSchedules {
     pub subject_schedule_id: String,
     pub subject_id: String,
@@ -218,54 +279,28 @@ pub struct SubjectSchedules {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct OpeningSubjectsInSemesterSchedules {
-    pub semester_id: String,
+pub struct Subjects {
     pub subject_id: String,
-    pub room_id: String,
+    pub subject_name: String,
+    pub subject_description: String,
+    pub subject_credit: i32,
+    pub subject_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct UserSessions {
+    pub user_session_id: String,
+    pub user_session_user_id: String,
+    pub user_session_refresh_token: String,
+}
+
+#[derive(ger_from_row::FromRow)]
+pub struct Users {
+    pub user_id: String,
+    pub user_username: String,
+    pub user_email: String,
+    pub user_password: String,
     #[fromrow(num)]
-    pub day_of_week: DayOfWeek,
-    pub start_time_of_day: time::Time,
-    pub end_time_of_day: time::Time,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct StudentEnrollments {
-    pub semester_id: String,
-    pub subject_id: String,
-    pub student_id: String,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Majors {
-    pub major_id: String,
-    pub major_representative_id: String,
-    pub curriculum_id: String,
-    pub major_name: String,
-    pub major_created_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct AcademicYears {
-    pub academic_year_id: String,
-    pub academic_year_gregorian_year: String,
-    pub academic_year_start_timestamp: time::OffsetDateTime,
-    pub academic_year_end_timestamp: time::OffsetDateTime,
-    pub academic_year_created_timestamp: time::OffsetDateTime,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Rooms {
-    pub room_id: String,
-    pub building_id: String,
-    pub room_name: String,
-    pub room_capacity: i32,
-    pub room_floor: i16,
-}
-
-#[derive(ger_from_row::FromRow)]
-pub struct Buildings {
-    pub building_id: String,
-    pub building_name: String,
-    pub building_coordinates: geo_types::Point<f64>,
-    pub building_created_timestamp: time::OffsetDateTime,
+    pub user_role: Role,
+    pub user_created_timestamp: time::OffsetDateTime,
 }

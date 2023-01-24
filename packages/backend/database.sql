@@ -42,6 +42,11 @@ drop table student_subject_comments cascade;
 drop table student_assignments cascade;
 drop table student_scores cascade;
 
+drop table forum_categories cascade;
+drop table forum_posts cascade;
+drop table forum_post_replies cascade;
+drop table forum_post_views cascade;
+
 -- available faculties in the university.
 create table faculties (
     faculty_id text not null unique,
@@ -354,4 +359,43 @@ create table student_scores (
     assignment_id text not null references student_assignments(student_assignment_id),
     student_score real not null,
     primary key (semester_id, subject_id, student_id, assignment_id)
+);
+
+create table forum_categories (
+    forum_category_id text not null unique,
+    forum_category_name text not null unique,
+    forum_category_representative_id text not null unique,
+    user_id text not null,
+    -- generated from name slugging
+    forum_category_hex_color_code text not null,
+    forum_category_created_timestamp timestamptz not null default now(),
+    primary key (forum_category_id),
+    foreign key (user_id) references users(user_id)
+);
+
+create table forum_posts (
+    forum_post_id text not null unique,
+    forum_post_name text not null,
+    forum_cagetory_id text not null,
+    forum_post_content text not null,
+    forum_post_created_timestamp timestamptz not null default now(),
+    forum_post_is_categoric_announcement boolean not null default false,
+    forum_post_is_global_announcement boolean not null default false,
+    primary key (forum_post_id),
+    foreign key (forum_category_id) references forum_categories(forum_category_id)
+);
+
+create table forum_post_replies (
+    forum_post_reply_id text not null unique,
+    user_id text not null,
+    forum_post_reply_content text not null default '',
+    forum_post_reply_created_timestamp timestamptz not null default now(),
+    primary key (forum_post_reply_id),
+    foreign key (user_id) references users(user_id)
+);
+
+create table forum_post_views (
+    forum_post_id text not null references forum_posts(forum_post_id),
+    user_id text not null references users(user_id),
+    primary key (forum_post_id, user_id)
 );
