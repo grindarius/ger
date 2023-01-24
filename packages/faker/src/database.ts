@@ -47,15 +47,13 @@ export interface Faculties {
   faculty_created_timestamp: string
 }
 
-export interface ForumChannels {
-  forum_channel_id: string
-  forum_channel_name: string
-  forum_channel_representative_id: string
+export interface ForumCategories {
+  forum_category_id: string
+  forum_category_name: string
+  forum_category_representative_id: string
   user_id: string
-  forum_channel_short_description: string
-  forum_channel_long_description: string
-  forum_channel_color_theme: string
-  forum_channel_created_timestamp: string
+  forum_category_color_theme: string
+  forum_category_created_timestamp: string
 }
 
 export interface ForumPostReplies {
@@ -73,7 +71,7 @@ export interface ForumPostViews {
 export interface ForumPosts {
   forum_post_id: string
   forum_post_name: string
-  forum_channel_id: string
+  forum_category_id: string
   forum_post_content: string
   forum_post_created_timestamp: string
   forum_post_is_channel_based_announcement: boolean
