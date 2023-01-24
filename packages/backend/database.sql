@@ -42,7 +42,7 @@ drop table student_subject_comments cascade;
 drop table student_assignments cascade;
 drop table student_scores cascade;
 
-drop table forum_categories cascade;
+drop table forum_channels cascade;
 drop table forum_posts cascade;
 drop table forum_post_replies cascade;
 drop table forum_post_views cascade;
@@ -361,28 +361,31 @@ create table student_scores (
     primary key (semester_id, subject_id, student_id, assignment_id)
 );
 
-create table forum_categories (
-    forum_category_id text not null unique,
-    forum_category_name text not null unique,
-    forum_category_representative_id text not null unique,
+create table forum_channels (
+    forum_channel_id text not null unique,
+    forum_channel_name text not null unique,
+    forum_channel_representative_id text not null unique,
     user_id text not null,
-    -- generated from name slugging
-    forum_category_hex_color_code text not null,
-    forum_category_created_timestamp timestamptz not null default now(),
-    primary key (forum_category_id),
+    forum_channel_short_description text not null default '',
+    forum_channel_long_description text not null default '',
+    forum_channel_color_theme text not null default '#000000',
+    forum_channel_created_timestamp timestamptz not null default now(),
+    primary key (forum_channel_id),
     foreign key (user_id) references users(user_id)
 );
+
+alter table forum_channels add constraint color_hex_constraint check (forum_channel_color_theme ~* '^#[a-fA-F0-9]{6}$');
 
 create table forum_posts (
     forum_post_id text not null unique,
     forum_post_name text not null,
-    forum_cagetory_id text not null,
+    forum_channel_id text not null,
     forum_post_content text not null,
     forum_post_created_timestamp timestamptz not null default now(),
-    forum_post_is_categoric_announcement boolean not null default false,
+    forum_post_is_channel_based_announcement boolean not null default false,
     forum_post_is_global_announcement boolean not null default false,
     primary key (forum_post_id),
-    foreign key (forum_category_id) references forum_categories(forum_category_id)
+    foreign key (forum_channel_id) references forum_channels(forum_channel_id)
 );
 
 create table forum_post_replies (

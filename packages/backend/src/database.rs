@@ -49,13 +49,15 @@ pub struct Faculties {
 }
 
 #[derive(ger_from_row::FromRow)]
-pub struct ForumCategories {
-    pub forum_category_id: String,
-    pub forum_category_name: String,
-    pub forum_category_representative_id: String,
+pub struct ForumChannels {
+    pub forum_channel_id: String,
+    pub forum_channel_name: String,
+    pub forum_channel_representative_id: String,
     pub user_id: String,
-    pub forum_category_hex_color_code: String,
-    pub forum_category_created_timestamp: time::OffsetDateTime,
+    pub forum_channel_short_description: String,
+    pub forum_channel_long_description: String,
+    pub forum_channel_color_theme: String,
+    pub forum_channel_created_timestamp: time::OffsetDateTime,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -76,10 +78,10 @@ pub struct ForumPostViews {
 pub struct ForumPosts {
     pub forum_post_id: String,
     pub forum_post_name: String,
-    pub forum_cagetory_id: String,
+    pub forum_channel_id: String,
     pub forum_post_content: String,
     pub forum_post_created_timestamp: time::OffsetDateTime,
-    pub forum_post_is_categoric_announcement: bool,
+    pub forum_post_is_channel_based_announcement: bool,
     pub forum_post_is_global_announcement: bool,
 }
 
