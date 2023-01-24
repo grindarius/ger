@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/gobeam/stringy"
@@ -149,11 +150,19 @@ func main() {
 	output := ""
 	typescriptOutput := ""
 
-	for name, columns := range tables {
+	tableKeys := make([]string, 0, len(tables))
+
+	for k := range tables {
+		tableKeys = append(tableKeys, k)
+	}
+
+	sort.Strings(tableKeys)
+
+	for _, name := range tableKeys {
 		output += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub struct %s {\n", name)
 		typescriptOutput += fmt.Sprintf("export interface %s {\n", name)
 
-		for _, col := range columns {
+		for _, col := range tables[name] {
 			newType, isEnum := convertColumnType(col.columnType)
 			newTypescriptType, _ := convertColumnTypeTypescript(col.columnType)
 
