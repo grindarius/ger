@@ -14,6 +14,7 @@ import (
 type Column struct {
 	columnName string
 	columnType *pg_query.Node
+	isNonNull  bool
 }
 
 func convertColumnType(kind *pg_query.Node) (string, bool) {
@@ -78,6 +79,19 @@ func convertColumnTypeTypescript(kind *pg_query.Node) (string, bool) {
 	}
 }
 
+// https://stackoverflow.com/a/70802740/12386405
+func Contains(s []*pg_query.Node) bool {
+	for _, v := range s {
+		if v.GetConstraint().Contype == pg_query.ConstrType_CONSTR_NOTNULL {
+			fmt.Println("column nonnull")
+			return true
+		}
+	}
+
+	fmt.Println("column nullable")
+	return false
+}
+
 func main() {
 	file, err := os.ReadFile("../backend/database.sql")
 	if err != nil {
@@ -136,10 +150,21 @@ func main() {
 
 			for _, tableElement := range statement.GetStmt().GetCreateStmt().GetTableElts() {
 				if tableElement.GetColumnDef() != nil {
-					columnNames = append(columnNames, Column{
-						columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
-						columnName: tableElement.GetColumnDef().Colname,
-					})
+					if len(tableElement.GetColumnDef().GetConstraints()) != 0 {
+						isNonNull := Contains(tableElement.GetColumnDef().GetConstraints())
+
+						columnNames = append(columnNames, Column{
+							columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
+							columnName: tableElement.GetColumnDef().Colname,
+							isNonNull:  isNonNull,
+						})
+					} else {
+						columnNames = append(columnNames, Column{
+							columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
+							columnName: tableElement.GetColumnDef().Colname,
+							isNonNull:  false,
+						})
+					}
 				}
 			}
 
@@ -166,14 +191,21 @@ func main() {
 			newType, isEnum := convertColumnType(col.columnType)
 			newTypescriptType, _ := convertColumnTypeTypescript(col.columnType)
 
-			typescriptOutput += fmt.Sprintf("  %s: %s\n", col.columnName, newTypescriptType)
-
-			if isEnum {
-				output += fmt.Sprintf("    #[fromrow(num)]\n    pub %s: %s,\n", col.columnName, newType)
-				continue
+			if col.isNonNull {
+				typescriptOutput += fmt.Sprintf("  %s: %s\n", col.columnName, newTypescriptType)
+			} else {
+				typescriptOutput += fmt.Sprintf("  %s: %s?\n", col.columnName, newTypescriptType)
 			}
 
-			output += fmt.Sprintf("    pub %s: %s,\n", col.columnName, newType)
+			if isEnum {
+				output += fmt.Sprintf("    #[fromrow(num)]\n")
+			}
+
+			if col.isNonNull {
+				output += fmt.Sprintf("    pub %s: %s,\n", col.columnName, newType)
+			} else {
+				output += fmt.Sprintf("    pub %s: Option<%s>\n", col.columnName, newType)
+			}
 		}
 
 		output += "}\n\n"
@@ -182,6 +214,8 @@ func main() {
 
 	output = strings.TrimSuffix(output, "\n")
 	typescriptOutput = strings.TrimSuffix(typescriptOutput, "\n")
+
+	fmt.Println(tables)
 
 	err = os.WriteFile("../backend/src/database.rs", []byte(enumOutput+output), 0666)
 
@@ -194,6 +228,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// ast, err := pg_query.Parse("create table u (uname text not null unique, udate date, primary key (uname));")
+	//
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// for _, stmt := range ast.Stmts {
+	// 	for _, tblElts := range stmt.GetStmt().GetCreateStmt().GetTableElts() {
+	// 		fmt.Println(tblElts.GetColumnDef().GetConstraints()[0].GetConstraint().Contype)
+	// 	}
+	// }
 
 	log.Println("file saved successfully")
 }

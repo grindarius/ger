@@ -56,6 +56,16 @@ export interface ForumCategories {
   forum_category_created_timestamp: string
 }
 
+export interface ForumGlobalAnnouncements {
+  forum_global_announcement_id: string
+  forum_global_announcement_name: string
+  user_id: string
+  forum_global_announcement_content: string
+  forum_global_announcement_is_active: boolean
+  forum_global_announcement_created_timestamp: string
+  forum_global_announcement_deactivated_timestamp: string?
+}
+
 export interface ForumPostReplies {
   forum_post_reply_id: string
   user_id: string
@@ -71,11 +81,11 @@ export interface ForumPostViews {
 export interface ForumPosts {
   forum_post_id: string
   forum_post_name: string
+  user_id: string
   forum_category_id: string
   forum_post_content: string
   forum_post_created_timestamp: string
-  forum_post_is_channel_based_announcement: boolean
-  forum_post_is_global_announcement: boolean
+  forum_post_is_category_based_announcement: boolean
 }
 
 export interface GradingCriteriaGrades {
@@ -225,7 +235,7 @@ export interface StudentTransactions {
   student_transaction_is_transaction_successful: boolean
   student_transaction_price: number
   student_transaction_created_timestamp: string
-  student_transaction_finished_timestamp: string
+  student_transaction_finished_timestamp: string?
 }
 
 export interface Students {

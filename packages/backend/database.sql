@@ -43,6 +43,7 @@ drop table student_assignments cascade;
 drop table student_scores cascade;
 
 drop table forum_categories cascade;
+drop table forum_global_announcements cascade;
 drop table forum_posts cascade;
 drop table forum_post_replies cascade;
 drop table forum_post_views cascade;
@@ -374,16 +375,28 @@ create table forum_categories (
 
 alter table forum_categories add constraint color_hex_constraint check (forum_category_color_theme ~* '^#[a-fA-F0-9]{6}$');
 
+create table forum_global_announcements (
+    forum_global_announcement_id text not null unique,
+    forum_global_announcement_name text not null,
+    user_id text not null,
+    forum_global_announcement_content text not null default '',
+    forum_global_announcement_is_active boolean not null default true,
+    forum_global_announcement_created_timestamp timestamptz not null default now(),
+    -- when forum_global_announcement_is_active gets switch to false, deactivated timestamp gets updated
+    forum_global_announcement_deactivated_timestamp timestamptz,
+    primary key (forum_global_announcement_id),
+    foreign key (user_id) references users(user_id)
+);
+
 create table forum_posts (
     forum_post_id text not null unique,
     forum_post_name text not null,
-    forum_category_id text not null,
+    user_id text not null references users(user_id),
+    forum_category_id text not null references forum_categories(forum_category_id),
     forum_post_content text not null,
     forum_post_created_timestamp timestamptz not null default now(),
-    forum_post_is_channel_based_announcement boolean not null default false,
-    forum_post_is_global_announcement boolean not null default false,
-    primary key (forum_post_id),
-    foreign key (forum_category_id) references forum_categories(forum_category_id)
+    forum_post_is_category_based_announcement boolean not null default false,
+    primary key (forum_post_id)
 );
 
 create table forum_post_replies (
@@ -396,7 +409,10 @@ create table forum_post_replies (
 );
 
 create table forum_post_views (
-    forum_post_id text not null references forum_posts(forum_post_id),
-    user_id text not null references users(user_id),
-    primary key (forum_post_id, user_id)
+    forum_post_id text not null,
+    user_id text not null,
+    primary key (forum_post_id, user_id),
+    foreign key (user_id) references users(user_id),
+    foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
+    foreign key (forum_post_id) references forum_posts(forum_post_id)
 );

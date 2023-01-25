@@ -59,6 +59,17 @@ pub struct ForumCategories {
 }
 
 #[derive(ger_from_row::FromRow)]
+pub struct ForumGlobalAnnouncements {
+    pub forum_global_announcement_id: String,
+    pub forum_global_announcement_name: String,
+    pub user_id: String,
+    pub forum_global_announcement_content: String,
+    pub forum_global_announcement_is_active: bool,
+    pub forum_global_announcement_created_timestamp: time::OffsetDateTime,
+    pub forum_global_announcement_deactivated_timestamp: Option<time::OffsetDateTime>
+}
+
+#[derive(ger_from_row::FromRow)]
 pub struct ForumPostReplies {
     pub forum_post_reply_id: String,
     pub user_id: String,
@@ -76,11 +87,11 @@ pub struct ForumPostViews {
 pub struct ForumPosts {
     pub forum_post_id: String,
     pub forum_post_name: String,
+    pub user_id: String,
     pub forum_category_id: String,
     pub forum_post_content: String,
     pub forum_post_created_timestamp: time::OffsetDateTime,
-    pub forum_post_is_channel_based_announcement: bool,
-    pub forum_post_is_global_announcement: bool,
+    pub forum_post_is_category_based_announcement: bool,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -251,7 +262,7 @@ pub struct StudentTransactions {
     pub student_transaction_is_transaction_successful: bool,
     pub student_transaction_price: f64,
     pub student_transaction_created_timestamp: time::OffsetDateTime,
-    pub student_transaction_finished_timestamp: time::OffsetDateTime,
+    pub student_transaction_finished_timestamp: Option<time::OffsetDateTime>
 }
 
 #[derive(ger_from_row::FromRow)]
