@@ -83,12 +83,10 @@ func convertColumnTypeTypescript(kind *pg_query.Node) (string, bool) {
 func Contains(s []*pg_query.Node) bool {
 	for _, v := range s {
 		if v.GetConstraint().Contype == pg_query.ConstrType_CONSTR_NOTNULL {
-			fmt.Println("column nonnull")
 			return true
 		}
 	}
 
-	fmt.Println("column nullable")
 	return false
 }
 
@@ -150,21 +148,13 @@ func main() {
 
 			for _, tableElement := range statement.GetStmt().GetCreateStmt().GetTableElts() {
 				if tableElement.GetColumnDef() != nil {
-					if len(tableElement.GetColumnDef().GetConstraints()) != 0 {
-						isNonNull := Contains(tableElement.GetColumnDef().GetConstraints())
+					isNonNull := Contains(tableElement.GetColumnDef().GetConstraints())
 
-						columnNames = append(columnNames, Column{
-							columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
-							columnName: tableElement.GetColumnDef().Colname,
-							isNonNull:  isNonNull,
-						})
-					} else {
-						columnNames = append(columnNames, Column{
-							columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
-							columnName: tableElement.GetColumnDef().Colname,
-							isNonNull:  false,
-						})
-					}
+					columnNames = append(columnNames, Column{
+						columnType: tableElement.GetColumnDef().GetTypeName().Names[len(tableElement.GetColumnDef().GetTypeName().Names)-1],
+						columnName: tableElement.GetColumnDef().Colname,
+						isNonNull:  isNonNull,
+					})
 				}
 			}
 
@@ -215,8 +205,6 @@ func main() {
 	output = strings.TrimSuffix(output, "\n")
 	typescriptOutput = strings.TrimSuffix(typescriptOutput, "\n")
 
-	fmt.Println(tables)
-
 	err = os.WriteFile("../backend/src/database.rs", []byte(enumOutput+output), 0666)
 
 	if err != nil {
@@ -228,18 +216,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// ast, err := pg_query.Parse("create table u (uname text not null unique, udate date, primary key (uname));")
-	//
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	//
-	// for _, stmt := range ast.Stmts {
-	// 	for _, tblElts := range stmt.GetStmt().GetCreateStmt().GetTableElts() {
-	// 		fmt.Println(tblElts.GetColumnDef().GetConstraints()[0].GetConstraint().Contype)
-	// 	}
-	// }
 
 	log.Println("file saved successfully")
 }
