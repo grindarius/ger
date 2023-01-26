@@ -76,8 +76,6 @@ fn parse_field_attribute(attrs: &Vec<syn::Attribute>) -> Option<MacroAttribute> 
                                         }
                                     }
                                     syn::Meta::Path(ref p) => {
-                                        println!("{:?}", p.segments);
-
                                         if let Some(f) = p.segments.first() {
                                             if f.ident.to_string() == "num" {
                                                 return Some(MacroAttribute::Enum(None));
