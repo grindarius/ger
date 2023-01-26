@@ -99,7 +99,7 @@ pub struct GradingCriteriaGrades {
     pub grading_criteria_grade_id: String,
     pub grading_criteria_id: String,
     pub grading_criteria_grade_alphabet: String,
-    pub grading_criteria_grade_minimum_score: i32,
+    pub grading_criteria_grade_minimum_score: f64,
 }
 
 #[derive(ger_from_row::FromRow)]

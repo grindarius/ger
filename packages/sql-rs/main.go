@@ -23,6 +23,8 @@ func convertColumnType(kind *pg_query.Node) (string, bool) {
 		return "String", false
 	case "float4":
 		return "f64", false
+	case "numeric":
+		return "f64", false
 	case "int4":
 		return "i32", false
 	case "int2":
@@ -184,7 +186,7 @@ func main() {
 			if col.isNonNull {
 				typescriptOutput += fmt.Sprintf("  %s: %s\n", col.columnName, newTypescriptType)
 			} else {
-				typescriptOutput += fmt.Sprintf("  %s: %s?\n", col.columnName, newTypescriptType)
+				typescriptOutput += fmt.Sprintf("  %s?: %s\n", col.columnName, newTypescriptType)
 			}
 
 			if isEnum {

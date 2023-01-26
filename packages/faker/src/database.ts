@@ -63,7 +63,7 @@ export interface ForumGlobalAnnouncements {
   forum_global_announcement_content: string
   forum_global_announcement_is_active: boolean
   forum_global_announcement_created_timestamp: string
-  forum_global_announcement_deactivated_timestamp: string?
+  forum_global_announcement_deactivated_timestamp?: string
 }
 
 export interface ForumPostReplies {
@@ -235,7 +235,7 @@ export interface StudentTransactions {
   student_transaction_is_transaction_successful: boolean
   student_transaction_price: number
   student_transaction_created_timestamp: string
-  student_transaction_finished_timestamp: string?
+  student_transaction_finished_timestamp?: string
 }
 
 export interface Students {

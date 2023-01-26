@@ -138,7 +138,7 @@ create table user_sessions (
     user_session_id text not null unique,
     user_session_user_id text not null unique,
     user_session_refresh_token text not null,
-    primary key (user_session_id ),
+    primary key (user_session_id),
     foreign key (user_session_user_id) references users(user_id)
 );
 
@@ -159,7 +159,7 @@ create table grading_criteria_grades (
     grading_criteria_grade_id text not null unique,
     grading_criteria_id text not null,
     grading_criteria_grade_alphabet text not null,
-    grading_criteria_grade_minimum_score int not null,
+    grading_criteria_grade_minimum_score numeric(6, 2) not null,
     primary key (grading_criteria_grade_id),
     foreign key (grading_criteria_id) references grading_criterias(grading_criteria_id)
 );
@@ -222,7 +222,7 @@ create table students (
     student_nid text not null,
     student_birthdate date not null,
     student_previous_school_name text not null,
-    student_previous_school_gpa real not null,
+    student_previous_school_gpa numeric(3, 2) not null,
     major_id text not null references majors(major_id),
     professor_id text not null references professors(professor_id),
     -- what year is the student's first academic year in the university
@@ -326,7 +326,7 @@ create table student_transactions (
     student_id text not null references students(student_id),
     student_transaction_id text not null unique,
     student_transaction_is_transaction_successful boolean not null default false,
-    student_transaction_price real not null,
+    student_transaction_price numeric(8, 2) not null,
     student_transaction_created_timestamp timestamptz not null default now(),
     student_transaction_finished_timestamp timestamptz,
     primary key (semester_id, student_id)
@@ -349,7 +349,7 @@ create table student_assignments (
     student_assignment_name text not null,
     subject_id text not null references subjects(subject_id),
     semester_id text not null references semesters(semester_id),
-    student_assignment_full_score real not null,
+    student_assignment_full_score numeric(6, 2) not null,
     primary key (student_assignment_id)
 );
 
@@ -358,7 +358,7 @@ create table student_scores (
     subject_id text not null references subjects(subject_id),
     student_id text not null references students(student_id),
     assignment_id text not null references student_assignments(student_assignment_id),
-    student_score real not null,
+    student_score numeric(6, 2) not null,
     primary key (semester_id, subject_id, student_id, assignment_id)
 );
 
