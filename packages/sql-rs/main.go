@@ -60,6 +60,8 @@ func convertColumnTypeTypescript(kind *pg_query.Node) (string, bool) {
 		return "number", false
 	case "int2":
 		return "number", false
+	case "numeric":
+		return "number", false
 	case "date":
 		return "string", false
 	case "timestamptz":
