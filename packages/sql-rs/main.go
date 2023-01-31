@@ -122,13 +122,13 @@ func main() {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[2:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub enum %s {\n", enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]\npub enum %s {\n", enumNameCamelCase)
 				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			} else if typeName[0].GetString_().GetStr() == "t_user_role" {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[len(typeName[0].GetString_().GetStr())-4:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub enum %s {\n", enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]\npub enum %s {\n", enumNameCamelCase)
 				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			}
 
@@ -170,7 +170,7 @@ func main() {
 		"impl Role {\n" +
 			"    pub fn as_str<'lt>(self: &Self) -> &'lt str {\n" +
 			"        match self {\n" +
-			"            Self::User => \"user\",\n" +
+			"            Self::Admin => \"admin\",\n" +
 			"            Self::Student => \"student\",\n" +
 			"            Self::Professor => \"professor\",\n" +
 			"        }\n" +
@@ -203,7 +203,7 @@ func main() {
 	sort.Strings(tableKeys)
 
 	for _, name := range tableKeys {
-		output += fmt.Sprintf("#[derive(ger_from_row::FromRow)]\npub struct %s {\n", name)
+		output += fmt.Sprintf("#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]\npub struct %s {\n", name)
 		typescriptOutput += fmt.Sprintf("export interface %s {\n", name)
 
 		for _, col := range tables[name] {
@@ -223,7 +223,7 @@ func main() {
 			if col.isNonNull {
 				output += fmt.Sprintf("    pub %s: %s,\n", col.columnName, newType)
 			} else {
-				output += fmt.Sprintf("    pub %s: Option<%s>\n", col.columnName, newType)
+				output += fmt.Sprintf("    pub %s: Option<%s>,\n", col.columnName, newType)
 			}
 		}
 

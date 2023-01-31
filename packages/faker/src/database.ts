@@ -14,7 +14,7 @@ export enum DayOfWeek {
 }
 
 export enum Role {
-  User,
+  Admin,
   Student,
   Professor,
 }

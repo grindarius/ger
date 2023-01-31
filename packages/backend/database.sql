@@ -10,7 +10,7 @@ drop type t_user_role cascade;
 
 -- types for day of week.
 create type t_day_of_week as enum ('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
-create type t_user_role as enum ('user', 'student', 'professor');
+create type t_user_role as enum ('admin', 'student', 'professor');
 
 drop table faculties cascade;
 drop table curriculums cascade;

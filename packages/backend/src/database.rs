@@ -1,4 +1,4 @@
-#[derive(ger_from_row::FromRow)]
+#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub enum DayOfWeek {
     Sunday,
     Monday,
@@ -9,9 +9,9 @@ pub enum DayOfWeek {
     Saturday,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub enum Role {
-    User,
+    Admin,
     Student,
     Professor,
 }
@@ -19,7 +19,7 @@ pub enum Role {
 impl Role {
     pub fn as_str<'lt>(self: &Self) -> &'lt str {
         match self {
-            Self::User => "user",
+            Self::Admin => "admin",
             Self::Student => "student",
             Self::Professor => "professor",
         }
@@ -40,7 +40,7 @@ impl DayOfWeek {
     }
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct AcademicYears {
     pub academic_year_id: String,
     pub academic_year_gregorian_year: String,
@@ -49,7 +49,7 @@ pub struct AcademicYears {
     pub academic_year_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Buildings {
     pub building_id: String,
     pub building_name: String,
@@ -57,7 +57,7 @@ pub struct Buildings {
     pub building_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Curriculums {
     pub curriculum_id: String,
     pub faculty_id: String,
@@ -65,14 +65,14 @@ pub struct Curriculums {
     pub curriculum_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Faculties {
     pub faculty_id: String,
     pub faculty_name: String,
     pub faculty_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumCategories {
     pub forum_category_id: String,
     pub forum_category_name: String,
@@ -82,7 +82,7 @@ pub struct ForumCategories {
     pub forum_category_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumGlobalAnnouncements {
     pub forum_global_announcement_id: String,
     pub forum_global_announcement_name: String,
@@ -93,7 +93,7 @@ pub struct ForumGlobalAnnouncements {
     pub forum_global_announcement_deactivated_timestamp: Option<time::OffsetDateTime>,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumPostReplies {
     pub forum_post_reply_id: String,
     pub user_id: String,
@@ -101,13 +101,13 @@ pub struct ForumPostReplies {
     pub forum_post_reply_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumPostViews {
     pub forum_post_id: String,
     pub user_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumPosts {
     pub forum_post_id: String,
     pub forum_post_name: String,
@@ -118,7 +118,7 @@ pub struct ForumPosts {
     pub forum_post_is_category_based_announcement: bool,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct GradingCriteriaGrades {
     pub grading_criteria_grade_id: String,
     pub grading_criteria_id: String,
@@ -126,7 +126,7 @@ pub struct GradingCriteriaGrades {
     pub grading_criteria_grade_minimum_score: f64,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct GradingCriterias {
     pub grading_criteria_id: String,
     pub user_id: String,
@@ -134,7 +134,7 @@ pub struct GradingCriterias {
     pub grading_criteria_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct MajorCreditSpecifications {
     pub major_credit_specification_id: String,
     pub major_id: String,
@@ -143,13 +143,13 @@ pub struct MajorCreditSpecifications {
     pub major_credit_specification_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct MajorSubjects {
     pub major_credit_specification_id: String,
     pub subject_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Majors {
     pub major_id: String,
     pub major_representative_id: String,
@@ -158,14 +158,14 @@ pub struct Majors {
     pub major_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct OpeningSubjectsInSemesterAdditionalEligibleStudents {
     pub semester_id: String,
     pub subject_id: String,
     pub additional_student_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct OpeningSubjectsInSemesterEligibleMajors {
     pub semester_id: String,
     pub subject_id: String,
@@ -173,14 +173,14 @@ pub struct OpeningSubjectsInSemesterEligibleMajors {
     pub academic_year_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct OpeningSubjectsInSemesterProfessors {
     pub semester_id: String,
     pub subject_id: String,
     pub professor_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct OpeningSubjectsInSemesterSchedules {
     pub semester_id: String,
     pub subject_id: String,
@@ -191,7 +191,7 @@ pub struct OpeningSubjectsInSemesterSchedules {
     pub end_time_of_day: time::Time,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct OpeningSubjectsInSemesterSubjectDescriptions {
     pub semester_id: String,
     pub subject_id: String,
@@ -200,7 +200,7 @@ pub struct OpeningSubjectsInSemesterSubjectDescriptions {
     pub is_grade_released: bool,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ProfessorNames {
     pub professor_name_id: String,
     pub professor_id: String,
@@ -210,14 +210,14 @@ pub struct ProfessorNames {
     pub professor_last_name: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Professors {
     pub professor_id: String,
     pub professor_profile_image_path: String,
     pub professor_birthdate: time::Date,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Rooms {
     pub room_id: String,
     pub building_id: String,
@@ -226,7 +226,7 @@ pub struct Rooms {
     pub room_floor: i16,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Semesters {
     pub semester_id: String,
     pub academic_year_id: String,
@@ -235,7 +235,7 @@ pub struct Semesters {
     pub semester_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct StudentAssignments {
     pub student_assignment_id: String,
     pub student_assignment_name: String,
@@ -244,14 +244,14 @@ pub struct StudentAssignments {
     pub student_assignment_full_score: f64,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct StudentEnrollments {
     pub semester_id: String,
     pub subject_id: String,
     pub student_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct StudentNames {
     pub student_name_id: String,
     pub student_id: String,
@@ -261,7 +261,7 @@ pub struct StudentNames {
     pub student_last_name: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct StudentScores {
     pub semester_id: String,
     pub subject_id: String,
@@ -270,7 +270,7 @@ pub struct StudentScores {
     pub student_score: f64,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct StudentSubjectComments {
     pub semester_id: String,
     pub subject_id: String,
@@ -278,7 +278,7 @@ pub struct StudentSubjectComments {
     pub student_comment: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct StudentTransactions {
     pub semester_id: String,
     pub student_id: String,
@@ -289,7 +289,7 @@ pub struct StudentTransactions {
     pub student_transaction_finished_timestamp: Option<time::OffsetDateTime>,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Students {
     pub student_id: String,
     pub student_representative_id: String,
@@ -303,7 +303,7 @@ pub struct Students {
     pub first_academic_year_id: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct SubjectSchedules {
     pub subject_schedule_id: String,
     pub subject_id: String,
@@ -313,7 +313,7 @@ pub struct SubjectSchedules {
     pub subject_schedule_end_time_of_day: time::Time,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Subjects {
     pub subject_id: String,
     pub subject_name: String,
@@ -322,14 +322,14 @@ pub struct Subjects {
     pub subject_created_timestamp: time::OffsetDateTime,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct UserSessions {
     pub user_session_id: String,
     pub user_session_user_id: String,
     pub user_session_refresh_token: String,
 }
 
-#[derive(ger_from_row::FromRow)]
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Users {
     pub user_id: String,
     pub user_username: String,
