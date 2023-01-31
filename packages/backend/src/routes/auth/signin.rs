@@ -1,17 +1,15 @@
-use std::future;
-
 use actix_web::{web, HttpResponse};
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use argon2::{PasswordHash, PasswordVerifier};
 use serde::Deserialize;
 use tokio_postgres::types::Type;
 use utoipa::ToSchema;
 
 use crate::{
     constants::{
-        get_expires_timestamp, AccessTokenClaims, DefaultSuccessResponse, RefreshTokenClaims, Role,
-        ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_VALID_TIME_LENGTH,
-        HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME,
-        REFRESH_TOKEN_VALID_TIME_LENGTH,
+        create_argon2_context, get_expires_timestamp, AccessTokenClaims, DefaultSuccessResponse,
+        RefreshTokenClaims, Role, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
+        ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY,
+        REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
     },
     errors::HttpError,
     shared_app_data::SharedAppData,
@@ -19,15 +17,13 @@ use crate::{
 
 #[derive(Deserialize, ToSchema)]
 pub struct SigninBody {
-    pub student_id_or_email_or_username: String,
+    pub username: String,
     pub password: String,
 }
 
 #[derive(ger_from_row::FromRow)]
 pub struct UserQuery {
-    student_representative_id: Option<String>,
     user_id: String,
-    user_username: String,
     user_password: String,
     #[fromrow(num)]
     user_role: Role,
@@ -67,7 +63,7 @@ pub async fn handler(
     body: web::Json<SigninBody>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
-    if body.student_id_or_email_or_username.is_empty() {
+    if body.username.is_empty() {
         return Err(HttpError::InputValidationError);
     }
 
@@ -75,44 +71,26 @@ pub async fn handler(
         return Err(HttpError::InputValidationError);
     }
 
-    let client = data
-        .pool
-        .get()
-        .await
-        .map_err(|_| HttpError::InternalServerError)?;
+    let client = data.pool.get().await?;
 
-    let get_user_statement = client
+    let statement = client
         .prepare_typed_cached(
             r##"
             select
-                students.student_representative_id,
                 users.user_id,
-                users.user_username,
                 users.user_password,
                 users.user_role
             from users
-            left join students on users.user_id = students.student_id
-            where users.user_username = $1 or users.user_email = $1 or students.student_representative_id = $1"##,
+            where users.user_username = $1"##,
             &[Type::TEXT],
         )
-        .await
-        .map_err(|_| HttpError::InternalServerError)?;
+        .await?;
 
-    let user = client
-        .query_one(
-            &get_user_statement,
-            &[&body.student_id_or_email_or_username],
-        )
-        .await
-        .map_err(|_| HttpError::InternalServerError)?;
+    let user = client.query_one(&statement, &[&body.username]).await?;
+    let user = UserQuery::try_from(&user)?;
 
-    let user = UserQuery::try_from(&user).map_err(|_| HttpError::InternalServerError)?;
-
-    let argon2 = Argon2::default();
-    let parsed_password = PasswordHash::new(user.user_password.as_str())
-        .map_err(|_| HttpError::InternalServerError)?;
-
-    let password_result = argon2
+    let parsed_password = PasswordHash::new(user.user_password.as_str())?;
+    let password_result = create_argon2_context()?
         .verify_password(body.password.as_bytes(), &parsed_password)
         .is_ok();
 
@@ -138,19 +116,15 @@ pub async fn handler(
     )?;
 
     let access_token =
-        jsonwebtoken::encode(&HEADER, &access_token_claims, &ACCESS_TOKEN_ENCODING_KEY)
-            .map_err(|_| HttpError::InternalServerError)?;
-
+        jsonwebtoken::encode(&HEADER, &access_token_claims, &ACCESS_TOKEN_ENCODING_KEY)?;
     let refresh_token =
-        jsonwebtoken::encode(&HEADER, &refresh_token_claims, &REFRESH_TOKEN_ENCODING_KEY)
-            .map_err(|_| HttpError::InternalServerError)?;
+        jsonwebtoken::encode(&HEADER, &refresh_token_claims, &REFRESH_TOKEN_ENCODING_KEY)?;
 
     client
         .execute(
             "insert into user_sessions (user_session_id, user_session_user_id, user_session_refresh_token) values ($1, $2, $3)",
             &[&new_session_id, &user.user_id, &refresh_token])
-        .await
-        .map_err(|_| HttpError::InternalServerError)?;
+        .await?;
 
     Ok(HttpResponse::Ok()
         .insert_header((ACCESS_TOKEN_HEADER_NAME, access_token))

@@ -16,6 +16,30 @@ pub enum Role {
     Professor,
 }
 
+impl Role {
+    pub fn as_str<'lt>(self: &Self) -> &'lt str {
+        match self {
+            Self::User => "user",
+            Self::Student => "student",
+            Self::Professor => "professor",
+        }
+    }
+}
+
+impl DayOfWeek {
+    pub fn as_str<'lt>(self: &Self) -> &'lt str {
+        match self {
+            Self::Sunday => "sunday",
+            Self::Monday => "monday",
+            Self::Tuesday => "tuesday",
+            Self::Wednesday => "wednesday",
+            Self::Thursday => "thursday",
+            Self::Friday => "friday",
+            Self::Saturday => "saturday",
+        }
+    }
+}
+
 #[derive(ger_from_row::FromRow)]
 pub struct AcademicYears {
     pub academic_year_id: String,
@@ -66,7 +90,7 @@ pub struct ForumGlobalAnnouncements {
     pub forum_global_announcement_content: String,
     pub forum_global_announcement_is_active: bool,
     pub forum_global_announcement_created_timestamp: time::OffsetDateTime,
-    pub forum_global_announcement_deactivated_timestamp: Option<time::OffsetDateTime>
+    pub forum_global_announcement_deactivated_timestamp: Option<time::OffsetDateTime>,
 }
 
 #[derive(ger_from_row::FromRow)]
@@ -262,7 +286,7 @@ pub struct StudentTransactions {
     pub student_transaction_is_transaction_successful: bool,
     pub student_transaction_price: f64,
     pub student_transaction_created_timestamp: time::OffsetDateTime,
-    pub student_transaction_finished_timestamp: Option<time::OffsetDateTime>
+    pub student_transaction_finished_timestamp: Option<time::OffsetDateTime>,
 }
 
 #[derive(ger_from_row::FromRow)]

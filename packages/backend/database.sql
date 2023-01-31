@@ -74,7 +74,7 @@ create table curriculums (
 -- majors in the faculty that you could take in the curriculum.
 create table majors (
     major_id text not null unique,
-    major_representative_id text not null unique,
+    major_representative_id text not null,
     curriculum_id text not null,
     major_name text not null,
     major_created_timestamp timestamptz not null default now(),

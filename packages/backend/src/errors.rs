@@ -21,6 +21,8 @@ pub enum HttpError {
     UserNotFound,
     #[display(fmt = "password is incorrect")]
     IncorrectPassword,
+    #[display(fmt = "incoming data is empty")]
+    NoData,
 }
 
 /// Struct for formatting error into beautified json
@@ -40,6 +42,7 @@ impl HttpError {
             HttpError::InternalServerError => "server error".to_string(),
             HttpError::UserNotFound => "user not found".to_string(),
             HttpError::IncorrectPassword => "incorrect password".to_string(),
+            HttpError::NoData => "no data".to_string(),
         }
     }
 
@@ -61,6 +64,7 @@ impl HttpError {
             HttpError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
             HttpError::UserNotFound => StatusCode::NOT_FOUND,
             HttpError::IncorrectPassword => StatusCode::BAD_REQUEST,
+            HttpError::NoData => StatusCode::BAD_REQUEST,
         }
     }
 }
@@ -80,5 +84,41 @@ impl actix_web::error::ResponseError for HttpError {
 
     fn status_code(&self) -> StatusCode {
         self.match_status_code()
+    }
+}
+
+impl From<deadpool_postgres::PoolError> for HttpError {
+    fn from(_error: deadpool_postgres::PoolError) -> Self {
+        HttpError::InternalServerError
+    }
+}
+
+impl From<tokio_postgres::Error> for HttpError {
+    fn from(_error: tokio_postgres::Error) -> Self {
+        HttpError::InternalServerError
+    }
+}
+
+impl From<argon2::Error> for HttpError {
+    fn from(_error: argon2::Error) -> Self {
+        HttpError::InternalServerError
+    }
+}
+
+impl From<argon2::password_hash::Error> for HttpError {
+    fn from(_error: argon2::password_hash::Error) -> Self {
+        HttpError::InternalServerError
+    }
+}
+
+impl From<anyhow::Error> for HttpError {
+    fn from(_error: anyhow::Error) -> Self {
+        HttpError::InternalServerError
+    }
+}
+
+impl From<jsonwebtoken::errors::Error> for HttpError {
+    fn from(_error: jsonwebtoken::errors::Error) -> Self {
+        HttpError::InternalServerError
     }
 }

@@ -1,3 +1,4 @@
+use argon2::{Algorithm as Argon2Algorithm, Argon2, Params, Version};
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
@@ -37,7 +38,23 @@ lazy_static! {
     pub static ref SWAGGER_API_KEY: String =
         dotenvy::var("GER_SWAGGER_API_KEY").expect("cannot load swagger api key");
     pub static ref JWT_TOKEN_AUDIENCE_NAME: String = "ger.com".to_string();
+    pub static ref ARGON2_PEPPER_STRING: String =
+        dotenvy::var("GER_ARGON2_PEPPER").expect("cannot load argon2 pepper string");
 }
+
+pub fn create_argon2_context<'key>() -> Result<argon2::Argon2<'key>, argon2::Error> {
+    let context: Argon2 = Argon2::new_with_secret(
+        &ARGON2_PEPPER_STRING.as_bytes(),
+        Argon2Algorithm::Argon2id,
+        Version::V0x13,
+        Params::new(20000u32, 3u32, 3u32, Some(64usize))?,
+    )?;
+
+    Ok(context)
+}
+
+/// application name
+pub const APP_NAME: &'static str = "ger";
 
 /// Length of id used in most primary keys.
 pub const ID_LENGTH: usize = 32;
@@ -56,6 +73,16 @@ pub const ACCESS_TOKEN_HEADER_NAME: &'static str = "x-access-token";
 
 /// The name of header that carries refresh token
 pub const REFRESH_TOKEN_HEADER_NAME: &'static str = "x-refresh-token";
+
+#[derive(Deserialize, utoipa::IntoParams)]
+#[into_params(parameter_in = Header)]
+#[serde(rename_all = "kebab-case")]
+pub struct AuthenticationHeaders {
+    /// User's access token
+    x_access_token: String,
+    /// User's refresh token
+    x_refresh_token: String,
+}
 
 /// Get utc expires time from current time.
 pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
@@ -79,12 +106,12 @@ pub enum Role {
 
 #[derive(Serialize, Deserialize)]
 pub struct AccessTokenClaims {
-    aud: String,
-    exp: usize,
-    iat: usize,
-    uid: String,
-    sid: String,
-    rle: Role,
+    pub aud: String,
+    pub exp: usize,
+    pub iat: usize,
+    pub uid: String,
+    pub sid: String,
+    pub rle: Role,
 }
 
 impl AccessTokenClaims {
@@ -113,11 +140,11 @@ impl AccessTokenClaims {
 
 #[derive(Serialize, Deserialize)]
 pub struct RefreshTokenClaims {
-    aud: String,
-    exp: usize,
-    iat: usize,
-    uid: String,
-    sid: String,
+    pub aud: String,
+    pub exp: usize,
+    pub iat: usize,
+    pub uid: String,
+    pub sid: String,
 }
 
 impl RefreshTokenClaims {

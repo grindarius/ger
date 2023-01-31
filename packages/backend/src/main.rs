@@ -1,11 +1,18 @@
 use std::{fs::File, io::BufReader};
 
 use actix_web::{web, App, HttpServer, ResponseError};
+use constants::APP_NAME;
 use deadpool_postgres::{Config, ManagerConfig, RecyclingMethod, Runtime};
+use opentelemetry::global;
+use opentelemetry::runtime::Tokio;
+use opentelemetry::sdk::propagation::TraceContextPropagator;
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 use tokio_postgres::NoTls;
 use tracing_actix_web::TracingLogger;
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
+use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+use tracing_subscriber::{EnvFilter, Registry};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -15,6 +22,7 @@ use crate::shared_app_data::SharedAppData;
 mod constants;
 mod database;
 mod errors;
+mod extractors;
 mod openapi;
 mod routes;
 mod shared_app_data;
@@ -87,14 +95,32 @@ async fn main() -> std::io::Result<()> {
         .create_pool(Some(Runtime::Tokio1), NoTls)
         .expect("cannot create postgres pool from a given config");
 
-    // logging setup
-    let (non_blocking_writer, _guard) = tracing_appender::non_blocking(std::io::stdout());
-    tracing_subscriber::fmt()
-        .with_writer(non_blocking_writer)
-        .init();
-
     // https setup
     let rustls_config = load_rustls_config();
+
+    // log setup
+    global::set_text_map_propagator(TraceContextPropagator::new());
+    let tracer = opentelemetry_jaeger::new_agent_pipeline()
+        .with_service_name(APP_NAME)
+        .install_batch(Tokio)
+        .expect("failed to install Opentelemetry tracer");
+
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("info"));
+    let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+    let (non_blocking_writer, _guard) = tracing_appender::non_blocking(std::io::stdout());
+    let bunyan_formatter = BunyanFormattingLayer::new(APP_NAME.into(), non_blocking_writer);
+
+    let subscriber = Registry::default()
+        .with(env_filter)
+        .with(telemetry)
+        .with(JsonStorageLayer)
+        .with(bunyan_formatter);
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("failed to install tracing subscriber");
+
+    // openapi setup
+    let openapi = ApiDoc::openapi();
 
     tracing::info!("starting https server at https://127.0.0.1:5155");
     tracing::info!("starting swagger ui at https://127.0.0.1:5155/swagger-doc/");
@@ -166,14 +192,22 @@ async fn main() -> std::io::Result<()> {
             .app_data(path_deserialize_config)
             .app_data(query_deserialize_config)
             .wrap(TracingLogger::default())
+            .wrap(cors)
             .route("/", web::get().to(crate::routes::hello::handler))
             .route(
                 "/auth/signin",
                 web::post().to(crate::routes::auth::signin::handler),
             )
+            .route(
+                "/auth/refresh",
+                web::post().to(crate::routes::auth::refresh::handler),
+            )
+            .route(
+                "/students/signup",
+                web::post().to(crate::routes::students::signup::handler),
+            )
             .service(
-                SwaggerUi::new("/swagger-doc/{_:.*}")
-                    .url("/openapi/openapi.json", ApiDoc::openapi()),
+                SwaggerUi::new("/swagger-doc/{_:.*}").url("/openapi/openapi.json", openapi.clone()),
             )
     })
     .bind_rustls(("127.0.0.1", 5155), rustls_config)

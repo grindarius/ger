@@ -28,16 +28,23 @@ ger-from-row = { path = "../ger-from-row" }
 jsonwebtoken = { version = "8", features = ["use_pem"] }
 lazy_static = "1"
 nanoid = "0.4"
+opentelemetry = { version = "0.18", features = ["rt-tokio"] }
+opentelemetry-jaeger = { version = "0.17", features = ["rt-tokio"] }
+rand_core = { version = "0.6", features = ["std"] }
+rust_decimal = { version = "1.28", features = ["db-tokio-postgres", "serde-with-str"] }
 rustls = "0.20"
 rustls-pemfile = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-time = { version = "0.3", features = ["local-offset"] }
+slug = "0.1.4"
+time = { version = "0.3", features = ["local-offset", "serde-human-readable"] }
 tokio-postgres = { version = "0.7", features = ["with-time-0_3", "with-serde_json-1", "with-geo-types-0_7"] }
 tracing = "0.1"
-tracing-actix-web = "0.7"
+tracing-actix-web = { version = "0.7", features = ["opentelemetry_0_18"] }
 tracing-appender = "0.2"
-tracing-subscriber = { version = "0.3", features = ["json"] }
-ts-rs = "6.1"
-utoipa = { version = "2", features = ["time", "actix_extras"] }
+tracing-bunyan-formatter = "0.3"
+tracing-opentelemetry = "0.18"
+tracing-subscriber = { version = "0.3", features = ["json", "registry", "env-filter"] }
+ts-rs = "6.2"
+utoipa = { version = "3", features = ["time", "decimal", "actix_extras"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
