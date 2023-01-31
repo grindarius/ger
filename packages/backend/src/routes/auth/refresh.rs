@@ -12,11 +12,7 @@ use crate::database::UserSessions;
 use crate::errors::HttpError;
 use crate::shared_app_data::SharedAppData;
 
-// 1. check if refresh token is out of date yet. if not: refresh the token as before. if
-//    yes, requires relogin.
-// 2. both tokens have same session id. if not: clean the database with a given session id
-//    and refresh token
-
+/// Checks and refresh tokens from the user when tokens are out of time.
 #[utoipa::path(
     post,
     path = "/auth/refresh",
@@ -39,6 +35,12 @@ use crate::shared_app_data::SharedAppData;
             example = json!(HttpError::InputValidationError.get_error_struct())
         ),
         (
+            status = 401,
+            description = "unauthorized, any unauthorized in here requires a re-login",
+            body = FormattedErrorResponse,
+            example = json!(HttpError::Unauthorized.get_error_struct())
+        ),
+        (
             status = 500,
             description = "internal server errors",
             body = FormattedErrorResponse,
@@ -52,38 +54,52 @@ pub async fn handler(
 ) -> Result<HttpResponse, HttpError> {
     let client = data.pool.get().await?;
 
-    let access_token_header = request
-        .headers()
-        .get(ACCESS_TOKEN_HEADER_NAME.to_string())
-        .ok_or(HttpError::Unauthorized)?;
-    let refresh_token_header = request
-        .headers()
-        .get(REFRESH_TOKEN_HEADER_NAME.to_string())
-        .ok_or(HttpError::Unauthorized)?;
+    let access_token_header = match request.headers().get(ACCESS_TOKEN_HEADER_NAME) {
+        Some(t) => t,
+        None => return Err(HttpError::Unauthorized),
+    };
+    let refresh_token_header = match request.headers().get(REFRESH_TOKEN_HEADER_NAME) {
+        Some(t) => t,
+        None => return Err(HttpError::Unauthorized),
+    };
 
     if access_token_header.is_empty() || refresh_token_header.is_empty() {
         return Err(HttpError::Unauthorized);
     }
 
-    let access_token_extracted_claims = jsonwebtoken::decode::<AccessTokenClaims>(
-        access_token_header
-            .to_str()
-            .map_err(|_| HttpError::Unauthorized)?,
+    let access_token_header = match access_token_header.to_str() {
+        Ok(t) => t,
+        Err(_) => return Err(HttpError::Unauthorized),
+    };
+    let refresh_token_header = match refresh_token_header.to_str() {
+        Ok(t) => t,
+        Err(_) => return Err(HttpError::Unauthorized),
+    };
+
+    let access_token = match jsonwebtoken::decode::<AccessTokenClaims>(
+        access_token_header,
         &ACCESS_TOKEN_DECODING_KEY,
         &VALIDATION,
-    )?;
-
-    let refresh_token_extracted_claims = jsonwebtoken::decode::<RefreshTokenClaims>(
-        refresh_token_header
-            .to_str()
-            .map_err(|_| HttpError::Unauthorized)?,
+    ) {
+        Ok(t) => t,
+        Err(_) => return Err(HttpError::Unauthorized),
+    };
+    let refresh_token = match jsonwebtoken::decode::<RefreshTokenClaims>(
+        refresh_token_header,
         &REFRESH_TOKEN_DECODING_KEY,
         &VALIDATION,
-    )?;
+    ) {
+        Ok(t) => t,
+        Err(_) => return Err(HttpError::Unauthorized),
+    };
 
-    if time::OffsetDateTime::now_utc().unix_timestamp()
-        > refresh_token_extracted_claims.claims.exp as i64
-    {
+    if access_token.claims.sid != refresh_token.claims.sid {
+        client
+            .execute(
+                "delete from user_sessions where user_session_id in ($1, $2)",
+                &[&access_token.claims.sid, &refresh_token.claims.sid],
+            )
+            .await?;
         return Err(HttpError::Unauthorized);
     }
 
@@ -94,34 +110,22 @@ pub async fn handler(
         )
         .await?;
 
-    if access_token_extracted_claims.claims.sid != refresh_token_extracted_claims.claims.sid {
-        client
-            .execute(
-                "delete from user_sessions where user_session_id in ($1, $2)",
-                &[
-                    &access_token_extracted_claims.claims.sid,
-                    &refresh_token_extracted_claims.claims.sid,
-                ],
-            )
-            .await?;
-
-        return Err(HttpError::Unauthorized);
-    }
-
     let session = client
-        .query_one(&statement, &[&refresh_token_extracted_claims.claims.sid])
+        .query_one(&statement, &[&refresh_token.claims.sid])
         .await?;
-
     let session = UserSessions::try_from(session)?;
 
-    if session.user_session_refresh_token.as_str() != refresh_token_header.to_str().unwrap() {
+    let refresh_token_from_database = jsonwebtoken::decode::<RefreshTokenClaims>(
+        session.user_session_refresh_token.as_str(),
+        &REFRESH_TOKEN_DECODING_KEY,
+        &VALIDATION,
+    )?;
+
+    if refresh_token_from_database.claims != refresh_token.claims {
         client
             .execute(
                 "delete from user_sessions where user_session_refresh_token in ($1, $2)",
-                &[
-                    &session.user_session_refresh_token,
-                    &refresh_token_header.to_str().unwrap(),
-                ],
+                &[&session.user_session_refresh_token, &refresh_token_header],
             )
             .await?;
 
@@ -131,7 +135,7 @@ pub async fn handler(
     let new_access_token_expires_timestamp = get_expires_timestamp(ACCESS_TOKEN_VALID_TIME_LENGTH)?;
     let new_access_token_claims = AccessTokenClaims::new(
         session.user_session_user_id.clone(),
-        access_token_extracted_claims.claims.rle,
+        access_token.claims.rle,
         session.user_session_id.clone(),
         new_access_token_expires_timestamp,
     )?;
@@ -158,10 +162,7 @@ pub async fn handler(
     client
         .execute(
             "update user_sessions set user_session_refresh_token = $1 where user_session_id = $2",
-            &[
-                &new_refresh_token,
-                &refresh_token_extracted_claims.claims.sid,
-            ],
+            &[&new_refresh_token, &refresh_token.claims.sid],
         )
         .await?;
 
