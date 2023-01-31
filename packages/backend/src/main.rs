@@ -22,7 +22,7 @@ use crate::shared_app_data::SharedAppData;
 mod constants;
 mod database;
 mod errors;
-mod extractors;
+mod middlewares;
 mod openapi;
 mod routes;
 mod shared_app_data;
