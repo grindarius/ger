@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 pub enum HttpError {
     #[display(fmt = "input field validation failed")]
     InputValidationError,
-    #[display(fmt = "session timed out")]
+    #[display(fmt = "you are not authorized")]
     Unauthorized,
     #[display(fmt = "invalid swagger api key")]
     InvalidSwaggerAPIKey,
@@ -23,6 +23,10 @@ pub enum HttpError {
     IncorrectPassword,
     #[display(fmt = "incoming data is empty")]
     NoData,
+    #[display(fmt = "you do not have to role to access this content")]
+    Forbidden,
+    #[display(fmt = "invalid authentication credentials")]
+    InvalidAuthenticationCredentials,
 }
 
 /// Struct for formatting error into beautified json
@@ -43,6 +47,10 @@ impl HttpError {
             HttpError::UserNotFound => "user not found".to_string(),
             HttpError::IncorrectPassword => "incorrect password".to_string(),
             HttpError::NoData => "no data".to_string(),
+            HttpError::Forbidden => "forbidden".to_string(),
+            HttpError::InvalidAuthenticationCredentials => {
+                "invalid authentication credentials".to_string()
+            }
         }
     }
 
@@ -65,6 +73,8 @@ impl HttpError {
             HttpError::UserNotFound => StatusCode::NOT_FOUND,
             HttpError::IncorrectPassword => StatusCode::BAD_REQUEST,
             HttpError::NoData => StatusCode::BAD_REQUEST,
+            HttpError::Forbidden => StatusCode::FORBIDDEN,
+            HttpError::InvalidAuthenticationCredentials => StatusCode::BAD_REQUEST,
         }
     }
 }
