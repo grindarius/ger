@@ -57,6 +57,9 @@ export default function Menu ({ children }: { children: ReactElement }): JSX.Ele
             <li>
               <Link href="/subjects">Subjects</Link>
             </li>
+            <li>
+              <Link href="/grades">Grades</Link>
+            </li>
           </ul>
         </div>
       </div>
