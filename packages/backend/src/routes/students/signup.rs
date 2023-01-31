@@ -11,6 +11,7 @@ use crate::constants::AuthenticationHeaders;
 use crate::constants::{create_argon2_context, DefaultSuccessResponse, ID_LENGTH};
 use crate::database::Role;
 use crate::errors::HttpError;
+use crate::extractors::admins::AuthenticatedAdminClaims;
 use crate::shared_app_data::SharedAppData;
 
 #[derive(Deserialize, ToSchema)]
@@ -223,7 +224,7 @@ pub async fn handler(
                     &nanoid::nanoid!(10),
                     &new_student_email,
                     &new_student_account_password.to_string(),
-                    &Role::User.as_str(),
+                    &Role::Student.as_str(),
                 ],
             )
             .await?;
