@@ -7,10 +7,11 @@ use utoipa::ToSchema;
 use crate::{
     constants::{
         create_argon2_context, get_expires_timestamp, AccessTokenClaims, DefaultSuccessResponse,
-        RefreshTokenClaims, Role, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
+        RefreshTokenClaims, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
         ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY,
         REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
     },
+    database::Role,
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
