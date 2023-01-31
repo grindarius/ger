@@ -4,8 +4,6 @@ import { fileURLToPath } from 'node:url'
 import type pg from 'pg'
 
 import { faker } from '@faker-js/faker'
-import type { Options } from '@node-rs/argon2'
-import { hash } from '@node-rs/argon2'
 
 import { logger } from './index.js'
 
@@ -115,13 +113,8 @@ export function nid (): string {
   return first12digits.toString() + checksum.toString()
 }
 
-const hashOptions: Options = {
-  parallelism: 6,
-  secret: Buffer.from(process.env['GER_ARGON2_SALT'] ?? '')
-}
-
 export const UNENCRYPTED_PASSWORD = 'aryastark'
-export const ENCRYPTED_PASSWORD = await hash(UNENCRYPTED_PASSWORD, hashOptions)
+export const ENCRYPTED_PASSWORD = '$argon2id$v=19$m=4096,t=12,p=6$Yw4TlZTREJt9FX15Qbp5wcOaf0rs6z+MDYjgOx+i/vBfSCqel7DSa1UG$KKR3zYuM98AVnhADF920hB/cAFjByy/3maLCQH5lWGvguBCBAEIWgFZQv6rJcdNHOeB3Pw3Y20ZXqHyWMXTnQQ'
 
 export async function saveToFile<T> (contents: Array<T>, filename: string): Promise<void> {
   await writeFile(resolve(__dirname, '..', 'data', filename), JSON.stringify(contents, null, 2))
