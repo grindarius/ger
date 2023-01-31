@@ -166,6 +166,31 @@ func main() {
 		}
 	}
 
+	enumOutput +=
+		"impl Role {\n" +
+			"    pub fn as_str<'lt>(self: &Self) -> &'lt str {\n" +
+			"        match self {\n" +
+			"            Self::User => \"user\",\n" +
+			"            Self::Student => \"student\",\n" +
+			"            Self::Professor => \"professor\",\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"\n" +
+			"impl DayOfWeek {\n" +
+			"    pub fn as_str<'lt>(self: &Self) -> &'lt str {\n" +
+			"        match self {\n" +
+			"            Self::Sunday => \"sunday\",\n" +
+			"            Self::Monday => \"monday\",\n" +
+			"            Self::Tuesday => \"tuesday\",\n" +
+			"            Self::Wednesday => \"wednesday\",\n" +
+			"            Self::Thursday => \"thursday\",\n" +
+			"            Self::Friday => \"friday\",\n" +
+			"            Self::Saturday => \"saturday\",\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"\n"
 	output := ""
 	typescriptOutput := ""
 
