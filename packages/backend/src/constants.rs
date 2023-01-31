@@ -4,6 +4,7 @@ use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+use crate::database::Role;
 use crate::errors::HttpError;
 
 lazy_static! {
@@ -93,18 +94,7 @@ pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
         .map_err(|_| HttpError::InternalServerError);
 }
 
-/// Possible roles of any users in the server
-#[derive(ger_from_row::FromRow, Serialize, Deserialize)]
-pub enum Role {
-    /// Student role for students, the student's account cannot be created by the students theirselves.
-    Student,
-    /// Professor role for professors, the professor's account cannot be created by the professor theirselves.
-    Professor,
-    /// Admins. simple as that.
-    Admin,
-}
-
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct AccessTokenClaims {
     pub aud: String,
     pub exp: usize,
@@ -138,7 +128,7 @@ impl AccessTokenClaims {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct RefreshTokenClaims {
     pub aud: String,
     pub exp: usize,
