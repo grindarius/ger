@@ -11,7 +11,6 @@ use crate::constants::AuthenticationHeaders;
 use crate::constants::{create_argon2_context, DefaultSuccessResponse, ID_LENGTH};
 use crate::database::Role;
 use crate::errors::HttpError;
-use crate::extractors::admins::AuthenticatedAdminClaims;
 use crate::shared_app_data::SharedAppData;
 
 #[derive(Deserialize, ToSchema)]

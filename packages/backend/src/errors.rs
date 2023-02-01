@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 pub enum HttpError {
     #[display(fmt = "input field validation failed")]
     InputValidationError,
-    #[display(fmt = "you are not authorized")]
+    #[display(fmt = "session timed out")]
     Unauthorized,
     #[display(fmt = "invalid swagger api key")]
     InvalidSwaggerAPIKey,
