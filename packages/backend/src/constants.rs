@@ -54,6 +54,9 @@ pub fn create_argon2_context<'key>() -> Result<argon2::Argon2<'key>, argon2::Err
     Ok(context)
 }
 
+/// difference between AD (Anno domini) year and BE (Bhuddist era) year.
+pub const AD_BE_YEAR_DIFFERENCE: u32 = 543;
+
 /// application name
 pub const APP_NAME: &'static str = "ger";
 
