@@ -71,6 +71,12 @@ const students = generateStudents(majors, academicYears, professors.map(p => p[1
 users.push(...professors.map(p => p[0]))
 users.push(...students.map(s => s[0]))
 
+const studentsSet = new Set(students.map(s => s[1].student_representative_id))
+if (studentsSet.size < students.length) {
+  const msg = `duplicate ids occured in students list. Students: ${students.length}, Student set: ${studentsSet.size}`
+  throw new Error(msg)
+}
+
 await Promise.all([
   saveToFile(faculties, 'faculties.json'),
   saveToFile(curriculums, 'curriculums.json'),

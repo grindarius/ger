@@ -15,7 +15,7 @@ export function generateUsers (amount: number = 20): Array<Users> {
       user_username: faker.internet.userName(firstName, lastName),
       user_email: faker.internet.email(firstName, lastName),
       user_password: ENCRYPTED_PASSWORD,
-      user_role: Role.User,
+      user_role: Role.Admin,
       user_created_timestamp: faker.date.past(10).toISOString()
     }
 
