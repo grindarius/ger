@@ -85,7 +85,7 @@ create table majors (
 -- years in the academic year
 create table academic_years (
     academic_year_id text not null unique,
-    academic_year_gregorian_year text not null unique default date_part('year', now()),
+    academic_year_anno_domini_year text not null unique default date_part('year', now()),
     academic_year_start_timestamp timestamptz not null default now(),
     academic_year_end_timestamp timestamptz not null default now(),
     academic_year_created_timestamp timestamptz not null default now(),

@@ -21,7 +21,7 @@ export enum Role {
 
 export interface AcademicYears {
   academic_year_id: string
-  academic_year_gregorian_year: string
+  academic_year_anno_domini_year: string
   academic_year_start_timestamp: string
   academic_year_end_timestamp: string
   academic_year_created_timestamp: string

@@ -43,7 +43,7 @@ impl DayOfWeek {
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct AcademicYears {
     pub academic_year_id: String,
-    pub academic_year_gregorian_year: String,
+    pub academic_year_anno_domini_year: String,
     pub academic_year_start_timestamp: time::OffsetDateTime,
     pub academic_year_end_timestamp: time::OffsetDateTime,
     pub academic_year_created_timestamp: time::OffsetDateTime,
