@@ -11,7 +11,7 @@ impl FromRequest for AuthenticatedAdminClaims {
     type Error = HttpError;
     type Future = Ready<Result<Self, Self::Error>>;
 
-    fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
         let claims = match validate_tokens_in_header(req) {
             Ok(c) => c,
             Err(e) => return ready(Err(e)),
