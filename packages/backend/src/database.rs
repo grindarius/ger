@@ -108,6 +108,14 @@ pub struct ForumPostViews {
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
+pub struct ForumPostVotes {
+    pub forum_post_id: String,
+    pub user_id: String,
+    pub forum_post_vote_voted_at: time::OffsetDateTime,
+    pub forum_post_vote_increment: i16,
+}
+
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumPosts {
     pub forum_post_id: String,
     pub forum_post_name: String,

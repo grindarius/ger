@@ -78,6 +78,13 @@ export interface ForumPostViews {
   user_id: string
 }
 
+export interface ForumPostVotes {
+  forum_post_id: string
+  user_id: string
+  forum_post_vote_voted_at: string
+  forum_post_vote_increment: number
+}
+
 export interface ForumPosts {
   forum_post_id: string
   forum_post_name: string

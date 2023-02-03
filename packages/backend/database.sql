@@ -416,3 +416,15 @@ create table forum_post_views (
     foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
     foreign key (forum_post_id) references forum_posts(forum_post_id)
 );
+
+create table forum_post_votes (
+    forum_post_id text not null,
+    user_id text not null,
+    forum_post_vote_voted_at timestamptz not null default now(),
+    -- either 1 or -1 for upvote or downvote.
+    forum_post_vote_increment smallint not null,
+    primary key (forum_post_id, user_id),
+    foreign key (user_id) references users(user_id),
+    foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
+    foreign key (forum_post_id) references forum_posts(forum_post_id)
+);
