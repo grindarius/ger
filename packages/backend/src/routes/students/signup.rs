@@ -15,8 +15,8 @@ use crate::extractors::admins::AuthenticatedAdminClaims;
 use crate::shared_app_data::SharedAppData;
 
 #[derive(Deserialize, ToSchema)]
-pub struct StudentSignupBody {
-    students: Vec<StudentSignupBodyInner>,
+pub struct StudentSignupRequestBody {
+    students: Vec<StudentSignupRequestBodyInner>,
     major_id: String,
     #[schema(example = json!("31"))]
     major_representative_id: String,
@@ -28,7 +28,7 @@ pub struct StudentSignupBody {
 }
 
 #[derive(Deserialize, ToSchema)]
-pub struct StudentSignupBodyInner {
+pub struct StudentSignupRequestBodyInner {
     #[schema(example = json!("8365079019452"))]
     student_nid: String,
     student_english_first_name: String,
@@ -48,29 +48,12 @@ struct LatestStudentIndex {
     student_representative_id: String,
 }
 
-// function getRepresentativeId (previousStudents: Array<[Users, Students]>, major: Majors, firstAcadYear: AcademicYears): string {
-//   const firstAcadYearBE = Number(firstAcadYear.academic_year_anno_domini_year) + 543
-//   const studentsInSameMajorAndYear = previousStudents.filter(ps => ps[1].major_id === major.major_id && ps[1].first_academic_year_id === firstAcadYear.academic_year_id)
-//   const latestStudentId = studentsInSameMajorAndYear.sort((a, b) => {
-//     return Number(b[1].student_representative_id.slice(4)) - Number(a[1].student_representative_id.slice(4))
-//   })
-//
-//   const template = `${firstAcadYearBE.toString().substring(2)}${major.major_representative_id}${((Number(latestStudentId?.[0]?.[1].student_representative_id.slice(4) ?? 0) ?? 0) + 1).toString().padStart(4, '0')}`
-//
-//   if (previousStudents.map(p => p[1].student_representative_id).includes(template)) {
-//     const msg = `redundant student representative id found: representative_id: ${template}`
-//     throw new Error(msg)
-//   }
-//
-//   return template
-// }
-
 /// Bulk signup students either given from a csv file or some admission website.
 #[utoipa::path(
     post,
     path = "/students/signup",
-    request_body = StudentSignupBody,
     params(AuthenticationHeaders),
+    request_body = StudentSignupRequestBody,
     responses(
         (
             status = 200,
@@ -99,7 +82,7 @@ struct LatestStudentIndex {
     )
 )]
 pub async fn handler(
-    body: web::Json<StudentSignupBody>,
+    body: web::Json<StudentSignupRequestBody>,
     data: web::Data<SharedAppData>,
     _claims: AuthenticatedAdminClaims,
 ) -> Result<HttpResponse, HttpError> {
