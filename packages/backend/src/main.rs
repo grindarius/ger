@@ -1,13 +1,9 @@
-use std::{fs::File, io::BufReader};
-
 use actix_web::{web, App, HttpServer, ResponseError};
 use constants::APP_NAME;
 use deadpool_postgres::{Config, ManagerConfig, RecyclingMethod, Runtime};
 use opentelemetry::global;
 use opentelemetry::runtime::Tokio;
 use opentelemetry::sdk::propagation::TraceContextPropagator;
-use rustls::{Certificate, PrivateKey, ServerConfig};
-use rustls_pemfile::{certs, pkcs8_private_keys};
 use tokio_postgres::NoTls;
 use tracing_actix_web::TracingLogger;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
@@ -96,7 +92,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         // cors config
         let cors = actix_cors::Cors::default()
-            .allowed_origin("https://127.0.0.1")
+            .allowed_origin("http://127.0.0.1")
             .supports_credentials();
 
         // deserializer errors config
@@ -186,8 +182,14 @@ async fn main() -> std::io::Result<()> {
                 SwaggerUi::new("/swagger-doc/{_:.*}").url("/openapi/openapi.json", openapi.clone()),
             )
     })
-    .bind(("127.0.0.1", 5155))
-    .expect("cannot start https server")
+    .bind((
+        "127.0.0.1",
+        dotenvy::var("GER_API_PORT")
+            .expect("cannot find GER_API_PORT environment variable")
+            .parse::<u16>()
+            .expect("cannot parse port environment variable"),
+    ))
+    .expect("cannot start http server")
     .run()
     .await
 }
