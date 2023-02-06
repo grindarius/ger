@@ -24,7 +24,9 @@ func convertColumnType(kind *pg_query.Node) (string, bool) {
 	case "float4":
 		return "f64", false
 	case "numeric":
-		return "f64", false
+		return "rust_decimal::Decimal", false
+	case "int8":
+		return "i64", false
 	case "int4":
 		return "i32", false
 	case "int2":

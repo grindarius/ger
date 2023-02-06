@@ -140,7 +140,7 @@ pub struct GradingCriteriaGrades {
     pub grading_criteria_grade_id: String,
     pub grading_criteria_id: String,
     pub grading_criteria_grade_alphabet: String,
-    pub grading_criteria_grade_minimum_score: f64,
+    pub grading_criteria_grade_minimum_score: rust_decimal::Decimal,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
@@ -230,7 +230,6 @@ pub struct ProfessorNames {
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Professors {
     pub professor_id: String,
-    pub professor_profile_image_path: String,
     pub professor_birthdate: time::Date,
 }
 
@@ -258,7 +257,7 @@ pub struct StudentAssignments {
     pub student_assignment_name: String,
     pub subject_id: String,
     pub semester_id: String,
-    pub student_assignment_full_score: f64,
+    pub student_assignment_full_score: rust_decimal::Decimal,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
@@ -284,7 +283,7 @@ pub struct StudentScores {
     pub subject_id: String,
     pub student_id: String,
     pub assignment_id: String,
-    pub student_score: f64,
+    pub student_score: rust_decimal::Decimal,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
@@ -301,7 +300,7 @@ pub struct StudentTransactions {
     pub student_id: String,
     pub student_transaction_id: String,
     pub student_transaction_is_transaction_successful: bool,
-    pub student_transaction_price: f64,
+    pub student_transaction_price: rust_decimal::Decimal,
     pub student_transaction_created_timestamp: time::OffsetDateTime,
     pub student_transaction_finished_timestamp: Option<time::OffsetDateTime>,
 }
@@ -310,11 +309,10 @@ pub struct StudentTransactions {
 pub struct Students {
     pub student_id: String,
     pub student_representative_id: String,
-    pub student_profile_image_path: String,
     pub student_nid: String,
     pub student_birthdate: time::Date,
     pub student_previous_school_name: String,
-    pub student_previous_school_gpa: f64,
+    pub student_previous_school_gpa: rust_decimal::Decimal,
     pub major_id: String,
     pub professor_id: String,
     pub first_academic_year_id: String,
@@ -352,6 +350,7 @@ pub struct Users {
     pub user_username: String,
     pub user_email: String,
     pub user_password: String,
+    pub user_image_profile_path: String,
     #[fromrow(num)]
     pub user_role: Role,
     pub user_created_timestamp: time::OffsetDateTime,

@@ -180,7 +180,6 @@ export interface ProfessorNames {
 
 export interface Professors {
   professor_id: string
-  professor_profile_image_path: string
   professor_birthdate: string
 }
 
@@ -251,7 +250,6 @@ export interface StudentTransactions {
 export interface Students {
   student_id: string
   student_representative_id: string
-  student_profile_image_path: string
   student_nid: string
   student_birthdate: string
   student_previous_school_name: string
@@ -288,6 +286,7 @@ export interface Users {
   user_username: string
   user_email: string
   user_password: string
+  user_image_profile_path: string
   user_role: Role
   user_created_timestamp: string
 }

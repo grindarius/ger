@@ -47,6 +47,7 @@ drop table forum_global_announcements cascade;
 drop table forum_posts cascade;
 drop table forum_post_replies cascade;
 drop table forum_post_views cascade;
+drop table forum_post_votes cascade;
 
 -- available faculties in the university.
 create table faculties (
@@ -129,6 +130,7 @@ create table users (
     user_username text not null unique,
     user_email text not null unique,
     user_password text not null,
+    user_image_profile_path text not null default '',
     user_role t_user_role not null,
     user_created_timestamp timestamptz not null default now(),
     primary key (user_id)
@@ -191,7 +193,6 @@ create table subject_schedules (
 
 create table professors (
     professor_id text not null references users(user_id) unique,
-    professor_profile_image_path text not null default '',
     professor_birthdate date not null,
     primary key (professor_id)
 );
@@ -218,7 +219,6 @@ create index if not exists pgroonga_professor_names_index on professor_names usi
 create table students (
     student_id text not null references users(user_id) unique,
     student_representative_id text not null unique,
-    student_profile_image_path text not null default '',
     student_nid text not null,
     student_birthdate date not null,
     student_previous_school_name text not null,
@@ -433,3 +433,6 @@ create table forum_post_votes (
     foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
     foreign key (forum_post_id) references forum_posts(forum_post_id)
 );
+
+-- this is image link i uploaded on 2023-02-06T19:36:00.000+07:00 https://user-images.githubusercontent.com/60266519/216972928-5cc3e991-dd10-4f84-8d61-56d2aa267302.jpg
+-- I will see when the image gets deleted.
