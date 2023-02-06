@@ -3,7 +3,7 @@ use serde::Serialize;
 use utoipa::ToSchema;
 
 use crate::{
-    constants::{AuthenticationHeaders, DefaultSuccessResponse},
+    constants::{responses::DefaultSuccessResponse, swagger::AuthenticationHeaders},
     errors::HttpError,
     extractors::users::AuthenticatedUserClaims,
 };
@@ -25,6 +25,7 @@ pub struct GetAnnouncementsListResponseBodyInner {
 #[utoipa::path(
     get,
     path = "/forum/announcements",
+    tag = "forums",
     params(AuthenticationHeaders),
     responses(
         (

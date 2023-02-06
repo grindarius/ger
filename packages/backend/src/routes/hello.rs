@@ -1,11 +1,12 @@
 use actix_web::HttpResponse;
 
-use crate::constants::GetServerInformationResponse;
+use crate::constants::responses::GetServerInformationResponse;
 
 /// Get server information about contribution and contributors
 #[utoipa::path(
     get,
     path = "/",
+    tag = "home",
     responses(
         (
             status = 200,

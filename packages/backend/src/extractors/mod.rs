@@ -3,8 +3,9 @@ use jsonwebtoken::TokenData;
 
 use crate::{
     constants::{
-        AccessTokenClaims, RefreshTokenClaims, ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_HEADER_NAME,
-        REFRESH_TOKEN_DECODING_KEY, REFRESH_TOKEN_HEADER_NAME, VALIDATION,
+        claims::{AccessTokenClaims, RefreshTokenClaims},
+        ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_HEADER_NAME, REFRESH_TOKEN_DECODING_KEY,
+        REFRESH_TOKEN_HEADER_NAME, VALIDATION,
     },
     errors::HttpError,
 };

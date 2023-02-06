@@ -33,10 +33,12 @@ fn load_rustls_config() -> rustls::ServerConfig {
         .with_safe_defaults()
         .with_no_client_auth();
 
-    let key_file =
-        &mut BufReader::new(File::open("cert/ger-key.key").expect("missing tls key file"));
-    let cert_file =
-        &mut BufReader::new(File::open("cert/ger-cert.pem").expect("missing tls certificate file"));
+    let key_file = &mut BufReader::new(
+        File::open("packages/backend/cert/ger-key.key").expect("missing tls key file"),
+    );
+    let cert_file = &mut BufReader::new(
+        File::open("packages/backend/cert/ger-cert.pem").expect("missing tls certificate file"),
+    );
 
     let mut keys: Vec<PrivateKey> = pkcs8_private_keys(key_file)
         .expect("cannot load private key file")

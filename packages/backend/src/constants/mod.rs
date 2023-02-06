@@ -1,11 +1,12 @@
 use argon2::{Algorithm as Argon2Algorithm, Argon2, Params, Version};
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
-use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
-use crate::database::Role;
 use crate::errors::HttpError;
+
+pub mod claims;
+pub mod responses;
+pub mod swagger;
 
 lazy_static! {
     pub static ref HEADER: Header = Header::new(Algorithm::RS256);
@@ -54,6 +55,15 @@ pub fn create_argon2_context<'key>() -> Result<argon2::Argon2<'key>, argon2::Err
     Ok(context)
 }
 
+/// Get utc expires time from current time.
+pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
+    let current_time =
+        time::OffsetDateTime::now_utc() + time::Duration::minutes(valid_minutes as i64);
+
+    return usize::try_from(current_time.unix_timestamp())
+        .map_err(|_| HttpError::InternalServerError);
+}
+
 /// difference between AD (Anno domini) year and BE (Bhuddist era) year.
 pub const AD_BE_YEAR_DIFFERENCE: u32 = 543;
 
@@ -77,116 +87,3 @@ pub const ACCESS_TOKEN_HEADER_NAME: &'static str = "x-access-token";
 
 /// The name of header that carries refresh token
 pub const REFRESH_TOKEN_HEADER_NAME: &'static str = "x-refresh-token";
-
-#[derive(Deserialize, utoipa::IntoParams)]
-#[into_params(parameter_in = Header)]
-#[serde(rename_all = "kebab-case")]
-pub struct AuthenticationHeaders {
-    /// User's access token
-    x_access_token: String,
-    /// User's refresh token
-    x_refresh_token: String,
-}
-
-/// Get utc expires time from current time.
-pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
-    let current_time =
-        time::OffsetDateTime::now_utc() + time::Duration::minutes(valid_minutes as i64);
-
-    return usize::try_from(current_time.unix_timestamp())
-        .map_err(|_| HttpError::InternalServerError);
-}
-
-#[derive(Serialize, Deserialize, PartialEq)]
-pub struct AccessTokenClaims {
-    pub aud: String,
-    pub exp: usize,
-    pub iat: usize,
-    pub uid: String,
-    pub sid: String,
-    pub rle: Role,
-}
-
-impl AccessTokenClaims {
-    /// Creates new access token claims with required parameters.
-    ///
-    /// # Panics
-    ///
-    /// The instantiation could fail from converting offsetdatetime wrongly
-    pub fn new(
-        user_id: String,
-        user_role: Role,
-        session_id: String,
-        expires_timestamp: usize,
-    ) -> Result<Self, HttpError> {
-        Ok(Self {
-            aud: JWT_TOKEN_AUDIENCE_NAME.to_string(),
-            exp: expires_timestamp,
-            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp())
-                .map_err(|_| HttpError::InternalServerError)?,
-            uid: user_id,
-            sid: session_id,
-            rle: user_role,
-        })
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq)]
-pub struct RefreshTokenClaims {
-    pub aud: String,
-    pub exp: usize,
-    pub iat: usize,
-    pub uid: String,
-    pub sid: String,
-}
-
-impl RefreshTokenClaims {
-    pub fn new(
-        user_id: String,
-        session_id: String,
-        expires_timestamp: usize,
-    ) -> Result<Self, HttpError> {
-        Ok(Self {
-            aud: JWT_TOKEN_AUDIENCE_NAME.to_string(),
-            exp: expires_timestamp,
-            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp())
-                .map_err(|_| HttpError::InternalServerError)?,
-            uid: user_id,
-            sid: session_id,
-        })
-    }
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct GetServerInformationResponse {
-    contributors: Vec<String>,
-    contact: String,
-}
-
-impl Default for GetServerInformationResponse {
-    fn default() -> Self {
-        Self {
-            contributors: vec!["Bhattarpong Somwong".to_string()],
-            contact: "numbbutt34685@gmail.com".to_string(),
-        }
-    }
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct DefaultSuccessResponse {
-    message: String,
-}
-
-impl Default for DefaultSuccessResponse {
-    fn default() -> Self {
-        Self {
-            message: "completed".to_string(),
-        }
-    }
-}
-
-impl DefaultSuccessResponse {
-    pub fn new(message: String) -> Self {
-        Self { message }
-    }
-}

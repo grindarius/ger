@@ -6,10 +6,12 @@ use utoipa::ToSchema;
 
 use crate::{
     constants::{
-        create_argon2_context, get_expires_timestamp, AccessTokenClaims, DefaultSuccessResponse,
-        RefreshTokenClaims, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
-        ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY,
-        REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
+        claims::{AccessTokenClaims, RefreshTokenClaims},
+        create_argon2_context, get_expires_timestamp,
+        responses::DefaultSuccessResponse,
+        ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_VALID_TIME_LENGTH,
+        HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME,
+        REFRESH_TOKEN_VALID_TIME_LENGTH,
     },
     database::Role,
     errors::HttpError,
@@ -34,6 +36,7 @@ pub struct UserQuery {
 #[utoipa::path(
     post,
     path = "/auth/signin",
+    tag = "auth",
     request_body = SigninBody,
     responses(
         (

@@ -1,43 +1,48 @@
-#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
+#[derive(
+    ger_from_row::FromRow,
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    postgres_types::FromSql,
+    postgres_types::ToSql,
+)]
+#[postgres(name = "t_day_of_week")]
+#[serde(rename_all = "lowercase")]
 pub enum DayOfWeek {
+    #[postgres(name = "sunday")]
     Sunday,
+    #[postgres(name = "monday")]
     Monday,
+    #[postgres(name = "tuesday")]
     Tuesday,
+    #[postgres(name = "wednesday")]
     Wednesday,
+    #[postgres(name = "thursday")]
     Thursday,
+    #[postgres(name = "friday")]
     Friday,
+    #[postgres(name = "saturday")]
     Saturday,
 }
 
-#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
+#[derive(
+    PartialEq,
+    Debug,
+    ger_from_row::FromRow,
+    serde::Serialize,
+    serde::Deserialize,
+    postgres_types::FromSql,
+    postgres_types::ToSql,
+)]
+#[postgres(name = "t_user_role")]
+#[serde(rename_all = "lowercase")]
 pub enum Role {
+    #[postgres(name = "admin")]
     Admin,
+    #[postgres(name = "student")]
     Student,
+    #[postgres(name = "professor")]
     Professor,
-}
-
-impl Role {
-    pub fn as_str<'lt>(self: &Self) -> &'lt str {
-        match self {
-            Self::Admin => "admin",
-            Self::Student => "student",
-            Self::Professor => "professor",
-        }
-    }
-}
-
-impl DayOfWeek {
-    pub fn as_str<'lt>(self: &Self) -> &'lt str {
-        match self {
-            Self::Sunday => "sunday",
-            Self::Monday => "monday",
-            Self::Tuesday => "tuesday",
-            Self::Wednesday => "wednesday",
-            Self::Thursday => "thursday",
-            Self::Friday => "friday",
-            Self::Saturday => "saturday",
-        }
-    }
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]

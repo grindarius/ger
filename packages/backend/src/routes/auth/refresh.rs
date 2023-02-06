@@ -1,12 +1,13 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use tokio_postgres::types::Type;
 
-use crate::constants::AuthenticationHeaders;
+use crate::constants::swagger::AuthenticationHeaders;
 use crate::constants::{
-    get_expires_timestamp, AccessTokenClaims, DefaultSuccessResponse, RefreshTokenClaims,
-    ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
-    ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, REFRESH_TOKEN_DECODING_KEY, REFRESH_TOKEN_ENCODING_KEY,
-    REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH, VALIDATION,
+    claims::AccessTokenClaims, claims::RefreshTokenClaims, get_expires_timestamp,
+    responses::DefaultSuccessResponse, ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_ENCODING_KEY,
+    ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, REFRESH_TOKEN_DECODING_KEY,
+    REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
+    VALIDATION,
 };
 use crate::database::UserSessions;
 use crate::errors::HttpError;
@@ -16,6 +17,7 @@ use crate::shared_app_data::SharedAppData;
 #[utoipa::path(
     post,
     path = "/auth/refresh",
+    tag = "auth",
     params(AuthenticationHeaders),
     responses(
         (

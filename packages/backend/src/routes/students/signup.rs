@@ -7,8 +7,8 @@ use serde::Deserialize;
 use tokio_postgres::types::Type;
 use utoipa::ToSchema;
 
-use crate::constants::{create_argon2_context, DefaultSuccessResponse, ID_LENGTH};
-use crate::constants::{AuthenticationHeaders, AD_BE_YEAR_DIFFERENCE};
+use crate::constants::{create_argon2_context, responses::DefaultSuccessResponse, ID_LENGTH};
+use crate::constants::{swagger::AuthenticationHeaders, AD_BE_YEAR_DIFFERENCE};
 use crate::database::Role;
 use crate::errors::HttpError;
 use crate::extractors::admins::AuthenticatedAdminClaims;
@@ -52,6 +52,7 @@ struct LatestStudentIndex {
 #[utoipa::path(
     post,
     path = "/students/signup",
+    tag = "students",
     params(AuthenticationHeaders),
     request_body = StudentSignupRequestBody,
     responses(
@@ -241,7 +242,7 @@ pub async fn handler(
                     &nanoid::nanoid!(10),
                     &new_student_email,
                     &new_student_account_password.to_string(),
-                    &Role::Student.as_str(),
+                    &Role::Student,
                 ],
             )
             .await?;

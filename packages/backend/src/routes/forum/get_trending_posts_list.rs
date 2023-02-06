@@ -5,7 +5,8 @@ use serde::{de, Deserialize, Deserializer};
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
-    constants::AuthenticationHeaders, errors::HttpError, extractors::users::AuthenticatedUserClaims,
+    constants::swagger::AuthenticationHeaders, errors::HttpError,
+    extractors::users::AuthenticatedUserClaims,
 };
 
 #[derive(Deserialize, ToSchema, IntoParams)]
@@ -27,6 +28,7 @@ pub struct GetTrendingPostsListRequestQueries {
 #[utoipa::path(
     get,
     path = "/forum/trending",
+    tag = "forums",
     params(AuthenticationHeaders, GetTrendingPostsListRequestQueries)
 )]
 pub async fn handler(

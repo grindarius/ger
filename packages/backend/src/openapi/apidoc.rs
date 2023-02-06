@@ -13,9 +13,9 @@ use crate::openapi::security_addon::SecurityAddon;
     components(
         schemas(
             crate::errors::FormattedErrorResponse,
-            crate::constants::GetServerInformationResponse,
+            crate::constants::responses::GetServerInformationResponse,
             crate::routes::auth::signin::SigninBody,
-            crate::constants::DefaultSuccessResponse,
+            crate::constants::responses::DefaultSuccessResponse,
             crate::routes::students::signup::StudentSignupRequestBody,
             crate::routes::students::signup::StudentSignupRequestBodyInner,
             crate::routes::forum::announcements::get_announcements_list::GetAnnouncementsListResponseBody,
