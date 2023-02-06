@@ -27,37 +27,6 @@ mod openapi;
 mod routes;
 mod shared_app_data;
 
-/// Load key file and certificates file for spinnning server up in https context
-fn load_rustls_config() -> rustls::ServerConfig {
-    let config = ServerConfig::builder()
-        .with_safe_defaults()
-        .with_no_client_auth();
-
-    let key_file = &mut BufReader::new(
-        File::open("packages/backend/cert/ger-key.key").expect("missing tls key file"),
-    );
-    let cert_file = &mut BufReader::new(
-        File::open("packages/backend/cert/ger-cert.pem").expect("missing tls certificate file"),
-    );
-
-    let mut keys: Vec<PrivateKey> = pkcs8_private_keys(key_file)
-        .expect("cannot load private key file")
-        .into_iter()
-        .map(PrivateKey)
-        .collect();
-    let cert_chain = certs(cert_file)
-        .expect("cannot load certificate file")
-        .into_iter()
-        .map(Certificate)
-        .collect();
-
-    if keys.is_empty() {
-        panic!("could not locate pkcs 8 private keys");
-    }
-
-    config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
-}
-
 /// Load postgres config from environment variables
 fn load_postgres_config() -> Config {
     let postgres_username =
@@ -97,9 +66,6 @@ async fn main() -> std::io::Result<()> {
         .create_pool(Some(Runtime::Tokio1), NoTls)
         .expect("cannot create postgres pool from a given config");
 
-    // https setup
-    let rustls_config = load_rustls_config();
-
     // log setup
     global::set_text_map_propagator(TraceContextPropagator::new());
     let tracer = opentelemetry_jaeger::new_agent_pipeline()
@@ -124,8 +90,8 @@ async fn main() -> std::io::Result<()> {
     // openapi setup
     let openapi = ApiDoc::openapi();
 
-    tracing::info!("starting https server at https://127.0.0.1:5155");
-    tracing::info!("starting swagger ui at https://127.0.0.1:5155/swagger-doc/");
+    tracing::info!("starting https server at http://127.0.0.1:5155");
+    tracing::info!("starting swagger ui at http://127.0.0.1:5155/swagger-doc/");
 
     HttpServer::new(move || {
         // cors config
@@ -220,7 +186,7 @@ async fn main() -> std::io::Result<()> {
                 SwaggerUi::new("/swagger-doc/{_:.*}").url("/openapi/openapi.json", openapi.clone()),
             )
     })
-    .bind_rustls(("127.0.0.1", 5155), rustls_config)
+    .bind(("127.0.0.1", 5155))
     .expect("cannot start https server")
     .run()
     .await
