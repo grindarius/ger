@@ -19,7 +19,7 @@ use crate::{
 };
 
 #[derive(Deserialize, ToSchema)]
-pub struct SigninBody {
+pub struct SigninRequestBody {
     pub username: String,
     pub password: String,
 }
@@ -37,7 +37,8 @@ pub struct UserQuery {
     post,
     path = "/auth/signin",
     tag = "auth",
-    request_body = SigninBody,
+    operation_id = "signin",
+    request_body = SigninRequestBody,
     responses(
         (
             status = 200,
@@ -64,7 +65,7 @@ pub struct UserQuery {
     )
 )]
 pub async fn handler(
-    body: web::Json<SigninBody>,
+    body: web::Json<SigninRequestBody>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
     if body.username.is_empty() {

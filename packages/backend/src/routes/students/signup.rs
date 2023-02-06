@@ -53,6 +53,7 @@ struct LatestStudentIndex {
     post,
     path = "/students/signup",
     tag = "students",
+    operation_id = "signup",
     params(AuthenticationHeaders),
     request_body = StudentSignupRequestBody,
     responses(

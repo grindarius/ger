@@ -14,7 +14,7 @@ use crate::openapi::security_addon::SecurityAddon;
         schemas(
             crate::errors::FormattedErrorResponse,
             crate::constants::responses::GetServerInformationResponse,
-            crate::routes::auth::signin::SigninBody,
+            crate::routes::auth::signin::SigninRequestBody,
             crate::constants::responses::DefaultSuccessResponse,
             crate::routes::students::signup::StudentSignupRequestBody,
             crate::routes::students::signup::StudentSignupRequestBodyInner,
@@ -23,6 +23,20 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::forum::get_trending_posts_list::GetTrendingPostsListRequestQueries
         )
     ),
-    modifiers(&SecurityAddon)
+    modifiers(&SecurityAddon),
+    tags(
+        (
+            name = "home"
+        ),
+        (
+            name = "auth"
+        ),
+        (
+            name = "forum"
+        ),
+        (
+            name = "students"
+        )
+    )
 )]
 pub struct ApiDoc;

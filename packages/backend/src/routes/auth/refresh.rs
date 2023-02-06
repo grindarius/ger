@@ -18,6 +18,7 @@ use crate::shared_app_data::SharedAppData;
     post,
     path = "/auth/refresh",
     tag = "auth",
+    operation_id = "refresh",
     params(AuthenticationHeaders),
     responses(
         (

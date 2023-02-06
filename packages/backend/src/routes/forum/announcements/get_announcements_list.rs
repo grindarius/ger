@@ -16,6 +16,7 @@ pub struct GetAnnouncementsListResponseBody {
 #[derive(Serialize, ToSchema)]
 pub struct GetAnnouncementsListResponseBodyInner {
     pub announcement_id: String,
+    pub user_id: String,
     pub announcement_name: String,
     pub announcement_content: String,
     pub announcement_created_timestamp: time::OffsetDateTime,
@@ -25,7 +26,8 @@ pub struct GetAnnouncementsListResponseBodyInner {
 #[utoipa::path(
     get,
     path = "/forum/announcements",
-    tag = "forums",
+    tag = "forum",
+    operation_id = "get_announcements_list",
     params(AuthenticationHeaders),
     responses(
         (

@@ -7,6 +7,7 @@ use crate::constants::responses::GetServerInformationResponse;
     get,
     path = "/",
     tag = "home",
+    operation_id = "get_server_information",
     responses(
         (
             status = 200,

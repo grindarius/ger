@@ -28,7 +28,8 @@ pub struct GetTrendingPostsListRequestQueries {
 #[utoipa::path(
     get,
     path = "/forum/trending",
-    tag = "forums",
+    tag = "forum",
+    operation_id = "get_trending_posts_list",
     params(AuthenticationHeaders, GetTrendingPostsListRequestQueries)
 )]
 pub async fn handler(
