@@ -9,7 +9,7 @@ export default function Annoucement (): JSX.Element {
   return (
     <>
       <Head>
-        <title>How to surf the web. • ger</title>
+        <title>How to surf the web • ger</title>
         <meta name="description" content="reg spelled backwards" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
