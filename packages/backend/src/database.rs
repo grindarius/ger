@@ -102,6 +102,7 @@ pub struct ForumGlobalAnnouncements {
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumPostReplies {
     pub forum_post_reply_id: String,
+    pub forum_post_id: String,
     pub user_id: String,
     pub forum_post_reply_content: String,
     pub forum_post_reply_created_timestamp: time::OffsetDateTime,
@@ -117,7 +118,7 @@ pub struct ForumPostViews {
 pub struct ForumPostVotes {
     pub forum_post_id: String,
     pub user_id: String,
-    pub forum_post_vote_voted_at: time::OffsetDateTime,
+    pub forum_post_vote_voted_timestamp: time::OffsetDateTime,
     pub forum_post_vote_increment: i16,
 }
 
@@ -128,7 +129,9 @@ pub struct ForumPosts {
     pub user_id: String,
     pub forum_category_id: String,
     pub forum_post_content: String,
+    pub forum_post_is_active: bool,
     pub forum_post_created_timestamp: time::OffsetDateTime,
+    pub forum_post_deactivated_timestamp: Option<time::OffsetDateTime>,
     pub forum_post_is_category_based_announcement: bool,
 }
 

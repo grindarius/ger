@@ -394,18 +394,23 @@ create table forum_posts (
     user_id text not null references users(user_id),
     forum_category_id text not null references forum_categories(forum_category_id),
     forum_post_content text not null,
+    forum_post_is_active boolean not null default true,
     forum_post_created_timestamp timestamptz not null default now(),
+    forum_post_deactivated_timestamp timestamptz,
     forum_post_is_category_based_announcement boolean not null default false,
     primary key (forum_post_id)
 );
 
 create table forum_post_replies (
     forum_post_reply_id text not null unique,
+    forum_post_id text not null,
     user_id text not null,
     forum_post_reply_content text not null default '',
     forum_post_reply_created_timestamp timestamptz not null default now(),
     primary key (forum_post_reply_id),
-    foreign key (user_id) references users(user_id)
+    foreign key (user_id) references users(user_id),
+    foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
+    foreign key (forum_post_id) references forum_posts(forum_post_id)
 );
 
 create table forum_post_views (
@@ -420,7 +425,7 @@ create table forum_post_views (
 create table forum_post_votes (
     forum_post_id text not null,
     user_id text not null,
-    forum_post_vote_voted_at timestamptz not null default now(),
+    forum_post_vote_voted_timestamp timestamptz not null default now(),
     -- either 1 or -1 for upvote or downvote.
     forum_post_vote_increment smallint not null,
     primary key (forum_post_id, user_id),

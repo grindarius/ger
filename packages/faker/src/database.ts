@@ -68,6 +68,7 @@ export interface ForumGlobalAnnouncements {
 
 export interface ForumPostReplies {
   forum_post_reply_id: string
+  forum_post_id: string
   user_id: string
   forum_post_reply_content: string
   forum_post_reply_created_timestamp: string
@@ -81,7 +82,7 @@ export interface ForumPostViews {
 export interface ForumPostVotes {
   forum_post_id: string
   user_id: string
-  forum_post_vote_voted_at: string
+  forum_post_vote_voted_timestamp: string
   forum_post_vote_increment: number
 }
 
@@ -91,7 +92,9 @@ export interface ForumPosts {
   user_id: string
   forum_category_id: string
   forum_post_content: string
+  forum_post_is_active: boolean
   forum_post_created_timestamp: string
+  forum_post_deactivated_timestamp?: string
   forum_post_is_category_based_announcement: boolean
 }
 
