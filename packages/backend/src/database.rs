@@ -1,13 +1,14 @@
 #[derive(
-    ger_from_row::FromRow,
     Debug,
+    PartialEq,
+    ger_from_row::FromRow,
     serde::Serialize,
     serde::Deserialize,
     postgres_types::FromSql,
-    postgres_types::ToSql,
+    postgres_types::ToSql
 )]
-#[postgres(name = "t_day_of_week")]
 #[serde(rename_all = "lowercase")]
+#[postgres(name = "t_day_of_week")]
 pub enum DayOfWeek {
     #[postgres(name = "sunday")]
     Sunday,
@@ -26,16 +27,16 @@ pub enum DayOfWeek {
 }
 
 #[derive(
-    PartialEq,
     Debug,
+    PartialEq,
     ger_from_row::FromRow,
     serde::Serialize,
     serde::Deserialize,
     postgres_types::FromSql,
-    postgres_types::ToSql,
+    postgres_types::ToSql
 )]
-#[postgres(name = "t_user_role")]
 #[serde(rename_all = "lowercase")]
+#[postgres(name = "t_user_role")]
 pub enum Role {
     #[postgres(name = "admin")]
     Admin,

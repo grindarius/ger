@@ -4,19 +4,19 @@ export interface Point {
 }
 
 export enum DayOfWeek {
-  Sunday,
-  Monday,
-  Tuesday,
-  Wednesday,
-  Thursday,
-  Friday,
-  Saturday,
+  Sunday = "sunday",
+  Monday = "monday",
+  Tuesday = "tuesday",
+  Wednesday = "wednesday",
+  Thursday = "thursday",
+  Friday = "friday",
+  Saturday = "saturday",
 }
 
 export enum Role {
-  Admin,
-  Student,
-  Professor,
+  Admin = "admin",
+  Student = "student",
+  Professor = "professor",
 }
 
 export interface AcademicYears {

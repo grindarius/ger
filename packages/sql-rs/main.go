@@ -122,13 +122,13 @@ func main() {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[2:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]\npub enum %s {\n", enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(\n    Debug,\n    PartialEq,\n    ger_from_row::FromRow,\n    serde::Serialize,\n    serde::Deserialize,\n    postgres_types::FromSql,\n    postgres_types::ToSql\n)]\n#[serde(rename_all = \"lowercase\")]\n#[postgres(name = \"%s\")]\npub enum %s {\n", typeName[0].GetString_().GetStr(), enumNameCamelCase)
 				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			} else if typeName[0].GetString_().GetStr() == "t_user_role" {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[len(typeName[0].GetString_().GetStr())-4:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("#[derive(PartialEq, ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]\npub enum %s {\n", enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(\n    Debug,\n    PartialEq,\n    ger_from_row::FromRow,\n    serde::Serialize,\n    serde::Deserialize,\n    postgres_types::FromSql,\n    postgres_types::ToSql\n)]\n#[serde(rename_all = \"lowercase\")]\n#[postgres(name = \"%s\")]\npub enum %s {\n", typeName[0].GetString_().GetStr(), enumNameCamelCase)
 				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			}
 
@@ -136,8 +136,8 @@ func main() {
 				enumVariant := stringy.New(enumValue.GetString_().GetStr())
 				enumVariantCamelCase := enumVariant.CamelCase()
 
-				enumOutput += fmt.Sprintf("    %s,\n", enumVariantCamelCase)
-				typescriptEnumOutput += fmt.Sprintf("  %s,\n", enumVariantCamelCase)
+				enumOutput += fmt.Sprintf("    #[postgres(name = \"%s\")]\n    %s,\n", enumVariant.ToLower(), enumVariantCamelCase)
+				typescriptEnumOutput += fmt.Sprintf("  %s = \"%s\",\n", enumVariantCamelCase, enumVariant.ToLower())
 			}
 
 			enumOutput += "}\n\n"
@@ -166,31 +166,6 @@ func main() {
 		}
 	}
 
-	enumOutput +=
-		"impl Role {\n" +
-			"    pub fn as_str<'lt>(self: &Self) -> &'lt str {\n" +
-			"        match self {\n" +
-			"            Self::Admin => \"admin\",\n" +
-			"            Self::Student => \"student\",\n" +
-			"            Self::Professor => \"professor\",\n" +
-			"        }\n" +
-			"    }\n" +
-			"}\n" +
-			"\n" +
-			"impl DayOfWeek {\n" +
-			"    pub fn as_str<'lt>(self: &Self) -> &'lt str {\n" +
-			"        match self {\n" +
-			"            Self::Sunday => \"sunday\",\n" +
-			"            Self::Monday => \"monday\",\n" +
-			"            Self::Tuesday => \"tuesday\",\n" +
-			"            Self::Wednesday => \"wednesday\",\n" +
-			"            Self::Thursday => \"thursday\",\n" +
-			"            Self::Friday => \"friday\",\n" +
-			"            Self::Saturday => \"saturday\",\n" +
-			"        }\n" +
-			"    }\n" +
-			"}\n" +
-			"\n"
 	output := ""
 	typescriptOutput := ""
 
