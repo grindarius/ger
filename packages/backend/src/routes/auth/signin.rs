@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse};
 use argon2::{PasswordHash, PasswordVerifier};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tokio_postgres::types::Type;
 use utoipa::ToSchema;
 
@@ -18,7 +18,7 @@ use crate::{
     shared_app_data::SharedAppData,
 };
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct SigninRequestBody {
     pub username: String,
     pub password: String,
@@ -135,4 +135,25 @@ pub async fn handler(
         .insert_header((ACCESS_TOKEN_HEADER_NAME, access_token))
         .insert_header((REFRESH_TOKEN_HEADER_NAME, refresh_token))
         .json(DefaultSuccessResponse::default()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{http::StatusCode, test, App};
+
+    #[actix_web::test]
+    async fn signin_user_not_found() {
+        let app = test::init_service(App::new().route("/", web::post().to(handler))).await;
+        let request = test::TestRequest::post()
+            .uri("/")
+            .set_json(SigninRequestBody {
+                username: "who_dis_eh".to_string(),
+                password: "who_dis_eh".to_string(),
+            })
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
 }

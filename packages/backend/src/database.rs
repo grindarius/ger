@@ -89,23 +89,20 @@ pub struct ForumCategories {
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
-pub struct ForumGlobalAnnouncements {
-    pub forum_global_announcement_id: String,
-    pub forum_global_announcement_name: String,
-    pub user_id: String,
-    pub forum_global_announcement_content: String,
-    pub forum_global_announcement_is_active: bool,
-    pub forum_global_announcement_created_timestamp: time::OffsetDateTime,
-    pub forum_global_announcement_deactivated_timestamp: Option<time::OffsetDateTime>,
-}
-
-#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct ForumPostReplies {
     pub forum_post_reply_id: String,
     pub forum_post_id: String,
     pub user_id: String,
     pub forum_post_reply_content: String,
     pub forum_post_reply_created_timestamp: time::OffsetDateTime,
+}
+
+#[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
+pub struct ForumPostReplyVotes {
+    pub forum_post_reply_id: String,
+    pub user_id: String,
+    pub forum_post_reply_vote_voted_timestamp: time::OffsetDateTime,
+    pub forum_post_reply_vote_increment: i16,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
@@ -131,8 +128,10 @@ pub struct ForumPosts {
     pub forum_post_content: String,
     pub forum_post_is_active: bool,
     pub forum_post_created_timestamp: time::OffsetDateTime,
+    pub forum_post_last_active_timestamp: time::OffsetDateTime,
     pub forum_post_deactivated_timestamp: Option<time::OffsetDateTime>,
     pub forum_post_is_category_based_announcement: bool,
+    pub forum_post_is_global_announcement: bool,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
@@ -230,7 +229,7 @@ pub struct ProfessorNames {
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
 pub struct Professors {
     pub professor_id: String,
-    pub professor_birthdate: time::Date,
+    pub professor_professions: String,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]
@@ -310,7 +309,6 @@ pub struct Students {
     pub student_id: String,
     pub student_representative_id: String,
     pub student_nid: String,
-    pub student_birthdate: time::Date,
     pub student_previous_school_name: String,
     pub student_previous_school_gpa: rust_decimal::Decimal,
     pub major_id: String,
@@ -353,5 +351,6 @@ pub struct Users {
     pub user_image_profile_path: String,
     #[fromrow(num)]
     pub user_role: Role,
+    pub user_birthdate: time::Date,
     pub user_created_timestamp: time::OffsetDateTime,
 }

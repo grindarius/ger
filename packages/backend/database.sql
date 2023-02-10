@@ -43,9 +43,9 @@ drop table student_assignments cascade;
 drop table student_scores cascade;
 
 drop table forum_categories cascade;
-drop table forum_global_announcements cascade;
 drop table forum_posts cascade;
 drop table forum_post_replies cascade;
+drop table forum_post_reply_votes cascade;
 drop table forum_post_views cascade;
 drop table forum_post_votes cascade;
 
@@ -132,6 +132,7 @@ create table users (
     user_password text not null,
     user_image_profile_path text not null default '',
     user_role t_user_role not null,
+    user_birthdate date not null,
     user_created_timestamp timestamptz not null default now(),
     primary key (user_id)
 );
@@ -193,7 +194,7 @@ create table subject_schedules (
 
 create table professors (
     professor_id text not null references users(user_id) unique,
-    professor_birthdate date not null,
+    professor_professions text not null default '',
     primary key (professor_id)
 );
 
@@ -220,7 +221,6 @@ create table students (
     student_id text not null references users(user_id) unique,
     student_representative_id text not null unique,
     student_nid text not null,
-    student_birthdate date not null,
     student_previous_school_name text not null,
     student_previous_school_gpa numeric(3, 2) not null,
     major_id text not null references majors(major_id),
@@ -375,19 +375,6 @@ create table forum_categories (
 
 alter table forum_categories add constraint color_hex_constraint check (forum_category_color_theme ~* '^#[a-fA-F0-9]{6}$');
 
-create table forum_global_announcements (
-    forum_global_announcement_id text not null unique,
-    forum_global_announcement_name text not null,
-    user_id text not null,
-    forum_global_announcement_content text not null default '',
-    forum_global_announcement_is_active boolean not null default true,
-    forum_global_announcement_created_timestamp timestamptz not null default now(),
-    -- when forum_global_announcement_is_active gets switch to false, deactivated timestamp gets updated
-    forum_global_announcement_deactivated_timestamp timestamptz,
-    primary key (forum_global_announcement_id),
-    foreign key (user_id) references users(user_id)
-);
-
 create table forum_posts (
     forum_post_id text not null unique,
     forum_post_name text not null,
@@ -396,8 +383,11 @@ create table forum_posts (
     forum_post_content text not null,
     forum_post_is_active boolean not null default true,
     forum_post_created_timestamp timestamptz not null default now(),
+    forum_post_last_active_timestamp timestamptz not null default now(),
+    -- when forum_post_is_active gets switch to false, deactivated timestamp gets updated
     forum_post_deactivated_timestamp timestamptz,
     forum_post_is_category_based_announcement boolean not null default false,
+    forum_post_is_global_announcement boolean not null default false,
     primary key (forum_post_id)
 );
 
@@ -409,8 +399,17 @@ create table forum_post_replies (
     forum_post_reply_created_timestamp timestamptz not null default now(),
     primary key (forum_post_reply_id),
     foreign key (user_id) references users(user_id),
-    foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
     foreign key (forum_post_id) references forum_posts(forum_post_id)
+);
+
+create table forum_post_reply_votes (
+    forum_post_reply_id text not null,
+    user_id text not null,
+    forum_post_reply_vote_voted_timestamp timestamptz not null default now(),
+    forum_post_reply_vote_increment smallint not null,
+    primary key (forum_post_reply_id, user_id),
+    foreign key (user_id) references users(user_id),
+    foreign key (forum_post_reply_id) references forum_post_replies(forum_post_reply_id)
 );
 
 create table forum_post_views (
@@ -418,10 +417,10 @@ create table forum_post_views (
     user_id text not null,
     primary key (forum_post_id, user_id),
     foreign key (user_id) references users(user_id),
-    foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
     foreign key (forum_post_id) references forum_posts(forum_post_id)
 );
 
+-- store votes for a post, and reply.
 create table forum_post_votes (
     forum_post_id text not null,
     user_id text not null,
@@ -430,9 +429,5 @@ create table forum_post_votes (
     forum_post_vote_increment smallint not null,
     primary key (forum_post_id, user_id),
     foreign key (user_id) references users(user_id),
-    foreign key (forum_post_id) references forum_global_announcements(forum_global_announcement_id),
     foreign key (forum_post_id) references forum_posts(forum_post_id)
 );
-
--- this is image link i uploaded on 2023-02-06T19:36:00.000+07:00 https://user-images.githubusercontent.com/60266519/216972928-5cc3e991-dd10-4f84-8d61-56d2aa267302.jpg
--- I will see when the image gets deleted.

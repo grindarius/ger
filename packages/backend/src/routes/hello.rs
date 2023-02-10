@@ -23,11 +23,20 @@ pub async fn handler() -> HttpResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_web::http::StatusCode;
+    use actix_web::{http::StatusCode, test, web, App};
 
     #[actix_web::test]
     async fn test_hello_ok() {
-        let resp = handler().await;
-        assert_eq!(resp.status(), StatusCode::OK);
+        let response = handler().await;
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_hello_404() {
+        let app = test::init_service(App::new().route("/", web::get().to(handler))).await;
+        let request = test::TestRequest::post().uri("/").to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 }

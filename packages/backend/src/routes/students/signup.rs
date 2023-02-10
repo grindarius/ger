@@ -21,10 +21,8 @@ pub struct StudentSignupRequestBody {
     #[schema(example = json!("31"))]
     major_representative_id: String,
     professor_id: String,
+    /// academic year id of student that will be recognized.
     first_academic_year_id: String,
-    /// The academic year that new students have joined in anno domini year
-    #[schema(example = json!("2017"))]
-    first_academic_year: String,
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -38,8 +36,8 @@ pub struct StudentSignupRequestBodyInner {
     #[serde(with = "time::Date")]
     student_birthdate: time::Date,
     student_previous_school_name: String,
-    #[serde(with = "rust_decimal::serde::str")]
-    #[schema(example = json!("3.99"))]
+    #[serde(with = "rust_decimal::serde::float")]
+    #[schema(value_type = f32, example = json!(3.99))]
     student_previous_school_gpa: Decimal,
 }
 
@@ -94,11 +92,30 @@ pub async fn handler(
 
     let mut client = data.pool.get().await?;
 
-    let first_academic_year_bhuddist_era_year = body
-        .first_academic_year
-        .parse::<u32>()
-        .map_err(|_| HttpError::InputValidationError)?
-        + AD_BE_YEAR_DIFFERENCE;
+    let get_numeric_first_academic_year_statement = client
+        .prepare_typed(
+            r##"
+            select
+                academic_year_id,
+                academic_year_anno_domini_year
+            from academic_years
+            where academic_year_id = $1
+            "##,
+            &[Type::TEXT],
+        )
+        .await?;
+
+    let first_academic_year = client
+        .query_one(
+            &get_numeric_first_academic_year_statement,
+            &[&body.first_academic_year_id],
+        )
+        .await?;
+    let first_academic_year = first_academic_year
+        .try_get::<usize, i32>(1usize)
+        .map_err(|_| HttpError::InternalServerError)?;
+
+    let first_academic_year_bhuddist_era_year = first_academic_year + AD_BE_YEAR_DIFFERENCE as i32;
 
     let insert_user_statement = client
         .prepare_typed_cached(
@@ -108,15 +125,24 @@ pub async fn handler(
                 user_username,
                 user_email,
                 user_password,
-                user_role
+                user_role,
+                user_birthdate
             ) values (
                 $1,
                 $2,
                 $3,
                 $4,
-                $5
+                $5,
+                $6
             )"##,
-            &[Type::TEXT, Type::TEXT, Type::TEXT, Type::TEXT, Type::TEXT],
+            &[
+                Type::TEXT,
+                Type::TEXT,
+                Type::TEXT,
+                Type::TEXT,
+                Type::TEXT,
+                Type::DATE,
+            ],
         )
         .await?;
 
@@ -127,7 +153,6 @@ pub async fn handler(
                 student_id,
                 student_representative_id,
                 student_nid,
-                student_birthdate,
                 student_previous_school_name,
                 student_previous_school_gpa,
                 major_id,
@@ -141,14 +166,12 @@ pub async fn handler(
                 $5,
                 $6,
                 $7,
-                $8,
-                $9
+                $8
             )"##,
             &[
                 Type::TEXT,
                 Type::TEXT,
                 Type::TEXT,
-                Type::DATE,
                 Type::TEXT,
                 Type::NUMERIC,
                 Type::TEXT,
@@ -244,6 +267,7 @@ pub async fn handler(
                     &new_student_email,
                     &new_student_account_password.to_string(),
                     &Role::Student,
+                    &student.student_birthdate,
                 ],
             )
             .await?;
@@ -254,7 +278,6 @@ pub async fn handler(
                     &new_student_id,
                     &new_student_representative_id,
                     &student.student_nid,
-                    &student.student_birthdate,
                     &student.student_previous_school_name,
                     &student.student_previous_school_gpa,
                     &body.major_id,

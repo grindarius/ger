@@ -8,7 +8,8 @@ use crate::openapi::security_addon::SecurityAddon;
         crate::routes::auth::refresh::handler,
         crate::routes::students::signup::handler,
         crate::routes::forum::announcements::get_announcements_list::handler,
-        crate::routes::forum::get_trending_posts_list::handler
+        crate::routes::forum::get_trending_posts_list::handler,
+        crate::routes::users::get_user_profile_image::handler
     ),
     components(
         schemas(
@@ -36,6 +37,9 @@ use crate::openapi::security_addon::SecurityAddon;
         ),
         (
             name = "students"
+        ),
+        (
+            name = "users"
         )
     )
 )]
