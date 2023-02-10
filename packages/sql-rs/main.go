@@ -139,7 +139,7 @@ func main() {
 				enumVariantCamelCase := enumVariant.CamelCase()
 
 				enumOutput += fmt.Sprintf("    #[postgres(name = \"%s\")]\n    %s,\n", enumVariant.ToLower(), enumVariantCamelCase)
-				typescriptEnumOutput += fmt.Sprintf("  %s = \"%s\",\n", enumVariantCamelCase, enumVariant.ToLower())
+				typescriptEnumOutput += fmt.Sprintf("  %s = '%s',\n", enumVariantCamelCase, enumVariant.ToLower())
 			}
 
 			enumOutput += "}\n\n"
@@ -190,7 +190,7 @@ func main() {
 			if col.isNonNull {
 				typescriptOutput += fmt.Sprintf("  %s: %s\n", col.columnName, newTypescriptType)
 			} else {
-				typescriptOutput += fmt.Sprintf("  %s?: %s\n", col.columnName, newTypescriptType)
+				typescriptOutput += fmt.Sprintf("  %s: %s | null\n", col.columnName, newTypescriptType)
 			}
 
 			if isEnum {
