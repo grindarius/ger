@@ -87,3 +87,13 @@ pub const ACCESS_TOKEN_HEADER_NAME: &'static str = "x-access-token";
 
 /// The name of header that carries refresh token
 pub const REFRESH_TOKEN_HEADER_NAME: &'static str = "x-refresh-token";
+
+/// Default page when page is missing
+pub const DEFAULT_PAGE: i32 = 1;
+
+/// Default page size when page size is missing
+pub const DEFAULT_PAGE_SIZE: i32 = 10;
+
+/// Default trending window for
+/// [get_trending_posts_list](crate::routes::forum::get_trending_posts_list::handler)
+pub const DEFAULT_TRENDING_WINDOW: i32 = 24;
