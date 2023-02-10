@@ -4,7 +4,8 @@ import { nanoid } from 'nanoid'
 import { faker } from '@faker-js/faker'
 
 import type { Subjects, SubjectSchedules } from '../../database.js'
-import { DayOfWeek, generateSubjectScheduleDays, NANOID_LENGTH } from '../../generals.js'
+import { DayOfWeek } from '../../database.js'
+import { generateSubjectScheduleDays, NANOID_LENGTH } from '../../generals.js'
 
 export function generateSubjectSchedules (subjects: Array<Subjects>, amountEach = 2): Array<SubjectSchedules> {
   return subjects.map(subject => {

@@ -13,9 +13,15 @@ import { generateAcademicYears } from './tables/academic-years/academic-years.js
 import { generateCurriculums } from './tables/curriculums/curriculums.js'
 import { generateFaculties } from './tables/curriculums/faculties.js'
 import { generateMajors } from './tables/curriculums/majors.js'
+import { generateForumCategories } from './tables/forums/forum-categories.js'
+import { generateForumPostReplies } from './tables/forums/forum-post-replies.js'
+import { generateForumPostViews } from './tables/forums/forum-post-views.js'
+import { generateForumPostVotes } from './tables/forums/forum-post-votes.js'
+import { generateForumPosts } from './tables/forums/forum-posts.js'
 import { generateUsers } from './tables/users/admins.js'
 import { generateProfessors } from './tables/users/professors.js'
 import { generateStudents } from './tables/users/students.js'
+import { generateForumPostReplyVotes } from './tables/forums/forum-post-reply-votes.js'
 
 import './env.js'
 
@@ -71,11 +77,12 @@ const students = generateStudents(majors, academicYears, professors.map(p => p[1
 users.push(...professors.map(p => p[0]))
 users.push(...students.map(s => s[0]))
 
-const studentsSet = new Set(students.map(s => s[1].student_representative_id))
-if (studentsSet.size < students.length) {
-  const msg = `duplicate ids occured in students list. Students: ${students.length}, Student set: ${studentsSet.size}`
-  throw new Error(msg)
-}
+const forumCategories = generateForumCategories(users)
+const forumPosts = generateForumPosts(users, forumCategories)
+const forumViews = generateForumPostViews(users, forumPosts)
+const forumVotes = generateForumPostVotes(forumPosts, forumViews)
+const forumPostReplies = generateForumPostReplies(users, forumPosts)
+const forumPostReplyVotes = generateForumPostReplyVotes(users, forumPostReplies)
 
 await Promise.all([
   saveToFile(faculties, 'faculties.json'),
@@ -84,7 +91,13 @@ await Promise.all([
   saveToFile(academicYears, 'academic-years.json'),
   saveToFile(users, 'users.json'),
   saveToFile(professors.map(p => p[1]), 'professors.json'),
-  saveToFile(students.map(s => s[1]), 'students.json')
+  saveToFile(students.map(s => s[1]), 'students.json'),
+  saveToFile(forumCategories, 'forum-categories.json'),
+  saveToFile(forumPosts, 'forum-posts.json'),
+  saveToFile(forumViews, 'forum-post-views.json'),
+  saveToFile(forumVotes, 'forum-post-votes.json'),
+  saveToFile(forumPostReplies, 'forum-post-replies.json'),
+  saveToFile(forumPostReplyVotes, 'forum-post-reply-votes.json')
 ])
 
 await insert(faculties, 'faculties', pool)
@@ -96,3 +109,10 @@ await insert(academicYears, 'academic_years', pool)
 await insert(users, 'users', pool)
 await insert(professors.map(p => p[1]), 'professors', pool)
 await insert(students.map(s => s[1]), 'students', pool)
+
+await insert(forumCategories, 'forum_categories', pool)
+await insert(forumPosts, 'forum_posts', pool)
+await insert(forumViews, 'forum_post_views', pool)
+await insert(forumVotes, 'forum_post_votes', pool)
+await insert(forumPostReplies, 'forum_post_replies', pool)
+await insert(forumPostReplyVotes, 'forum_post_reply_votes', pool)

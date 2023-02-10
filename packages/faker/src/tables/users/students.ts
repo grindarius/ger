@@ -3,10 +3,12 @@ import { nanoid } from 'nanoid'
 import { faker } from '@faker-js/faker'
 
 import type { AcademicYears, Majors, Professors, Students, Users } from '../../database.js'
-import { ENCRYPTED_PASSWORD, NANOID_LENGTH, nid, Role } from '../../generals.js'
-// import { logger } from '../../index.js'
+import { Role } from '../../database.js'
+import { ENCRYPTED_PASSWORD, NANOID_LENGTH, nid } from '../../generals.js'
 
-/// get latest index by major id and academic year id
+/**
+ * get latest index by major id and academic year id
+ */
 function getRepresentativeId (previousStudents: Array<[Users, Students]>, major: Majors, firstAcadYear: AcademicYears): string {
   const firstAcadYearBE = Number(firstAcadYear.academic_year_anno_domini_year) + 543
   const studentsInSameMajorAndYear = previousStudents.filter(ps => ps[1].major_id === major.major_id && ps[1].first_academic_year_id === firstAcadYear.academic_year_id)
@@ -43,7 +45,9 @@ export function generateStudents (
       user_email: faker.internet.email(firstName, lastName),
       user_password: ENCRYPTED_PASSWORD,
       user_role: Role.Student,
-      user_created_timestamp: faker.date.past(18).toISOString()
+      user_created_timestamp: faker.date.past(18).toISOString(),
+      user_image_profile_path: '',
+      user_birthdate: faker.date.birthdate().toISOString()
     }
 
     const firstAcadYear = faker.helpers.arrayElement(academicYears)
@@ -52,9 +56,7 @@ export function generateStudents (
     const student: Students = {
       student_id: id,
       student_representative_id: getRepresentativeId(students, major, firstAcadYear),
-      student_profile_image_path: '',
       student_nid: nid(),
-      student_birthdate: faker.date.past(30).toISOString(),
       student_previous_school_name: faker.company.name(),
       student_previous_school_gpa: faker.datatype.number({ min: 2, max: 4, precision: 0.01 }),
       major_id: major.major_id,

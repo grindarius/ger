@@ -1,3 +1,4 @@
+import { customAlphabet } from 'nanoid'
 import { writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -5,6 +6,7 @@ import type pg from 'pg'
 
 import { faker } from '@faker-js/faker'
 
+import { DayOfWeek } from './database.js'
 import { logger } from './index.js'
 
 /* eslint-disable-next-line @typescript-eslint/naming-convention */
@@ -15,22 +17,6 @@ export const NANOID_LENGTH = 32
 export interface Point {
   readonly x: number
   readonly y: number
-}
-
-export enum Role {
-  Admin = 'admin',
-  Student = 'student',
-  Professor = 'professor'
-}
-
-export enum DayOfWeek {
-  Sunday = 'sunday',
-  Monday = 'monday',
-  Tuesday = 'tuesday',
-  Wednesday = 'wednesday',
-  Thursday = 'thursday',
-  Friday = 'friday',
-  Saturday = 'saturday'
 }
 
 const dayOfWeekArray = [
@@ -92,8 +78,8 @@ export function coordsArrayToPoint (coords: [string, string]): Point {
   return point
 }
 
-function calculateNIDChecksum (first12digits: number): number {
-  const first12digitsArray = first12digits.toString().split('')
+function calculateNIDChecksum (first12digits: string): number {
+  const first12digitsArray = first12digits.split('')
 
   const checksum = first12digitsArray.reduce((previous, current, i) => {
     return (Number(current) * (13 - i)) + previous
@@ -104,13 +90,9 @@ function calculateNIDChecksum (first12digits: number): number {
 }
 
 export function nid (): string {
-  const first12digits = faker.datatype.number({
-    min: 100000000000,
-    max: 899999999999
-  })
-
+  const first12digits = customAlphabet('0123456789', 12)()
   const checksum = calculateNIDChecksum(first12digits)
-  return first12digits.toString() + checksum.toString()
+  return first12digits + checksum.toString()
 }
 
 export const UNENCRYPTED_PASSWORD = 'aryastark'

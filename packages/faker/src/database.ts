@@ -4,19 +4,19 @@ export interface Point {
 }
 
 export enum DayOfWeek {
-  Sunday = "sunday",
-  Monday = "monday",
-  Tuesday = "tuesday",
-  Wednesday = "wednesday",
-  Thursday = "thursday",
-  Friday = "friday",
-  Saturday = "saturday",
+  Sunday = 'sunday',
+  Monday = 'monday',
+  Tuesday = 'tuesday',
+  Wednesday = 'wednesday',
+  Thursday = 'thursday',
+  Friday = 'friday',
+  Saturday = 'saturday',
 }
 
 export enum Role {
-  Admin = "admin",
-  Student = "student",
-  Professor = "professor",
+  Admin = 'admin',
+  Student = 'student',
+  Professor = 'professor',
 }
 
 export interface AcademicYears {
@@ -56,22 +56,19 @@ export interface ForumCategories {
   forum_category_created_timestamp: string
 }
 
-export interface ForumGlobalAnnouncements {
-  forum_global_announcement_id: string
-  forum_global_announcement_name: string
-  user_id: string
-  forum_global_announcement_content: string
-  forum_global_announcement_is_active: boolean
-  forum_global_announcement_created_timestamp: string
-  forum_global_announcement_deactivated_timestamp?: string
-}
-
 export interface ForumPostReplies {
   forum_post_reply_id: string
   forum_post_id: string
   user_id: string
   forum_post_reply_content: string
   forum_post_reply_created_timestamp: string
+}
+
+export interface ForumPostReplyVotes {
+  forum_post_reply_id: string
+  user_id: string
+  forum_post_reply_vote_voted_timestamp: string
+  forum_post_reply_vote_increment: number
 }
 
 export interface ForumPostViews {
@@ -94,8 +91,10 @@ export interface ForumPosts {
   forum_post_content: string
   forum_post_is_active: boolean
   forum_post_created_timestamp: string
-  forum_post_deactivated_timestamp?: string
+  forum_post_last_active_timestamp: string
+  forum_post_deactivated_timestamp: string | null
   forum_post_is_category_based_announcement: boolean
+  forum_post_is_global_announcement: boolean
 }
 
 export interface GradingCriteriaGrades {
@@ -180,7 +179,7 @@ export interface ProfessorNames {
 
 export interface Professors {
   professor_id: string
-  professor_birthdate: string
+  professor_professions: string
 }
 
 export interface Rooms {
@@ -244,14 +243,13 @@ export interface StudentTransactions {
   student_transaction_is_transaction_successful: boolean
   student_transaction_price: number
   student_transaction_created_timestamp: string
-  student_transaction_finished_timestamp?: string
+  student_transaction_finished_timestamp: string | null
 }
 
 export interface Students {
   student_id: string
   student_representative_id: string
   student_nid: string
-  student_birthdate: string
   student_previous_school_name: string
   student_previous_school_gpa: number
   major_id: string
@@ -288,5 +286,6 @@ export interface Users {
   user_password: string
   user_image_profile_path: string
   user_role: Role
+  user_birthdate: string
   user_created_timestamp: string
 }
