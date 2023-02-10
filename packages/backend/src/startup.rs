@@ -1,11 +1,8 @@
 use deadpool_postgres::{Config, ManagerConfig, RecyclingMethod};
-use opentelemetry::global;
-use opentelemetry::runtime::Tokio;
-use opentelemetry::sdk::propagation::TraceContextPropagator;
+use opentelemetry::{global, runtime::Tokio, sdk::propagation::TraceContextPropagator};
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
-use tracing_subscriber::{EnvFilter, Registry};
+use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, EnvFilter, Registry};
 
 use crate::constants::APP_NAME;
 

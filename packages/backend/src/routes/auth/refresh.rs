@@ -1,17 +1,21 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use tokio_postgres::types::Type;
 
-use crate::constants::swagger::AuthenticationHeaders;
-use crate::constants::{
-    claims::AccessTokenClaims, claims::RefreshTokenClaims, get_expires_timestamp,
-    responses::DefaultSuccessResponse, ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_ENCODING_KEY,
-    ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, REFRESH_TOKEN_DECODING_KEY,
-    REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
-    VALIDATION,
+use crate::{
+    constants::{
+        claims::{AccessTokenClaims, RefreshTokenClaims},
+        get_expires_timestamp,
+        responses::DefaultSuccessResponse,
+        swagger::AuthenticationHeaders,
+        ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
+        ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, REFRESH_TOKEN_DECODING_KEY,
+        REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
+        VALIDATION,
+    },
+    database::UserSessions,
+    errors::HttpError,
+    shared_app_data::SharedAppData,
 };
-use crate::database::UserSessions;
-use crate::errors::HttpError;
-use crate::shared_app_data::SharedAppData;
 
 /// Checks and refresh tokens from the user when tokens are out of time.
 #[utoipa::path(

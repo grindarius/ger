@@ -5,9 +5,11 @@ use tracing_actix_web::TracingLogger;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::openapi::apidoc::ApiDoc;
-use crate::shared_app_data::SharedAppData;
-use crate::startup::{init_telemetry, load_postgres_config};
+use crate::{
+    openapi::apidoc::ApiDoc,
+    shared_app_data::SharedAppData,
+    startup::{init_telemetry, load_postgres_config},
+};
 
 mod constants;
 mod database;

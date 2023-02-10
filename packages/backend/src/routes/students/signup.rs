@@ -1,18 +1,21 @@
 use actix_web::{web, HttpResponse};
-use argon2::password_hash::SaltString;
-use argon2::PasswordHasher;
+use argon2::{password_hash::SaltString, PasswordHasher};
 use rand_core::OsRng;
 use rust_decimal::Decimal;
 use serde::Deserialize;
 use tokio_postgres::types::Type;
 use utoipa::ToSchema;
 
-use crate::constants::{create_argon2_context, responses::DefaultSuccessResponse, ID_LENGTH};
-use crate::constants::{swagger::AuthenticationHeaders, AD_BE_YEAR_DIFFERENCE};
-use crate::database::Role;
-use crate::errors::HttpError;
-use crate::extractors::admins::AuthenticatedAdminClaims;
-use crate::shared_app_data::SharedAppData;
+use crate::{
+    constants::{
+        create_argon2_context, responses::DefaultSuccessResponse, swagger::AuthenticationHeaders,
+        AD_BE_YEAR_DIFFERENCE, ID_LENGTH,
+    },
+    database::Role,
+    errors::HttpError,
+    extractors::admins::AuthenticatedAdminClaims,
+    shared_app_data::SharedAppData,
+};
 
 #[derive(Deserialize, ToSchema)]
 pub struct StudentSignupRequestBody {

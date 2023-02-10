@@ -5,7 +5,7 @@
     serde::Serialize,
     serde::Deserialize,
     postgres_types::FromSql,
-    postgres_types::ToSql
+    postgres_types::ToSql,
 )]
 #[serde(rename_all = "lowercase")]
 #[postgres(name = "t_day_of_week")]
@@ -33,7 +33,7 @@ pub enum DayOfWeek {
     serde::Serialize,
     serde::Deserialize,
     postgres_types::FromSql,
-    postgres_types::ToSql
+    postgres_types::ToSql,
 )]
 #[serde(rename_all = "lowercase")]
 #[postgres(name = "t_user_role")]
