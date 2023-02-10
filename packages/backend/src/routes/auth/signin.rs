@@ -140,20 +140,140 @@ pub async fn handler(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use crate::load_postgres_config;
+
     use actix_web::{http::StatusCode, test, App};
+    use argon2::{password_hash::SaltString, PasswordHasher};
+    use deadpool_postgres::Runtime;
+    use rand_core::OsRng;
+    use tokio_postgres::NoTls;
 
     #[actix_web::test]
-    async fn signin_user_not_found() {
-        let app = test::init_service(App::new().route("/", web::post().to(handler))).await;
+    async fn signin() {
+        let pool = load_postgres_config()
+            .create_pool(Some(Runtime::Tokio1), NoTls)
+            .expect("cannot create testing pool");
+
+        let client = pool.get().await.unwrap();
+
+        // 30 years old
+        let birthdate =
+            time::OffsetDateTime::now_utc() - time::Duration::new(30 * 365 * 24 * 60 * 60, 0);
+
+        let username = "simple_user_signin".to_string();
+        let email = "simple_user_signin@gmail.com".to_string();
+
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2_context = create_argon2_context().unwrap();
+        let password = argon2_context.hash_password(b"aryastark", &salt).unwrap();
+
+        client
+            .execute(
+                r##"
+                insert into users (
+                    user_id,
+                    user_username,
+                    user_email,
+                    user_password,
+                    user_role,
+                    user_birthdate
+                ) values (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6
+                )
+                "##,
+                &[
+                    &nanoid::nanoid!(ID_LENGTH),
+                    &username,
+                    &email,
+                    &password.to_string(),
+                    &Role::Admin,
+                    &birthdate.date(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        let app = test::init_service(
+            App::new()
+                .app_data(SharedAppData::new(pool.clone()))
+                .route("/", web::post().to(handler)),
+        )
+        .await;
+
+        // empty username
         let request = test::TestRequest::post()
             .uri("/")
             .set_json(SigninRequestBody {
-                username: "who_dis_eh".to_string(),
-                password: "who_dis_eh".to_string(),
+                username: "".to_string(),
+                password: password.clone().to_string(),
             })
             .to_request();
         let response = test::call_service(&app, request).await;
 
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
+
+        // empty password
+        let request = test::TestRequest::post()
+            .uri("/")
+            .set_json(SigninRequestBody {
+                username: username.clone(),
+                password: "".to_string(),
+            })
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+        // user not found
+        let request = test::TestRequest::post()
+            .uri("/")
+            .set_json(SigninRequestBody {
+                username: "who_is_this_eh".to_string(),
+                password: "who_is_this_eh".to_string(),
+            })
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+
+        // wrong password
+        let request = test::TestRequest::post()
+            .uri("/")
+            .set_json(SigninRequestBody {
+                username: username.clone().to_string(),
+                password: password.clone().to_string(),
+            })
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+        // successful
+        let request = test::TestRequest::post()
+            .uri("/")
+            .set_json(SigninRequestBody {
+                username: username.clone().to_string(),
+                password: password.clone().to_string(),
+            })
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_ne!(
+            response.headers().get("x-access-token"),
+            None,
+            "checking that the headers gets created"
+        );
+        assert_ne!(
+            response.headers().get("x-refresh-token"),
+            None,
+            "checking that the headers gets created"
+        );
     }
 }
