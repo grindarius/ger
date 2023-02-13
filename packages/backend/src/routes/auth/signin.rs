@@ -10,8 +10,8 @@ use crate::{
         create_argon2_context, get_expires_timestamp,
         responses::DefaultSuccessResponse,
         ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_VALID_TIME_LENGTH,
-        HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME,
-        REFRESH_TOKEN_VALID_TIME_LENGTH,
+        ARGON2_PEPPER_STRING, HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY,
+        REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,
     },
     database::Role,
     errors::HttpError,
@@ -91,11 +91,19 @@ pub async fn handler(
         )
         .await?;
 
-    let user = client.query_one(&statement, &[&body.username]).await?;
+    let user = client
+        .query_opt(&statement, &[&body.username])
+        .await
+        .unwrap();
+
+    let user = match user {
+        Some(u) => u,
+        None => return Err(HttpError::UserNotFound),
+    };
     let user = UserQuery::try_from(&user)?;
 
     let parsed_password = PasswordHash::new(user.user_password.as_str())?;
-    let password_result = create_argon2_context()?
+    let password_result = create_argon2_context(&ARGON2_PEPPER_STRING)?
         .verify_password(body.password.as_bytes(), &parsed_password)
         .is_ok();
 
@@ -165,8 +173,13 @@ mod tests {
         let email = "simple_user_signin@gmail.com".to_string();
 
         let salt = SaltString::generate(&mut OsRng);
-        let argon2_context = create_argon2_context().unwrap();
+        let argon2_context = create_argon2_context(&ARGON2_PEPPER_STRING).unwrap();
         let password = argon2_context.hash_password(b"aryastark", &salt).unwrap();
+
+        client
+            .execute("delete from users where user_username = $1", &[&username])
+            .await
+            .unwrap();
 
         client
             .execute(
@@ -201,7 +214,7 @@ mod tests {
 
         let app = test::init_service(
             App::new()
-                .app_data(SharedAppData::new(pool.clone()))
+                .app_data(web::Data::new(SharedAppData::new(pool.clone())))
                 .route("/", web::post().to(handler)),
         )
         .await;
@@ -216,7 +229,7 @@ mod tests {
             .to_request();
         let response = test::call_service(&app, request).await;
 
-        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
         // empty password
         let request = test::TestRequest::post()
@@ -252,6 +265,7 @@ mod tests {
             .to_request();
         let response = test::call_service(&app, request).await;
 
+        println!("{:?}", response.response().body());
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
         // successful
@@ -274,6 +288,34 @@ mod tests {
             response.headers().get("x-refresh-token"),
             None,
             "checking that the headers gets created"
+        );
+
+        let row = client
+            .query_one(
+                r##"
+                select
+                    users.user_id,
+                    users.user_username,
+                    user_sessions.user_session_id,
+                    user_sessions.user_session_refresh_token
+                from users
+                inner join user_sessions on users.user_id = user_sessions.user_session_user_id
+                where users.user_username = $1
+                "##,
+                &[&username],
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            response
+                .headers()
+                .get("x-refresh-token")
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            row.get::<&str, String>("user_session_refresh_token")
+                .as_str()
         );
     }
 }

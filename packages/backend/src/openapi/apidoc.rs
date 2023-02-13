@@ -9,7 +9,8 @@ use crate::openapi::security_addon::SecurityAddon;
         crate::routes::students::signup::handler,
         crate::routes::forum::announcements::get_announcements_list::handler,
         crate::routes::forum::get_trending_posts_list::handler,
-        crate::routes::users::get_user_profile_image::handler
+        crate::routes::users::get_user_profile_image::handler,
+        crate::routes::users::get_users_list::handler
     ),
     components(
         schemas(
@@ -21,7 +22,8 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::students::signup::StudentSignupRequestBodyInner,
             crate::routes::forum::announcements::get_announcements_list::GetAnnouncementsListResponseBody,
             crate::routes::forum::announcements::get_announcements_list::GetAnnouncementsListResponseBodyInner,
-            crate::routes::forum::get_trending_posts_list::GetTrendingPostsListRequestQueries
+            crate::routes::forum::get_trending_posts_list::GetTrendingPostsListRequestQueries,
+            crate::routes::users::get_users_list::GetUsersListQueries
         )
     ),
     modifiers(&SecurityAddon),

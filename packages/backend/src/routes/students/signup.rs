@@ -9,7 +9,7 @@ use utoipa::ToSchema;
 use crate::{
     constants::{
         create_argon2_context, responses::DefaultSuccessResponse, swagger::AuthenticationHeaders,
-        AD_BE_YEAR_DIFFERENCE, ID_LENGTH,
+        AD_BE_YEAR_DIFFERENCE, ARGON2_PEPPER_STRING, ID_LENGTH,
     },
     database::Role,
     errors::HttpError,
@@ -213,7 +213,7 @@ pub async fn handler(
         )
         .await?;
 
-    let argon2_context = create_argon2_context()?;
+    let argon2_context = create_argon2_context(&ARGON2_PEPPER_STRING)?;
 
     let latest_student_index = client
         .query_one(

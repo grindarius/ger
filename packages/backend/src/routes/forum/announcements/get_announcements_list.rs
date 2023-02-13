@@ -18,7 +18,7 @@ pub struct GetAnnouncementsListRequestQueries {
     #[param(default = json!(1))]
     pub page: Option<i32>,
     /// how big of the page to query. Default is `10`
-    #[param(default = json!(10))]
+    #[param(default = json!(crate::constants::DEFAULT_PAGE_SIZE))]
     pub page_size: Option<i32>,
 }
 
