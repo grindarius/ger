@@ -1,17 +1,11 @@
 use actix_web::{web, App, HttpServer, ResponseError};
 use deadpool_postgres::Runtime;
-use opentelemetry::{global, runtime::Tokio, sdk::propagation::TraceContextPropagator};
 use tokio_postgres::NoTls;
 use tracing_actix_web::TracingLogger;
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, EnvFilter, Registry};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{
-    constants::APP_NAME, openapi::apidoc::ApiDoc, shared_app_data::SharedAppData,
-    startup::load_postgres_config,
-};
+use crate::{openapi::apidoc::ApiDoc, shared_app_data::SharedAppData, startup::*};
 
 mod constants;
 mod database;
@@ -35,25 +29,7 @@ async fn main() -> std::io::Result<()> {
 
     // log setup, guard has to stay there, cannot be dropped, if dropped could result in weird
     // behavior of logging.
-    global::set_text_map_propagator(TraceContextPropagator::new());
-    let tracer = opentelemetry_jaeger::new_agent_pipeline()
-        .with_service_name(APP_NAME)
-        .install_batch(Tokio)
-        .expect("failed to install Opentelemetry tracer");
-
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("info"));
-    let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
-    let (non_blocking_writer, _guard) = tracing_appender::non_blocking(std::io::stdout());
-    let bunyan_formatter = BunyanFormattingLayer::new(APP_NAME.into(), non_blocking_writer);
-
-    let subscriber = Registry::default()
-        .with(env_filter)
-        .with(telemetry)
-        .with(JsonStorageLayer)
-        .with(bunyan_formatter);
-
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("failed to install tracing subscriber");
+    let _guard = init_telemetry();
 
     // openapi setup
     let openapi = ApiDoc::openapi();

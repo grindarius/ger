@@ -1,7 +1,6 @@
 #[derive(
     Debug,
     PartialEq,
-    ger_from_row::FromRow,
     serde::Serialize,
     serde::Deserialize,
     postgres_types::FromSql,
@@ -29,7 +28,6 @@ pub enum DayOfWeek {
 #[derive(
     Debug,
     PartialEq,
-    ger_from_row::FromRow,
     serde::Serialize,
     serde::Deserialize,
     postgres_types::FromSql,
@@ -201,7 +199,6 @@ pub struct OpeningSubjectsInSemesterSchedules {
     pub semester_id: String,
     pub subject_id: String,
     pub room_id: String,
-    #[fromrow(num)]
     pub day_of_week: DayOfWeek,
     pub start_time_of_day: time::Time,
     pub end_time_of_day: time::Time,
@@ -320,7 +317,6 @@ pub struct Students {
 pub struct SubjectSchedules {
     pub subject_schedule_id: String,
     pub subject_id: String,
-    #[fromrow(num)]
     pub subject_schedule_day_of_week: DayOfWeek,
     pub subject_schedule_start_time_of_day: time::Time,
     pub subject_schedule_end_time_of_day: time::Time,
@@ -349,7 +345,6 @@ pub struct Users {
     pub user_email: String,
     pub user_password: String,
     pub user_image_profile_path: String,
-    #[fromrow(num)]
     pub user_role: Role,
     pub user_birthdate: time::Date,
     pub user_created_timestamp: time::OffsetDateTime,

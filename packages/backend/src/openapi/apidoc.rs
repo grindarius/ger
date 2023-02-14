@@ -6,6 +6,7 @@ use crate::openapi::security_addon::SecurityAddon;
         crate::routes::hello::handler,
         crate::routes::auth::signin::handler,
         crate::routes::auth::refresh::handler,
+        crate::routes::admin::signup::handler,
         crate::routes::students::signup::handler,
         crate::routes::forum::announcements::get_announcements_list::handler,
         crate::routes::forum::get_trending_posts_list::handler,
@@ -23,7 +24,8 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::forum::announcements::get_announcements_list::GetAnnouncementsListResponseBody,
             crate::routes::forum::announcements::get_announcements_list::GetAnnouncementsListResponseBodyInner,
             crate::routes::forum::get_trending_posts_list::GetTrendingPostsListRequestQueries,
-            crate::routes::users::get_users_list::GetUsersListQueries
+            crate::routes::users::get_users_list::GetUsersListQueries,
+            crate::routes::admin::signup::AdminSignupRequestBody
         )
     ),
     modifiers(&SecurityAddon),

@@ -124,13 +124,13 @@ func main() {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[2:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("#[derive(\n    Debug,\n    PartialEq,\n    ger_from_row::FromRow,\n    serde::Serialize,\n    serde::Deserialize,\n    postgres_types::FromSql,\n    postgres_types::ToSql\n)]\n#[serde(rename_all = \"lowercase\")]\n#[postgres(name = \"%s\")]\npub enum %s {\n", typeName[0].GetString_().GetStr(), enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(\n    Debug,\n    PartialEq,\n    serde::Serialize,\n    serde::Deserialize,\n    postgres_types::FromSql,\n    postgres_types::ToSql,\n)]\n#[serde(rename_all = \"lowercase\")]\n#[postgres(name = \"%s\")]\npub enum %s {\n", typeName[0].GetString_().GetStr(), enumNameCamelCase)
 				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			} else if typeName[0].GetString_().GetStr() == "t_user_role" {
 				enumName := stringy.New(typeName[0].GetString_().GetStr()[len(typeName[0].GetString_().GetStr())-4:])
 				enumNameCamelCase := enumName.CamelCase()
 
-				enumOutput += fmt.Sprintf("#[derive(\n    Debug,\n    PartialEq,\n    ger_from_row::FromRow,\n    serde::Serialize,\n    serde::Deserialize,\n    postgres_types::FromSql,\n    postgres_types::ToSql\n)]\n#[serde(rename_all = \"lowercase\")]\n#[postgres(name = \"%s\")]\npub enum %s {\n", typeName[0].GetString_().GetStr(), enumNameCamelCase)
+				enumOutput += fmt.Sprintf("#[derive(\n    Debug,\n    PartialEq,\n    serde::Serialize,\n    serde::Deserialize,\n    postgres_types::FromSql,\n    postgres_types::ToSql,\n)]\n#[serde(rename_all = \"lowercase\")]\n#[postgres(name = \"%s\")]\npub enum %s {\n", typeName[0].GetString_().GetStr(), enumNameCamelCase)
 				typescriptEnumOutput += fmt.Sprintf("export enum %s {\n", enumNameCamelCase)
 			}
 
@@ -184,17 +184,13 @@ func main() {
 		typescriptOutput += fmt.Sprintf("export interface %s {\n", name)
 
 		for _, col := range tables[name] {
-			newType, isEnum := convertColumnType(col.columnType)
+			newType, _ := convertColumnType(col.columnType)
 			newTypescriptType, _ := convertColumnTypeTypescript(col.columnType)
 
 			if col.isNonNull {
 				typescriptOutput += fmt.Sprintf("  %s: %s\n", col.columnName, newTypescriptType)
 			} else {
 				typescriptOutput += fmt.Sprintf("  %s: %s | null\n", col.columnName, newTypescriptType)
-			}
-
-			if isEnum {
-				output += fmt.Sprintf("    #[fromrow(num)]\n")
 			}
 
 			if col.isNonNull {
