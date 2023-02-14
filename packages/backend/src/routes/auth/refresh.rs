@@ -51,7 +51,7 @@ use crate::{
             status = 500,
             description = "internal server errors",
             body = FormattedErrorResponse,
-            example = json!(HttpError::InternalServerError.get_error_struct())
+            example = json!(HttpError::InternalServerError { cause: "internal".to_string() }.get_error_struct())
         )
     )
 )]

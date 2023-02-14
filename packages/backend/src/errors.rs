@@ -15,8 +15,8 @@ pub enum HttpError {
     Unauthorized,
     #[display(fmt = "invalid swagger api key")]
     InvalidSwaggerAPIKey,
-    #[display(fmt = "internal server error")]
-    InternalServerError,
+    #[display(fmt = "internal server error {}", cause)]
+    InternalServerError { cause: String },
     #[display(fmt = "user not found")]
     UserNotFound,
     #[display(fmt = "password is incorrect")]
@@ -43,7 +43,7 @@ impl HttpError {
             HttpError::InputValidationError => "input validation error".to_string(),
             HttpError::Unauthorized => "unauthorized".to_string(),
             HttpError::InvalidSwaggerAPIKey => "invalid swagger api key".to_string(),
-            HttpError::InternalServerError => "server error".to_string(),
+            HttpError::InternalServerError { .. } => "internal server error".to_string(),
             HttpError::UserNotFound => "user not found".to_string(),
             HttpError::IncorrectPassword => "incorrect password".to_string(),
             HttpError::NoData => "no data".to_string(),
@@ -69,7 +69,7 @@ impl HttpError {
             HttpError::InputValidationError => StatusCode::BAD_REQUEST,
             HttpError::Unauthorized => StatusCode::UNAUTHORIZED,
             HttpError::InvalidSwaggerAPIKey => StatusCode::UNAUTHORIZED,
-            HttpError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            HttpError::InternalServerError { .. } => StatusCode::INTERNAL_SERVER_ERROR,
             HttpError::UserNotFound => StatusCode::NOT_FOUND,
             HttpError::IncorrectPassword => StatusCode::BAD_REQUEST,
             HttpError::NoData => StatusCode::BAD_REQUEST,
@@ -98,37 +98,49 @@ impl actix_web::error::ResponseError for HttpError {
 }
 
 impl From<deadpool_postgres::PoolError> for HttpError {
-    fn from(_error: deadpool_postgres::PoolError) -> Self {
-        HttpError::InternalServerError
+    fn from(error: deadpool_postgres::PoolError) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
     }
 }
 
 impl From<tokio_postgres::Error> for HttpError {
-    fn from(_error: tokio_postgres::Error) -> Self {
-        HttpError::InternalServerError
+    fn from(error: tokio_postgres::Error) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
     }
 }
 
 impl From<argon2::Error> for HttpError {
-    fn from(_error: argon2::Error) -> Self {
-        HttpError::InternalServerError
+    fn from(error: argon2::Error) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
     }
 }
 
 impl From<argon2::password_hash::Error> for HttpError {
-    fn from(_error: argon2::password_hash::Error) -> Self {
-        HttpError::InternalServerError
+    fn from(error: argon2::password_hash::Error) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
     }
 }
 
 impl From<anyhow::Error> for HttpError {
-    fn from(_error: anyhow::Error) -> Self {
-        HttpError::InternalServerError
+    fn from(error: anyhow::Error) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
     }
 }
 
 impl From<jsonwebtoken::errors::Error> for HttpError {
-    fn from(_error: jsonwebtoken::errors::Error) -> Self {
-        HttpError::InternalServerError
+    fn from(error: jsonwebtoken::errors::Error) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
     }
 }

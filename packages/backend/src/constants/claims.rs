@@ -27,8 +27,11 @@ impl AccessTokenClaims {
         Ok(Self {
             aud: JWT_TOKEN_AUDIENCE_NAME.to_string(),
             exp: expires_timestamp,
-            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp())
-                .map_err(|_| HttpError::InternalServerError)?,
+            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp()).map_err(
+                |_| HttpError::InternalServerError {
+                    cause: "cannot convert timestamp from type i64 to usize".to_string(),
+                },
+            )?,
             uid: user_id,
             sid: session_id,
             rle: user_role,
@@ -59,8 +62,11 @@ impl RefreshTokenClaims {
         Ok(Self {
             aud: JWT_TOKEN_AUDIENCE_NAME.to_string(),
             exp: expires_timestamp,
-            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp())
-                .map_err(|_| HttpError::InternalServerError)?,
+            iat: usize::try_from(time::OffsetDateTime::now_utc().unix_timestamp()).map_err(
+                |_| HttpError::InternalServerError {
+                    cause: "error converting timestamp from i64 to usize".to_string(),
+                },
+            )?,
             uid: user_id,
             sid: session_id,
         })

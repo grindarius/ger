@@ -79,7 +79,11 @@ pub fn validate_tokens_in_header(request: &HttpRequest) -> Result<AuthenticatedC
     let current_time = time::OffsetDateTime::now_utc().unix_timestamp();
     let current_time: usize = match current_time.try_into() {
         Ok(c) => c,
-        Err(_) => return Err(HttpError::InternalServerError),
+        Err(_) => {
+            return Err(HttpError::InternalServerError {
+                cause: "error converting timestamp from i64 to usize".to_string(),
+            })
+        }
     };
 
     if access_token.claims.exp < current_time || refresh_token.claims.exp < current_time {

@@ -100,7 +100,9 @@ pub async fn handler(
         .iter()
         .map(|r| return GetAnnouncementsListResponseBodyInner::try_from(r))
         .collect::<Result<Vec<_>, _>>()
-        .map_err(|_| HttpError::InternalServerError)?;
+        .map_err(|e| HttpError::InternalServerError {
+            cause: e.to_string(),
+        })?;
 
     let response = HttpResponse::Ok().json(GetAnnouncementsListResponseBody { announcements });
     Ok(response)

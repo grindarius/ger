@@ -15,28 +15,28 @@ lazy_static! {
     pub static ref HEADER: Header = Header::new(Algorithm::RS256);
     pub static ref VALIDATION: Validation = Validation::new(Algorithm::RS256);
     pub static ref ACCESS_TOKEN_ENCODING_KEY: EncodingKey = {
-        let access_token_private_key = dotenvy::var("GER_ACCESS_TOKEN_PRIVATE_KEY")
-            .expect("missing access token private key in constants.rs");
-        EncodingKey::from_rsa_pem(&access_token_private_key.as_bytes())
-            .expect("cannot create access token private key in constants.rs")
+        EncodingKey::from_rsa_pem(include_bytes!(
+            "../../jsonwebtoken/access_token_private_key.pem"
+        ))
+        .expect("cannot create access token private key in constants.rs")
     };
     pub static ref REFRESH_TOKEN_ENCODING_KEY: EncodingKey = {
-        let refresh_token_private_key = dotenvy::var("GER_REFRESH_TOKEN_PRIVATE_KEY")
-            .expect("missing refresh token private key in constants.rs");
-        EncodingKey::from_rsa_pem(&refresh_token_private_key.as_bytes())
-            .expect("cannot create refresh token private key in constants.rs")
+        EncodingKey::from_rsa_pem(include_bytes!(
+            "../../jsonwebtoken/refresh_token_private_key.pem"
+        ))
+        .expect("cannot create refresh token private key in constants.rs")
     };
     pub static ref ACCESS_TOKEN_DECODING_KEY: DecodingKey = {
-        let access_token_public_key = dotenvy::var("GER_ACCESS_TOKEN_PUBLIC_KEY")
-            .expect("cannot create access token public key in constants.rs");
-        DecodingKey::from_rsa_pem(&access_token_public_key.as_bytes())
-            .expect("cannot create access token public key in constants.rs")
+        DecodingKey::from_rsa_pem(include_bytes!(
+            "../../jsonwebtoken/access_token_public_key.pem"
+        ))
+        .expect("cannot create access token public key in constants.rs")
     };
     pub static ref REFRESH_TOKEN_DECODING_KEY: DecodingKey = {
-        let refresh_token_public_key = dotenvy::var("GER_REFRESH_TOKEN_PUBLIC_KEY")
-            .expect("cannot create refresh token public key in constants.rs");
-        DecodingKey::from_rsa_pem(&refresh_token_public_key.as_bytes())
-            .expect("cannot create refresh token public key in constants.rs")
+        DecodingKey::from_rsa_pem(include_bytes!(
+            "../../jsonwebtoken/refresh_token_public_key.pem"
+        ))
+        .expect("cannot create refresh token public key in constants.rs")
     };
     pub static ref SWAGGER_API_KEY_NAME: String =
         dotenvy::var("GER_SWAGGER_API_KEY_NAME").expect("cannot load swagger api key name");
@@ -65,8 +65,11 @@ pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
     let current_time =
         time::OffsetDateTime::now_utc() + time::Duration::minutes(valid_minutes as i64);
 
-    return usize::try_from(current_time.unix_timestamp())
-        .map_err(|_| HttpError::InternalServerError);
+    return usize::try_from(current_time.unix_timestamp()).map_err(|_| {
+        HttpError::InternalServerError {
+            cause: "cannot convert timestamp from type i64 to usize".to_string(),
+        }
+    });
 }
 
 /// Deserialize a given string option as `None` when a given string is an empty string.

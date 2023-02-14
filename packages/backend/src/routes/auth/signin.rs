@@ -1,7 +1,6 @@
 use actix_web::{web, HttpResponse};
 use argon2::{PasswordHash, PasswordVerifier};
 use serde::{Deserialize, Serialize};
-use tokio_postgres::types::Type;
 use utoipa::ToSchema;
 
 use crate::{
@@ -60,7 +59,7 @@ pub struct UserQuery {
             status = 500,
             description = "internal server errors",
             body = FormattedErrorResponse,
-            example = json!(HttpError::InternalServerError.get_error_struct())
+            example = json!(HttpError::InternalServerError { cause: "internal".to_string() }.get_error_struct())
         )
     )
 )]
@@ -79,7 +78,7 @@ pub async fn handler(
     let client = data.pool.get().await?;
 
     let statement = client
-        .prepare_typed_cached(
+        .prepare_cached(
             r##"
             select
                 users.user_id,
@@ -87,14 +86,10 @@ pub async fn handler(
                 users.user_role
             from users
             where users.user_username = $1"##,
-            &[Type::TEXT],
         )
         .await?;
 
-    let user = client
-        .query_opt(&statement, &[&body.username])
-        .await
-        .unwrap();
+    let user = client.query_opt(&statement, &[&body.username]).await?;
 
     let user = match user {
         Some(u) => u,
@@ -169,15 +164,30 @@ mod tests {
         let birthdate =
             time::OffsetDateTime::now_utc() - time::Duration::new(30 * 365 * 24 * 60 * 60, 0);
 
-        let username = "simple_user_signin".to_string();
-        let email = "simple_user_signin@gmail.com".to_string();
+        let username = "simple_user_signin";
+        let email = "simple_user_signin@gmail.com";
+        let password = "aryastark";
 
         let salt = SaltString::generate(&mut OsRng);
         let argon2_context = create_argon2_context(&ARGON2_PEPPER_STRING).unwrap();
-        let password = argon2_context.hash_password(b"aryastark", &salt).unwrap();
+        let hashed_password = argon2_context
+            .hash_password(password.as_bytes(), &salt)
+            .unwrap();
+
+        // testing preparation
+        let uid = client
+            .query_one(
+                "delete from users where user_username = $1 returning user_id",
+                &[&username],
+            )
+            .await
+            .unwrap();
 
         client
-            .execute("delete from users where user_username = $1", &[&username])
+            .execute(
+                "delete from user_sessions where user_session_user_id = $1",
+                &[&uid.get::<&str, String>("user_id")],
+            )
             .await
             .unwrap();
 
@@ -204,7 +214,7 @@ mod tests {
                     &nanoid::nanoid!(ID_LENGTH),
                     &username,
                     &email,
-                    &password.to_string(),
+                    &hashed_password.to_string(),
                     &Role::Admin,
                     &birthdate.date(),
                 ],
@@ -224,7 +234,7 @@ mod tests {
             .uri("/")
             .set_json(SigninRequestBody {
                 username: "".to_string(),
-                password: password.clone().to_string(),
+                password: password.to_string(),
             })
             .to_request();
         let response = test::call_service(&app, request).await;
@@ -235,7 +245,7 @@ mod tests {
         let request = test::TestRequest::post()
             .uri("/")
             .set_json(SigninRequestBody {
-                username: username.clone(),
+                username: username.to_string(),
                 password: "".to_string(),
             })
             .to_request();
@@ -259,21 +269,20 @@ mod tests {
         let request = test::TestRequest::post()
             .uri("/")
             .set_json(SigninRequestBody {
-                username: username.clone().to_string(),
-                password: password.clone().to_string(),
+                username: username.to_string(),
+                password: "who_dis_uh?".to_string(),
             })
             .to_request();
         let response = test::call_service(&app, request).await;
 
-        println!("{:?}", response.response().body());
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 
         // successful
         let request = test::TestRequest::post()
             .uri("/")
             .set_json(SigninRequestBody {
-                username: username.clone().to_string(),
-                password: password.clone().to_string(),
+                username: username.to_string(),
+                password: password.to_string(),
             })
             .to_request();
         let response = test::call_service(&app, request).await;

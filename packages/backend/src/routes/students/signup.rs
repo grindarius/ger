@@ -80,7 +80,7 @@ struct LatestStudentIndex {
             status = 500,
             description = "internal server errors",
             body = FormattedErrorResponse,
-            example = json!(HttpError::InternalServerError.get_error_struct())
+            example = json!(HttpError::InternalServerError { cause: "internal".to_string() }.get_error_struct())
         )
     )
 )]
@@ -116,7 +116,9 @@ pub async fn handler(
         .await?;
     let first_academic_year = first_academic_year
         .try_get::<usize, i32>(1usize)
-        .map_err(|_| HttpError::InternalServerError)?;
+        .map_err(|_| HttpError::InternalServerError {
+            cause: "row \"first_academic_year\" cannot be accessed".to_string(),
+        })?;
 
     let first_academic_year_bhuddist_era_year = first_academic_year + AD_BE_YEAR_DIFFERENCE as i32;
 
@@ -250,7 +252,9 @@ pub async fn handler(
 
         if new_student_index == 10000 {
             tracing::error!("new student_index overflow to {}", new_student_index);
-            return Err(HttpError::InternalServerError);
+            return Err(HttpError::InternalServerError {
+                cause: "new student_index integer overflow to 10000".to_string(),
+            });
         }
 
         let new_student_representative_id = format!(
