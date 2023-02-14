@@ -168,8 +168,22 @@ pub async fn handler(
 
     client
         .execute(
-            "update user_sessions set user_session_refresh_token = $1 where user_session_id = $2",
-            &[&new_refresh_token, &refresh_token.claims.sid],
+            r##"
+            insert into user_sessions (
+                user_session_id,
+                user_session_user_id,
+                user_session_refresh_token
+            ) values (
+                $1,
+                $2,
+                $3
+            ) on conflict (user_session_id) do update set user_session_refresh_token = $3
+            "##,
+            &[
+                &refresh_token.claims.sid,
+                &refresh_token.claims.uid,
+                &new_refresh_token,
+            ],
         )
         .await?;
 
@@ -177,4 +191,139 @@ pub async fn handler(
         .insert_header((ACCESS_TOKEN_HEADER_NAME, new_access_token))
         .insert_header((REFRESH_TOKEN_HEADER_NAME, new_refresh_token))
         .json(DefaultSuccessResponse::default()))
+}
+
+#[cfg(test)]
+mod tests {
+    use actix_web::{http::StatusCode, test, web, App};
+    use deadpool_postgres::Runtime;
+    use serde_json::json;
+    use tokio_postgres::NoTls;
+
+    use crate::{
+        routes::admin::signup::AdminSignupRequestBody, shared_app_data::SharedAppData,
+        startup::load_postgres_config,
+    };
+
+    use super::handler;
+
+    #[actix_web::test]
+    async fn test_refresh() {
+        let postgres_config = load_postgres_config();
+        let pool = postgres_config
+            .create_pool(Some(Runtime::Tokio1), NoTls)
+            .unwrap();
+
+        let username = "refresh_tokener";
+        let email = "refresh_tokener@gmail.com";
+        let password = "refresh_tokener";
+        let birthdate =
+            time::OffsetDateTime::now_utc() - time::Duration::new(60 * 60 * 24 * 365 * 30, 0);
+        let birthdate = birthdate.date();
+
+        let client = pool.get().await.unwrap();
+
+        let row = client
+            .query_opt(
+                "select user_id from users where user_username = $1",
+                &[&username],
+            )
+            .await
+            .unwrap();
+
+        if let Some(r) = row {
+            client
+                .execute("delete from users where user_username = $1", &[&username])
+                .await
+                .unwrap();
+
+            client
+                .execute(
+                    "delete from user_sessions where user_session_user_id = $1",
+                    &[&r.get::<&str, String>("user_id")],
+                )
+                .await
+                .unwrap();
+        }
+
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(SharedAppData::new(pool.clone())))
+                .route("/refresh", web::post().to(handler))
+                .route(
+                    "/signup",
+                    web::post().to(crate::routes::admin::signup::handler),
+                )
+                .route(
+                    "/signin",
+                    web::post().to(crate::routes::auth::signin::handler),
+                ),
+        )
+        .await;
+
+        let request = test::TestRequest::post()
+            .uri("/signup")
+            .set_json(AdminSignupRequestBody {
+                username: username.to_string(),
+                email: email.to_string(),
+                password: password.to_string(),
+                birthdate,
+            })
+            .to_request();
+
+        let _response = test::call_service(&app, request).await;
+
+        let request = test::TestRequest::post()
+            .uri("/signin")
+            .set_json(json!({
+                "username": "refresh_tokener".to_string(),
+                "password": "refresh_tokener".to_string(),
+            }))
+            .to_request();
+
+        let response = test::call_service(&app, request).await;
+
+        let access_token = response.headers().get("x-access-token").unwrap();
+        let refresh_token = response.headers().get("x-refresh-token").unwrap();
+
+        // empty access token, available refresh token
+        let request = test::TestRequest::post()
+            .uri("/refresh")
+            .insert_header(("x-access-token", ""))
+            .insert_header(("x-refresh-token", refresh_token.to_str().unwrap()))
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+        // empty refresh token, available access token
+        let request = test::TestRequest::post()
+            .uri("/refresh")
+            .insert_header(("x-access-token", access_token.to_str().unwrap()))
+            .insert_header(("x-refresh-token", ""))
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+        // successful call
+        let request = test::TestRequest::post()
+            .uri("/refresh")
+            .insert_header(("x-access-token", access_token.to_str().unwrap()))
+            .insert_header(("x-refresh-token", refresh_token.to_str().unwrap()))
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let row = client
+            .query_opt(
+                "select * from user_sessions where user_session_refresh_token = $1",
+                &[&refresh_token.to_str().unwrap()],
+            )
+            .await
+            .unwrap();
+
+        assert!(row.is_some());
+    }
 }

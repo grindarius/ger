@@ -142,7 +142,7 @@ create table user_sessions (
     user_session_user_id text not null unique,
     user_session_refresh_token text not null,
     primary key (user_session_id),
-    foreign key (user_session_user_id) references users(user_id)
+    foreign key (user_session_user_id) references users(user_id) on delete cascade
 );
 
 create index if not exists pgroonga_users_index on users using pgroonga (

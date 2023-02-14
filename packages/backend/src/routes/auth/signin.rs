@@ -176,20 +176,27 @@ mod tests {
 
         // testing preparation
         let uid = client
-            .query_one(
-                "delete from users where user_username = $1 returning user_id",
+            .query_opt(
+                "select user_id from users where user_username = $1",
                 &[&username],
             )
             .await
             .unwrap();
 
-        client
-            .execute(
-                "delete from user_sessions where user_session_user_id = $1",
-                &[&uid.get::<&str, String>("user_id")],
-            )
-            .await
-            .unwrap();
+        if let Some(u) = uid {
+            client
+                .execute("delete from users where user_username = $1", &[&username])
+                .await
+                .unwrap();
+
+            client
+                .execute(
+                    "delete from user_sessions where user_session_user_id = $1",
+                    &[&u.get::<&str, String>("user_id")],
+                )
+                .await
+                .unwrap();
+        }
 
         client
             .execute(
