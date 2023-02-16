@@ -131,12 +131,12 @@ async fn main() -> std::io::Result<()> {
                 web::post().to(crate::routes::students::signup::handler),
             )
             .route(
-                "/forum/announcements",
-                web::get().to(crate::routes::forum::announcements::get_announcements_list::handler),
+                "/forum/posts/trending",
+                web::get().to(crate::routes::forum::posts::get_trending_posts_list::handler),
             )
             .route(
-                "/forum/trending",
-                web::get().to(crate::routes::forum::get_trending_posts_list::handler),
+                "/forum/posts/{post_id}",
+                web::get().to(crate::routes::forum::posts::get_post::handler),
             )
             .service(
                 SwaggerUi::new("/swagger-doc/{_:.*}").url("/openapi/openapi.json", openapi.clone()),

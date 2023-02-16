@@ -11,27 +11,27 @@ use crate::{
 };
 
 #[derive(Deserialize, ToSchema, IntoParams)]
-#[into_params(style = Form, parameter_in = Query)]
+#[into_params(parameter_in = Query)]
 pub struct GetTrendingPostsListRequestQueries {
     /// How big of a window to check for the trending posts. like "trending in the last 24
-    /// hours". default is `24`.
+    /// hours".
     #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
-    #[param(minimum = 0)]
+    #[param(minimum = 1, default = json!(DEFAULT_TRENDING_WINDOW))]
     pub hours: Option<i32>,
     /// How much of a post to query for. default is `10`.
     #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
-    #[param(minimum = 0)]
+    #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
     pub page: Option<i32>,
     /// How much of a post to skip as a page change. default is `10`
     #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
-    #[param(minimum = 0)]
+    #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
     pub page_size: Option<i32>,
 }
 
 /// Gets trending posts list with a given page size and time window.
 #[utoipa::path(
     get,
-    path = "/forum/trending",
+    path = "/forum/posts/trending",
     tag = "forum",
     operation_id = "get_trending_posts_list",
     params(AuthenticationHeaders, GetTrendingPostsListRequestQueries)

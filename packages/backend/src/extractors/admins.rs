@@ -18,7 +18,7 @@ impl FromRequest for AuthenticatedAdminClaims {
         };
 
         if claims.access_token.claims.rle != Role::Admin {
-            return ready(Err(HttpError::Unauthorized));
+            return ready(Err(HttpError::Forbidden));
         }
 
         ready(Ok(AuthenticatedAdminClaims(claims)))
