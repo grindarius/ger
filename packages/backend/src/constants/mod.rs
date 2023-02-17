@@ -1,6 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
 use argon2::{Algorithm as Argon2Algorithm, Argon2, Params, Version};
+use comrak::ComrakOptions;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
 use serde::{de, Deserialize, Deserializer};
@@ -45,6 +46,15 @@ lazy_static! {
     pub static ref JWT_TOKEN_AUDIENCE_NAME: String = "ger.com".to_string();
     pub static ref ARGON2_PEPPER_STRING: String =
         dotenvy::var("GER_ARGON2_PEPPER").expect("cannot load argon2 pepper string");
+    pub static ref COMRAK_OPTIONS: ComrakOptions = {
+        let mut options = ComrakOptions::default();
+        options.extension.strikethrough = true;
+        options.extension.table = true;
+        options.extension.autolink = true;
+        options.extension.tasklist = true;
+
+        options
+    };
 }
 
 pub fn create_argon2_context<'key>(
@@ -87,6 +97,29 @@ where
     match opt.as_deref() {
         None | Some("") => Ok(None),
         Some(s) => FromStr::from_str(s).map_err(de::Error::custom).map(Some),
+    }
+}
+
+/// Sql number range used to query data as in parts
+pub struct SqlRange {
+    pub limit: i32,
+    pub offset: i32,
+}
+
+impl SqlRange {
+    /// Create `limit` and `offset` values used to query data from the database.
+    ///
+    /// # Panics
+    /// returns error when either `page` or `page_size` is less than zero.
+    pub fn from_page(page: i32, page_size: i32) -> Result<Self, HttpError> {
+        if !page.is_positive() || !page_size.is_positive() {
+            return Err(HttpError::InputValidationError);
+        }
+
+        Ok(Self {
+            limit: page_size,
+            offset: (page * page_size) - page_size,
+        })
     }
 }
 

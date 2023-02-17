@@ -19,6 +19,7 @@ actix-files = "0.6"
 actix-web = { version = "4" }
 anyhow = "1"
 argon2 = "0.4"
+comrak = "^0"
 deadpool-postgres = "0.10"
 derive_more = "0"
 dotenvy = "0"
