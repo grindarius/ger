@@ -131,6 +131,10 @@ async fn main() -> std::io::Result<()> {
                 web::post().to(crate::routes::students::signup::handler),
             )
             .route(
+                "/forum/posts",
+                web::get().to(crate::routes::forum::posts::get_post_list::handler),
+            )
+            .route(
                 "/forum/posts/trending",
                 web::get().to(crate::routes::forum::posts::get_trending_posts_list::handler),
             )
