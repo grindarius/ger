@@ -15,7 +15,7 @@ pub enum HttpError {
     Unauthorized,
     #[display(fmt = "invalid swagger api key")]
     InvalidSwaggerAPIKey,
-    #[display(fmt = "internal server error {}", cause)]
+    #[display(fmt = "{}", cause)]
     InternalServerError { cause: String },
     #[display(fmt = "user not found")]
     UserNotFound,
