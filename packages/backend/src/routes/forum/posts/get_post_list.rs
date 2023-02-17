@@ -37,12 +37,15 @@ pub struct GetPostListResponseBody {
 #[derive(FromRow, Serialize, ToSchema)]
 pub struct GetPostListResponseBodyInner {
     id: String,
+    user_id: String,
     username: String,
     name: String,
     view_count: i64,
     vote_count: i64,
     #[serde(with = "time::serde::rfc3339")]
     created_timestamp: time::OffsetDateTime,
+    category_id: String,
+    category_representative_id: String,
 }
 
 #[utoipa::path(
@@ -78,8 +81,11 @@ pub async fn handler(
             r##"
             select
                 forum_posts.forum_post_id as id,
+                forum_posts.user_id as user_id,
                 users.user_username as username,
                 forum_posts.forum_post_name as name,
+                forum_posts.forum_category_id as category_id,
+                forum_categories.forum_category_representative_id as category_representative_id,
                 count(distinct forum_post_views.user_id) as view_count,
                 sum(forum_post_votes.forum_post_vote_increment) as vote_count,
                 forum_posts.forum_post_created_timestamp as created_timestamp
@@ -87,6 +93,7 @@ pub async fn handler(
             inner join users on forum_posts.user_id = users.user_id
             inner join forum_post_views on forum_posts.forum_post_id = forum_post_views.forum_post_id
             inner join forum_post_votes on forum_posts.forum_post_id = forum_post_votes.forum_post_id
+            inner join forum_categories on forum_posts.forum_category_id = forum_categories.forum_category_id
             where
                 forum_posts.forum_post_is_global_announcement = $1 and
                 forum_posts.forum_post_is_category_based_announcement = $2
