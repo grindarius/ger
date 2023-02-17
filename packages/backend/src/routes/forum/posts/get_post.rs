@@ -16,12 +16,14 @@ pub struct GetPostRequestParams {
 #[derive(Serialize, ToSchema, FromRow)]
 pub struct GetPostResponseBody {
     id: String,
+    user_id: String,
+    username: String,
     name: String,
     /// HTML parsed content using `comrak`.
     content: String,
-    username: String,
     #[serde(with = "time::serde::rfc3339")]
     created_timestamp: time::OffsetDateTime,
+    category_id: String,
     category_representative_id: String,
     view_count: i64,
     vote_count: i64,
@@ -31,10 +33,12 @@ impl Default for GetPostResponseBody {
     fn default() -> Self {
         Self {
             id: "xlKFXqgUNkeGUnVNZvqrrFD0TtVm3-EU".to_string(),
-            name: "How to surf the web".to_string(),
+            user_id: "4QMPeOBJnjdcl6tMPllRtWHZoisfj9nU".to_string(),
             username: "grindarius".to_string(),
-            content: "go on gooogle.com".to_string(),
+            name: "How to surf the web".to_string(),
+            content: "<p>go on gooogle.com</p>".to_string(),
             created_timestamp: time::OffsetDateTime::from_unix_timestamp(1_546_600_000).unwrap(),
+            category_id: "EmYYiZHI_P2ZdyH34p_S3t5Lwq8eENJX".to_string(),
             category_representative_id: "homework".to_string(),
             view_count: 15,
             vote_count: 30,
@@ -93,11 +97,13 @@ pub async fn handler(
             r##"
             select
                 forum_posts.forum_post_id as id,
+                forum_posts.user_id as user_id,
+                users.user_username as username,
                 forum_posts.forum_post_name as name,
                 forum_posts.forum_post_content as content,
-                forum_categories.forum_category_representative_id as category_representative_id,
-                users.user_username as username,
                 forum_posts.forum_post_created_timestamp as created_timestamp,
+                forum_posts.forum_category_id as category_id,
+                forum_categories.forum_category_representative_id as category_representative_id,
                 count(distinct forum_post_views.user_id) as view_count,
                 sum(forum_post_votes.forum_post_vote_increment) as vote_count
             from forum_posts
@@ -123,8 +129,10 @@ pub async fn handler(
 
         let post = GetPostResponseBody {
             id: r.try_get::<&str, String>("id")?,
+            user_id: r.try_get::<&str, String>("user_id")?,
             username: r.try_get::<&str, String>("username")?,
             name: r.try_get::<&str, String>("name")?,
+            category_id: r.try_get::<&str, String>("category_id")?,
             category_representative_id: r.try_get::<&str, String>("category_representative_id")?,
             content: parsed_content,
             created_timestamp: r.try_get::<&str, time::OffsetDateTime>("created_timestamp")?,
