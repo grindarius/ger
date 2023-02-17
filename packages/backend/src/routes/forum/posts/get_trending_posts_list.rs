@@ -1,17 +1,12 @@
 use actix_web::{web, HttpResponse};
-use comrak::markdown_to_html;
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
-    constants::{
-        swagger::AuthenticationHeaders, SqlRange, COMRAK_OPTIONS, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
-        DEFAULT_TRENDING_WINDOW,
-    },
+    constants::{SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_TRENDING_WINDOW},
     errors::HttpError,
-    extractors::users::AuthenticatedUserClaims,
     shared_app_data::SharedAppData,
 };
 
@@ -110,6 +105,9 @@ pub async fn handler(
             inner join forum_post_votes on forum_posts.forum_post_id = forum_post_votes.forum_post_id
             where 
                 forum_posts.forum_post_created_timestamp >= now() - interval '$1 hours'
+            group by 
+                forum_posts.forum_post_id,
+                users.user_username
             order by
                 vote_count,
                 view_count
