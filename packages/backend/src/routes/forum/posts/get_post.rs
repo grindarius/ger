@@ -1,10 +1,11 @@
 use actix_web::{web, HttpResponse};
+use comrak::markdown_to_html;
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
-use crate::{errors::HttpError, shared_app_data::SharedAppData};
+use crate::{constants::COMRAK_OPTIONS, errors::HttpError, shared_app_data::SharedAppData};
 
 #[derive(Deserialize, ToSchema, IntoParams)]
 #[into_params(parameter_in = Path)]
@@ -16,6 +17,7 @@ pub struct GetPostRequestParams {
 pub struct GetPostResponseBody {
     id: String,
     name: String,
+    /// HTML parsed content using `comrak`.
     content: String,
     username: String,
     #[serde(with = "time::serde::rfc3339")]
@@ -93,14 +95,14 @@ pub async fn handler(
                 forum_posts.forum_post_content as content,
                 users.user_username as username,
                 forum_posts.forum_post_created_timestamp as created_timestamp,
-                count(forum_post_views.user_id) as view_count,
+                count(distinct forum_post_views.user_id) as view_count,
                 sum(forum_post_votes.forum_post_vote_increment) as vote_count
             from forum_posts
             inner join users on forum_posts.user_id = users.user_id
             inner join forum_post_views on forum_posts.forum_post_id = forum_post_views.forum_post_id
             inner join forum_post_votes on forum_posts.forum_post_id = forum_post_votes.forum_post_id
             where
-                and forum_posts.forum_post_id = $1
+                forum_posts.forum_post_id = $1
             group by
                 forum_posts.forum_post_id,
                 users.user_username
@@ -112,7 +114,19 @@ pub async fn handler(
     let row = client.query_opt(&statement, &[&params.post_id]).await?;
 
     if let Some(r) = row {
-        let post = GetPostResponseBody::try_from(r)?;
+        let raw_content = r.try_get::<&str, String>("content")?;
+        let parsed_content = markdown_to_html(&raw_content.as_str(), &COMRAK_OPTIONS);
+
+        let post = GetPostResponseBody {
+            id: r.try_get::<&str, String>("id")?,
+            username: r.try_get::<&str, String>("username")?,
+            name: r.try_get::<&str, String>("name")?,
+            content: parsed_content,
+            created_timestamp: r.try_get::<&str, time::OffsetDateTime>("created_timestamp")?,
+            view_count: r.try_get::<&str, i64>("view_count")?,
+            vote_count: r.try_get::<&str, i64>("vote_count")?,
+        };
+
         return Ok(HttpResponse::Ok().json(post));
     }
 
