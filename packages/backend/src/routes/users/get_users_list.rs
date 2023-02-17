@@ -6,12 +6,12 @@ use crate::{errors::HttpError, shared_app_data::SharedAppData};
 
 #[derive(Deserialize, IntoParams, ToSchema)]
 #[into_params(parameter_in = Query)]
-pub struct GetUsersListQueries {
+pub struct GetUsersListRequestQueries {
+    #[param(minimum = 1, default = json!(crate::constants::DEFAULT_PAGE))]
     #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
-    #[param(minimum = 0, default = json!(1))]
     pub page: Option<i32>,
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
     #[param(minimum = 1, default = json!(crate::constants::DEFAULT_PAGE_SIZE))]
+    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
     pub page_size: Option<i32>,
 }
 
@@ -20,10 +20,10 @@ pub struct GetUsersListQueries {
     path = "/users",
     tag = "users",
     operation_id = "get_users_list",
-    params(GetUsersListQueries)
+    params(GetUsersListRequestQueries)
 )]
 pub async fn handler(
-    queries: web::Query<GetUsersListQueries>,
+    queries: web::Query<GetUsersListRequestQueries>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
     Ok(HttpResponse::Ok().finish())

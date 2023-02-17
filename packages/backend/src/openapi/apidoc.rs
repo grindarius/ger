@@ -9,9 +9,11 @@ use crate::openapi::security_addon::SecurityAddon;
         crate::routes::admin::signup::handler,
         crate::routes::students::signup::handler,
         crate::routes::forum::posts::get_trending_posts_list::handler,
+        crate::routes::forum::posts::get_post::handler,
         crate::routes::users::get_user_profile_image::handler,
         crate::routes::users::get_users_list::handler,
-        crate::routes::forum::posts::get_post::handler
+        crate::routes::forum::posts::get_trending_posts_list::handler,
+        crate::routes::forum::posts::get_post_list::handler
     ),
     components(
         schemas(
@@ -22,10 +24,19 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::students::signup::StudentSignupRequestBody,
             crate::routes::students::signup::StudentSignupRequestBodyInner,
             crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListRequestQueries,
-            crate::routes::users::get_users_list::GetUsersListQueries,
+            crate::routes::users::get_users_list::GetUsersListRequestQueries,
             crate::routes::admin::signup::AdminSignupRequestBody,
             crate::routes::forum::posts::get_post::GetPostRequestParams,
-            crate::routes::forum::posts::get_post::GetPostResponseBody
+            crate::routes::forum::posts::get_post::GetPostResponseBody,
+            crate::routes::forum::posts::get_post_list::GetPostListRequestQueries,
+            crate::routes::forum::posts::get_post_list::GetPostListResponseBody,
+            crate::routes::forum::posts::get_post_list::GetPostListResponseBodyInner,
+            crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListRequestQueries,
+            crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListResponseBody,
+            crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListResponseBodyInner,
+            crate::routes::forum::posts::get_post_list::GetPostListRequestQueries,
+            crate::routes::forum::posts::get_post_list::GetPostListResponseBody,
+            crate::routes::forum::posts::get_post_list::GetPostListResponseBodyInner,
         )
     ),
     modifiers(&SecurityAddon),
