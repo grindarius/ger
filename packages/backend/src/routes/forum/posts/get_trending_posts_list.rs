@@ -56,7 +56,7 @@ pub struct GetTrendingPostsListResponseBodyInner {
             status = 200,
             description = "successfully get trending list of forums",
             body = GetTrendingPostsListResponseBody,
-            example = json!(GetTrendingPostsListResponseBody { posts: vec![] })
+            example = json!({ "posts": [] })
         ),
         (
             status = 400,
