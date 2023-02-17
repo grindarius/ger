@@ -22,6 +22,7 @@ pub struct GetPostResponseBody {
     username: String,
     #[serde(with = "time::serde::rfc3339")]
     created_timestamp: time::OffsetDateTime,
+    category_representative_id: String,
     view_count: i64,
     vote_count: i64,
 }
@@ -34,6 +35,7 @@ impl Default for GetPostResponseBody {
             username: "grindarius".to_string(),
             content: "go on gooogle.com".to_string(),
             created_timestamp: time::OffsetDateTime::from_unix_timestamp(1_546_600_000).unwrap(),
+            category_representative_id: "homework".to_string(),
             view_count: 15,
             vote_count: 30,
         }
@@ -93,6 +95,7 @@ pub async fn handler(
                 forum_posts.forum_post_id as id,
                 forum_posts.forum_post_name as name,
                 forum_posts.forum_post_content as content,
+                forum_categories.forum_category_representative_id as category_representative_id,
                 users.user_username as username,
                 forum_posts.forum_post_created_timestamp as created_timestamp,
                 count(distinct forum_post_views.user_id) as view_count,
@@ -101,6 +104,7 @@ pub async fn handler(
             inner join users on forum_posts.user_id = users.user_id
             inner join forum_post_views on forum_posts.forum_post_id = forum_post_views.forum_post_id
             inner join forum_post_votes on forum_posts.forum_post_id = forum_post_votes.forum_post_id
+            inner join forum_categories on forum_posts.forum_category_id = forum_categories.forum_category_id
             where
                 forum_posts.forum_post_id = $1
             group by
@@ -121,6 +125,7 @@ pub async fn handler(
             id: r.try_get::<&str, String>("id")?,
             username: r.try_get::<&str, String>("username")?,
             name: r.try_get::<&str, String>("name")?,
+            category_representative_id: r.try_get::<&str, String>("category_representative_id")?,
             content: parsed_content,
             created_timestamp: r.try_get::<&str, time::OffsetDateTime>("created_timestamp")?,
             view_count: r.try_get::<&str, i64>("view_count")?,
