@@ -115,7 +115,8 @@ pub async fn handler(
                 forum_posts.forum_post_id = $1
             group by
                 forum_posts.forum_post_id,
-                users.user_username
+                users.user_username,
+                forum_categories.forum_category_representative_id
             "##,
             &[Type::TEXT],
         )

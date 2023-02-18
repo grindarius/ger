@@ -40,12 +40,12 @@ pub struct GetPostListResponseBodyInner {
     user_id: String,
     username: String,
     name: String,
-    view_count: i64,
-    vote_count: i64,
     #[serde(with = "time::serde::rfc3339")]
     created_timestamp: time::OffsetDateTime,
     category_id: String,
     category_representative_id: String,
+    view_count: i64,
+    vote_count: i64,
 }
 
 #[utoipa::path(
@@ -99,7 +99,8 @@ pub async fn handler(
                 forum_posts.forum_post_is_category_based_announcement = $2
             group by
                 forum_posts.forum_post_id,
-                users.user_username
+                users.user_username,
+                forum_categories.forum_category_representative_id
             order by forum_posts.forum_post_created_timestamp desc
             limit $3
             offset $4
@@ -115,19 +116,10 @@ pub async fn handler(
         )
         .await?;
 
-    let posts = match posts
+    let posts = posts
         .iter()
         .map(|p| GetPostListResponseBodyInner::try_from(p))
-        .collect::<Result<Vec<_>, _>>()
-    {
-        Ok(p) => p,
-        Err(e) => {
-            tracing::error!("{}", e.to_string());
-            return Err(HttpError::InternalServerError {
-                cause: e.to_string(),
-            });
-        }
-    };
+        .collect::<Result<Vec<_>, _>>()?;
 
     return Ok(HttpResponse::Ok().json(GetPostListResponseBody { posts }));
 }
