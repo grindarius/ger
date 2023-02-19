@@ -1,0 +1,10 @@
+{
+  "name": "@ger/scripts",
+  "description": "scripts for manipulating things",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "move-files": "node move-bindings.mjs"
+  }
+}

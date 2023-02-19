@@ -3,6 +3,9 @@
   "description": "reg spelled backwards",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "move": "cd packages/scripts && pnpm move-files"
+  },
   "devDependencies": {
     "@tsconfig/node-lts-strictest": "18.12.1",
     "@types/node": "18.11.18",
