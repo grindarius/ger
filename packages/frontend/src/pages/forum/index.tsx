@@ -27,7 +27,7 @@ export default function Forum (): JSX.Element {
             <tbody>
               <tr>
                 <td>
-                  <Link className="font-bold link link-hover" href="/forum/announcements/123456">How to dive the web.</Link>
+                  <Link className="font-bold link link-hover" href="/forum/posts/123456">How to dive the web.</Link>
                   <div className="flex flex-row">
                     <Link className="text-sm opacity-75 link link-hover" href="/forum/users/grindarius">
                       grindarius

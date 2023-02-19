@@ -2,9 +2,9 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import React from 'react'
 
-export default function Annoucement (): JSX.Element {
+export default function Post (): JSX.Element {
   const router = useRouter()
-  const { announcementId } = router.query
+  const { postId } = router.query
 
   return (
     <>
@@ -15,7 +15,7 @@ export default function Annoucement (): JSX.Element {
       </Head>
       <main className="container mx-auto">
         <h1 className="text-4xl text-current font-bold">How to surf the web.</h1>
-        hi this is our first blog post {announcementId}
+        hi this is our first blog post {postId}
       </main>
     </>
   )
