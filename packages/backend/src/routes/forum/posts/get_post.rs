@@ -3,6 +3,7 @@ use comrak::markdown_to_html;
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{constants::COMRAK_OPTIONS, errors::HttpError, shared_app_data::SharedAppData};
@@ -13,7 +14,8 @@ pub struct GetPostRequestParams {
     pub post_id: String,
 }
 
-#[derive(Serialize, ToSchema, FromRow)]
+#[derive(Serialize, ToSchema, FromRow, TS)]
+#[ts(export)]
 pub struct GetPostResponseBody {
     id: String,
     user_id: String,
@@ -22,6 +24,7 @@ pub struct GetPostResponseBody {
     /// HTML parsed content using `comrak`.
     content: String,
     #[serde(with = "time::serde::rfc3339")]
+    #[ts(type = "string")]
     created_timestamp: time::OffsetDateTime,
     category_id: String,
     category_representative_id: String,

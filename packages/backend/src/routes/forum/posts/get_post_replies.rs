@@ -2,6 +2,7 @@ use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
@@ -39,12 +40,14 @@ pub struct GetPostRepliesRequestParams {
     post_id: String,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, TS)]
+#[ts(export)]
 pub struct GetPostRepliesResponseBody {
     replies: Vec<GetPostRepliesResponseBodyInner>,
 }
 
-#[derive(FromRow, Serialize, ToSchema)]
+#[derive(FromRow, Serialize, ToSchema, TS)]
+#[ts(export)]
 pub struct GetPostRepliesResponseBodyInner {
     id: String,
     user_id: String,
@@ -52,10 +55,12 @@ pub struct GetPostRepliesResponseBodyInner {
     /// Parsed `markdown` content
     content: String,
     #[serde(with = "time::serde::rfc3339")]
+    #[ts(type = "string")]
     created_timestamp: time::OffsetDateTime,
     vote_count: i64,
 }
 
+/// Get replies list of a given `post_id`
 #[utoipa::path(
     get,
     path = "/forum/posts/{post_id}/replies",

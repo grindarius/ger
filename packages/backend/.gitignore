@@ -1,1 +1,5 @@
+# jwt access and refresh tokens
 jsonwebtoken
+
+# TypeScript bindings.
+bindings

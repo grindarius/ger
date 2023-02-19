@@ -2,6 +2,7 @@ use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
@@ -29,18 +30,21 @@ pub struct GetPostListRequestQueries {
     pub page_size: Option<i32>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, TS)]
+#[ts(export)]
 pub struct GetPostListResponseBody {
     posts: Vec<GetPostListResponseBodyInner>,
 }
 
-#[derive(FromRow, Serialize, ToSchema)]
+#[derive(FromRow, Serialize, ToSchema, TS)]
+#[ts(export)]
 pub struct GetPostListResponseBodyInner {
     id: String,
     user_id: String,
     username: String,
     name: String,
     #[serde(with = "time::serde::rfc3339")]
+    #[ts(type = "string")]
     created_timestamp: time::OffsetDateTime,
     category_id: String,
     category_representative_id: String,
