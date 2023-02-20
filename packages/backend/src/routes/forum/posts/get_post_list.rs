@@ -11,22 +11,27 @@ use crate::{
     shared_app_data::SharedAppData,
 };
 
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, ToSchema, IntoParams, TS)]
 #[into_params(parameter_in = Query)]
+#[ts(export)]
 pub struct GetPostListRequestQueries {
     /// get list of global announcements
     #[param(default = json!(false))]
+    #[ts(optional)]
     pub announcement: Option<bool>,
     /// get list of category based announcements
     #[param(default = json!(false))]
+    #[ts(optional)]
     pub category_based_announcement: Option<bool>,
     /// page of the queried data
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
     #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[ts(optional)]
     pub page: Option<i32>,
     /// size of page for each query
     #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
     #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[ts(optional)]
     pub page_size: Option<i32>,
 }
 
@@ -48,7 +53,9 @@ pub struct GetPostListResponseBodyInner {
     created_timestamp: time::OffsetDateTime,
     category_id: String,
     category_representative_id: String,
+    #[ts(type = "number")]
     view_count: i64,
+    #[ts(type = "number")]
     vote_count: i64,
 }
 
