@@ -1,7 +1,45 @@
+import dayjs from 'dayjs'
+import got from 'got'
+import type { GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
 
-export default function Forum (): JSX.Element {
+import type { GetPostListRequestQueries } from '@/types/GetPostListRequestQueries'
+import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
+
+export async function getServerSideProps (): Promise<GetServerSidePropsResult<{ announcements: GetPostListResponseBody }>> {
+  const queries: GetPostListRequestQueries = {
+    announcement: true,
+    category_based_announcement: false,
+    page: 1
+  }
+
+  try {
+    const searchParams = new URLSearchParams(queries as Record<string, string>)
+
+    const response = await got.get('http://127.0.0.1:5155/forum/posts', {
+      searchParams
+    }).json<GetPostListResponseBody>()
+
+    return {
+      props: {
+        announcements: response
+      }
+    }
+  } catch (e) {
+    const response: GetPostListResponseBody = {
+      posts: []
+    }
+
+    return {
+      props: {
+        announcements: response
+      }
+    }
+  }
+}
+
+function Forum ({ announcements }: { announcements: GetPostListResponseBody }): JSX.Element {
   return (
     <>
       <Head>
@@ -18,43 +56,34 @@ export default function Forum (): JSX.Element {
             <thead>
               <tr>
                 <td>Topic</td>
-                <td>Viewers</td>
                 <td>Replies</td>
                 <td>Views</td>
                 <td>Activity</td>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <Link className="font-bold link link-hover" href="/forum/posts/123456">How to dive the web.</Link>
-                  <div className="flex flex-row">
-                    <Link className="text-sm opacity-75 link link-hover" href="/forum/users/grindarius">
-                      grindarius
-                    </Link>
-                    &nbsp;•&nbsp;
-                    <div className="text-sm opacity-50">
-                      February 6, 2022 19:12
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div className="flex flex-row">
-                    <Link className="w-8 h-8 rounded-full ring-white ring-2 overflow-hidden" href="/forum/users/grindarius" passHref>
-                      <img className="w-8 h-8" src="https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png" alt="what" />
-                    </Link>
-                    <Link className="w-8 h-8 rounded-full ring-white ring-2 overflow-hidden" href="/forum/users/grindarius" passHref>
-                      <img className="w-8 h-8" src="https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png" alt="what" />
-                    </Link>
-                    <Link className="w-8 h-8 rounded-full ring-white ring-2 overflow-hidden" href="/forum/users/grindarius" passHref>
-                      <img className="w-8 h-8" src="https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png" alt="what" />
-                    </Link>
-                  </div>
-                </td>
-                <td>10</td>
-                <td>10</td>
-                <td>1h</td>
-              </tr>
+              {
+                announcements.posts.map(a => {
+                  return (
+                    <tr key={a.id}>
+                      <td>
+                        <Link className="font-bold link link-hover" href={{ pathname: '/forum/posts/[postId]', query: { postId: a.id } }}>{a.name}</Link>
+                        <div className="flex flex-row">
+                          <Link className="text-sm opacity-75 link link-hover" href={{ pathname: '/forum/users/[username]', query: { username: a.username } }}>
+                            {a.username}
+                          </Link>
+                          <p className="text-sm opacity-75">
+                             &nbsp;•&nbsp;{dayjs(a.created_timestamp).format('MMMM D, YYYY HH:mm')}
+                          </p>
+                        </div>
+                      </td>
+                      <td>10</td>
+                      <td>{a.view_count}</td>
+                      <td>1h</td>
+                    </tr>
+                  )
+                })
+              }
             </tbody>
           </table>
         </div>
@@ -75,3 +104,5 @@ export default function Forum (): JSX.Element {
     </>
   )
 }
+
+export default Forum
