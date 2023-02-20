@@ -39,9 +39,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         // cors config
-        let cors = actix_cors::Cors::default()
-            .allowed_origin("http://127.0.0.1")
-            .supports_credentials();
+        let cors = actix_cors::Cors::permissive();
 
         // deserializer errors config
         let json_deserialize_config =
