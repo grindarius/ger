@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import ky from 'ky-universal'
 import type { GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -7,69 +8,46 @@ import { useState } from 'react'
 import type { GetPostListRequestQueries } from '@/types/GetPostListRequestQueries'
 import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
 
-export async function getServerSideProps (): Promise<GetServerSidePropsResult<{ announcements: GetPostListResponseBody }>> {
+const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody> => {
   const queries: GetPostListRequestQueries = {
     announcement: true,
     category_based_announcement: false,
-    page: 1
+    page
   }
 
+  const searchParams = new URLSearchParams(queries as Record<string, string>)
+
+  const response = await ky.get('http://127.0.0.1:5155/forum/posts', {
+    searchParams
+  }).json<GetPostListResponseBody>()
+
+  return response
+}
+
+export async function getServerSideProps (): Promise<GetServerSidePropsResult<{ response: GetPostListResponseBody }>> {
   try {
-    const url = new URL('http://127.0.0.1:5155/forum/posts')
-    const searchParams = new URLSearchParams(queries as Record<string, string>)
-    url.search = searchParams.toString()
-
-    const response = await fetch(url)
-    const announcements: GetPostListResponseBody = await response.json()
-
+    const response = await fetchAnnouncements(1)
     return {
       props: {
-        announcements
+        response
       }
     }
   } catch (e) {
-    const response: GetPostListResponseBody = {
-      posts: []
-    }
-
     return {
       props: {
-        announcements: response
+        response: {
+          posts: []
+        }
       }
     }
   }
 }
 
-function Forum ({ announcements }: { announcements: GetPostListResponseBody }): JSX.Element {
+function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Element {
   const [page, setPage] = useState(1)
-  const [pageAnnouncements, setPageAnnouncements] = useState(announcements)
+  const [announcements, setAnnouncements] = useState(response)
 
-  const fetchAnnouncements = async (nextPage: number): Promise<void> => {
-    const queries: GetPostListRequestQueries = {
-      announcement: true,
-      category_based_announcement: false,
-      page: nextPage
-    }
-
-    try {
-      const url = new URL('http://127.0.0.1:5155/forum/posts')
-      const searchParams = new URLSearchParams(queries as Record<string, string>)
-      url.search = searchParams.toString()
-
-      const response = await fetch(url)
-      const announcements: GetPostListResponseBody = await response.json()
-
-      setPageAnnouncements(announcements)
-    } catch (e) {
-      const response: GetPostListResponseBody = {
-        posts: []
-      }
-
-      setPageAnnouncements(response)
-    }
-  }
-
-  async function goToPreviousPage (): Promise<void> {
+  function goToPreviousPage (): void {
     const nextPage = page - 1
 
     if (nextPage <= 0) {
@@ -77,13 +55,27 @@ function Forum ({ announcements }: { announcements: GetPostListResponseBody }): 
     }
 
     setPage(nextPage)
-    await fetchAnnouncements(nextPage)
+    fetchAnnouncements(nextPage)
+      .then(response => {
+        setAnnouncements(response)
+      })
+      .catch(e => {
+        console.error(e)
+        setAnnouncements({ posts: [] })
+      })
   }
 
-  async function goToNextPage (): Promise<void> {
+  function goToNextPage (): void {
     const nextPage = page + 1
     setPage(nextPage)
-    await fetchAnnouncements(nextPage)
+    fetchAnnouncements(nextPage)
+      .then(response => {
+        setAnnouncements(response)
+      })
+      .catch(e => {
+        console.error(e)
+        setAnnouncements({ posts: [] })
+      })
   }
 
   return (
@@ -114,7 +106,7 @@ function Forum ({ announcements }: { announcements: GetPostListResponseBody }): 
             </thead>
             <tbody>
               {
-                pageAnnouncements.posts.map(a => {
+                announcements.posts.map(a => {
                   return (
                     <tr key={a.id}>
                       <td>
