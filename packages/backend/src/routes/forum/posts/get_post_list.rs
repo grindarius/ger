@@ -57,6 +57,7 @@ pub struct GetPostListResponseBodyInner {
     view_count: i64,
     #[ts(type = "number")]
     vote_count: i64,
+    #[ts(type = "number")]
     reply_count: i64,
     #[serde(with = "time::serde::rfc3339")]
     #[ts(type = "string")]
