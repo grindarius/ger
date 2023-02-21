@@ -105,7 +105,7 @@ pub async fn handler(
                 sum(forum_post_votes.forum_post_vote_increment) as vote_count,
                 forum_posts.forum_post_created_timestamp as created_timestamp,
                 forum_posts.forum_post_last_active_timestamp as last_active_timestamp,
-                count(distinct forum_posts_replies.forum_post_reply_id) as reply_count
+                count(distinct forum_post_replies.forum_post_reply_id) as reply_count
             from forum_posts
             inner join users on forum_posts.user_id = users.user_id
             inner join forum_post_views on forum_posts.forum_post_id = forum_post_views.forum_post_id
