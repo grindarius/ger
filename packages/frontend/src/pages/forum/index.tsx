@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import ky from 'ky-universal'
 import type { GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
@@ -46,6 +47,8 @@ export async function getServerSideProps (): Promise<GetServerSidePropsResult<{ 
 function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Element {
   const [page, setPage] = useState(1)
   const [announcements, setAnnouncements] = useState(response)
+
+  dayjs.extend(relativeTime)
 
   function goToPreviousPage (): void {
     const nextPage = page - 1
@@ -120,9 +123,9 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
                           </p>
                         </div>
                       </td>
-                      <td>10</td>
+                      <td>{a.reply_count}</td>
                       <td>{a.view_count}</td>
-                      <td>1h</td>
+                      <td>{dayjs(a.last_active_timestamp).fromNow()}</td>
                     </tr>
                   )
                 })
