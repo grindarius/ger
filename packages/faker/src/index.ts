@@ -81,7 +81,7 @@ const forumCategories = generateForumCategories(users)
 const forumPosts = generateForumPosts(users, forumCategories)
 const forumViews = generateForumPostViews(users, forumPosts)
 const forumVotes = generateForumPostVotes(forumPosts, forumViews)
-const forumPostReplies = generateForumPostReplies(users, forumPosts)
+const [adjustedLastActiveTimestampPosts, forumPostReplies] = generateForumPostReplies(users, forumPosts)
 const forumPostReplyVotes = generateForumPostReplyVotes(users, forumPostReplies)
 
 await Promise.all([
@@ -93,7 +93,7 @@ await Promise.all([
   saveToFile(professors.map(p => p[1]), 'professors.json'),
   saveToFile(students.map(s => s[1]), 'students.json'),
   saveToFile(forumCategories, 'forum-categories.json'),
-  saveToFile(forumPosts, 'forum-posts.json'),
+  saveToFile(adjustedLastActiveTimestampPosts, 'forum-posts.json'),
   saveToFile(forumViews, 'forum-post-views.json'),
   saveToFile(forumVotes, 'forum-post-votes.json'),
   saveToFile(forumPostReplies, 'forum-post-replies.json'),
@@ -111,7 +111,7 @@ await insert(professors.map(p => p[1]), 'professors', pool)
 await insert(students.map(s => s[1]), 'students', pool)
 
 await insert(forumCategories, 'forum_categories', pool)
-await insert(forumPosts, 'forum_posts', pool)
+await insert(adjustedLastActiveTimestampPosts, 'forum_posts', pool)
 await insert(forumViews, 'forum_post_views', pool)
 await insert(forumVotes, 'forum_post_votes', pool)
 await insert(forumPostReplies, 'forum_post_replies', pool)

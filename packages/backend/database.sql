@@ -383,6 +383,11 @@ create table forum_posts (
     forum_post_content text not null,
     forum_post_is_active boolean not null default true,
     forum_post_created_timestamp timestamptz not null default now(),
+    -- gets updated when user
+    --
+    -- have edited the post
+    -- new reply
+    -- user have un-deactivate (goes from deactivated to activated) the post.
     forum_post_last_active_timestamp timestamptz not null default now(),
     -- when forum_post_is_active gets switch to false, deactivated timestamp gets updated
     forum_post_deactivated_timestamp timestamptz,

@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "move": "cd packages/scripts && pnpm move-files"
+    "move": "cd packages/scripts && pnpm move-files",
+    "gen": "cd packages/faker && pnpm gen"
   },
   "devDependencies": {
     "@tsconfig/node-lts-strictest": "18.12.1",
