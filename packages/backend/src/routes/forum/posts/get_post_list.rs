@@ -57,6 +57,10 @@ pub struct GetPostListResponseBodyInner {
     view_count: i64,
     #[ts(type = "number")]
     vote_count: i64,
+    reply_count: i64,
+    #[serde(with = "time::serde::rfc3339")]
+    #[ts(type = "string")]
+    last_active_timestamp: time::OffsetDateTime,
 }
 
 #[utoipa::path(
@@ -99,12 +103,15 @@ pub async fn handler(
                 forum_categories.forum_category_representative_id as category_representative_id,
                 count(distinct forum_post_views.user_id) as view_count,
                 sum(forum_post_votes.forum_post_vote_increment) as vote_count,
-                forum_posts.forum_post_created_timestamp as created_timestamp
+                forum_posts.forum_post_created_timestamp as created_timestamp,
+                forum_posts.forum_post_last_active_timestamp as last_active_timestamp,
+                count(distinct forum_post_replies.forum_post_reply_id) as reply_count
             from forum_posts
             inner join users on forum_posts.user_id = users.user_id
             inner join forum_post_views on forum_posts.forum_post_id = forum_post_views.forum_post_id
             inner join forum_post_votes on forum_posts.forum_post_id = forum_post_votes.forum_post_id
             inner join forum_categories on forum_posts.forum_category_id = forum_categories.forum_category_id
+            inner join forum_post_replies on forum_posts.forum_post_id = forum_post_replies.forum_post_id
             where
                 forum_posts.forum_post_is_global_announcement = $1 and
                 forum_posts.forum_post_is_category_based_announcement = $2
