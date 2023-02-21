@@ -15,6 +15,7 @@ use crate::openapi::security_addon::SecurityAddon;
         crate::routes::forum::posts::get_trending_posts_list::handler,
         crate::routes::forum::posts::get_post_list::handler,
         crate::routes::forum::posts::get_post_replies::handler,
+        crate::routes::forum::categories::get_categories_list::handler
     ),
     components(
         schemas(
@@ -41,7 +42,10 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::forum::posts::get_post_replies::GetPostRepliesRequestParams,
             crate::routes::forum::posts::get_post_replies::GetPostRepliesRequestQueries,
             crate::routes::forum::posts::get_post_replies::GetPostRepliesResponseBody,
-            crate::routes::forum::posts::get_post_replies::GetPostRepliesResponseBodyInner
+            crate::routes::forum::posts::get_post_replies::GetPostRepliesResponseBodyInner,
+            crate::routes::forum::categories::get_categories_list::GetCategoriesListRequestQueries,
+            crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBody,
+            crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBodyInner
         )
     ),
     modifiers(&SecurityAddon),

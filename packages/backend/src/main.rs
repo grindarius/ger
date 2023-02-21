@@ -144,6 +144,10 @@ async fn main() -> std::io::Result<()> {
                 "/forum/posts/{post_id}/replies",
                 web::get().to(crate::routes::forum::posts::get_post_replies::handler),
             )
+            .route(
+                "/forum/categories",
+                web::get().to(crate::routes::forum::categories::get_categories_list::handler),
+            )
             .service(
                 SwaggerUi::new("/swagger-doc/{_:.*}").url("/openapi/openapi.json", openapi.clone()),
             )
