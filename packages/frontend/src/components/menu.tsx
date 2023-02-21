@@ -39,7 +39,7 @@ export default function Menu ({ children }: { children: ReactElement }): JSX.Ele
       </div>
       <div className="drawer">
         <input id="main-drawer" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
+        <div className="drawer-content" style={{ overflowY: 'visible' }}>
           { children }
         </div>
         <div className="drawer-side">
