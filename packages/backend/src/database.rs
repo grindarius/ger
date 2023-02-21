@@ -130,6 +130,7 @@ pub struct ForumPosts {
     pub forum_post_deactivated_timestamp: Option<time::OffsetDateTime>,
     pub forum_post_is_category_based_announcement: bool,
     pub forum_post_is_global_announcement: bool,
+    pub forum_post_latest_activity_timestamp: time::OffsetDateTime,
 }
 
 #[derive(ger_from_row::FromRow, serde::Serialize, serde::Deserialize)]

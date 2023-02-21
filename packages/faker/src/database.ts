@@ -95,6 +95,7 @@ export interface ForumPosts {
   forum_post_deactivated_timestamp: string | null
   forum_post_is_category_based_announcement: boolean
   forum_post_is_global_announcement: boolean
+  forum_post_latest_activity_timestamp: string
 }
 
 export interface GradingCriteriaGrades {

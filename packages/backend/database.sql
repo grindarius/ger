@@ -388,6 +388,8 @@ create table forum_posts (
     forum_post_deactivated_timestamp timestamptz,
     forum_post_is_category_based_announcement boolean not null default false,
     forum_post_is_global_announcement boolean not null default false,
+    -- gets updated either when user edit their post or there's a new comment.
+    forum_post_latest_activity_timestamp timestamptz not null default now(),
     primary key (forum_post_id)
 );
 
