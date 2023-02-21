@@ -13,3 +13,7 @@ packages/backend/cert/
 # nodejs packages
 node_modules/
 dist/
+
+# auto generated database schema files.
+packages/backend/src/database.rs
+packages/faker/src/database.ts
