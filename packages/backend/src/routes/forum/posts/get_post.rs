@@ -86,7 +86,6 @@ impl Default for GetPostResponseBody {
             body = FormattedErrorResponse,
             example = json!(HttpError::InternalServerError { cause: "internal".to_string() }.get_error_struct())
         )
-
     )
 )]
 pub async fn handler(

@@ -76,6 +76,24 @@ pub struct GetPostListResponseBodyInner {
             description = "successfully get list of posts",
             body = GetPostListResponseBody,
             example = json!({ "posts": [] })
+        ),
+        (
+            status = 400,
+            description = "input erorrs",
+            body = FormattedErrorResponse,
+            example = json!(HttpError::InputValidationError.get_error_struct())
+        ),
+        (
+            status = 401,
+            description = "unauthorized",
+            body = FormattedErrorResponse,
+            example = json!(HttpError::Unauthorized.get_error_struct())
+        ),
+        (
+            status = 500,
+            description = "bad errors",
+            body = FormattedErrorResponse,
+            example = json!(HttpError::InternalServerError { cause: "internal".to_string() }.get_error_struct())
         )
     )
 )]
