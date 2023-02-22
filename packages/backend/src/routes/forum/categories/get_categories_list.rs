@@ -2,7 +2,6 @@ use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
