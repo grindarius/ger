@@ -3,11 +3,13 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import ky from 'ky-universal'
 import type { GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
-import Link from 'next/link'
 import { useState } from 'react'
 
+import Row from '@/components/row'
 import type { GetPostListRequestQueries } from '@/types/GetPostListRequestQueries'
 import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
+
+const fetchCategories = async (page: number): Promise<Getcate>
 
 const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody> => {
   const queries: GetPostListRequestQueries = {
@@ -89,6 +91,7 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main className="container mx-auto">
+
         <h1 className="text-4xl text-current font-bold">Forum</h1>
         <div className="flex flex-row justify-between">
           <h3 className="text-2xl text-current">Global announcements</h3>
@@ -111,22 +114,16 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
               {
                 announcements.posts.map(a => {
                   return (
-                    <tr key={a.id}>
-                      <td>
-                        <Link className="font-bold link link-hover" href={{ pathname: '/forum/posts/[postId]', query: { postId: a.id } }}>{a.name}</Link>
-                        <div className="flex flex-row">
-                          <Link className="text-sm opacity-75 link link-hover" href={{ pathname: '/forum/users/[username]', query: { username: a.username } }}>
-                            {a.username}
-                          </Link>
-                          <p className="text-sm opacity-75">
-                             &nbsp;•&nbsp;{dayjs(a.created_timestamp).format('MMMM D, YYYY HH:mm')}
-                          </p>
-                        </div>
-                      </td>
-                      <td>{a.reply_count}</td>
-                      <td>{a.view_count}</td>
-                      <td>{dayjs(a.last_active_timestamp).fromNow()}</td>
-                    </tr>
+                    <Row
+                      key={a.id}
+                      id={a.id}
+                      name={a.name}
+                      username={a.username}
+                      createdTimestamp={a.created_timestamp}
+                      replyCount={a.reply_count}
+                      viewCount={a.view_count}
+                      lastActiveTimestamp={a.last_active_timestamp}
+                    />
                   )
                 })
               }
@@ -134,7 +131,7 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
           </table>
         </div>
 
-        <h3 className="text-2xl text-current font-bold">Trending</h3>
+        <h3 className="text-2xl text-current font-bold">Categories</h3>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <tbody>
