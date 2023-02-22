@@ -3,6 +3,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import ky from 'ky-universal'
 import type { GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import Row from '@/components/row'
@@ -71,19 +72,50 @@ interface ForumOptions {
 }
 
 function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.Element {
-  const [page, setPage] = useState(1)
+  const [announcementPage, setAnnouncementPage] = useState(1)
+  const [categoryPage, setCategoryPage] = useState(1)
   const [announcements, setAnnouncements] = useState(initialAnnouncements)
+  const [categories, setCategories] = useState(initialCategories)
 
   dayjs.extend(relativeTime)
 
-  function goToPreviousPage (): void {
-    const nextPage = page - 1
+  function goToPreviousCategoryPage (): void {
+    const nextPage = categoryPage - 1
 
     if (nextPage <= 0) {
       return
     }
 
-    setPage(nextPage)
+    setCategoryPage(nextPage)
+    fetchCategories(nextPage)
+      .then(response => {
+        setCategories(response)
+      }).catch(e => {
+        console.error(e)
+        setCategories({ categories: [] })
+      })
+  }
+
+  function goToNextCategoryPage (): void {
+    const nextPage = categoryPage + 1
+    setCategoryPage(nextPage)
+    fetchCategories(nextPage)
+      .then(response => {
+        setCategories(response)
+      }).catch(e => {
+        console.error(e)
+        setCategories({ categories: [] })
+      })
+  }
+
+  function goToPreviousGlobalAnnouncementPage (): void {
+    const nextPage = announcementPage - 1
+
+    if (nextPage <= 0) {
+      return
+    }
+
+    setAnnouncementPage(nextPage)
     fetchAnnouncements(nextPage)
       .then(response => {
         setAnnouncements(response)
@@ -94,9 +126,9 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
       })
   }
 
-  function goToNextPage (): void {
-    const nextPage = page + 1
-    setPage(nextPage)
+  function goToNextGlobalAnnouncementPage (): void {
+    const nextPage = announcementPage + 1
+    setAnnouncementPage(nextPage)
     fetchAnnouncements(nextPage)
       .then(response => {
         setAnnouncements(response)
@@ -115,13 +147,12 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main className="container mx-auto">
-
         <h1 className="text-4xl text-current font-bold">Forum</h1>
         <div className="flex flex-row justify-between">
           <h3 className="text-2xl text-current">Global announcements</h3>
           <div className="flex flex-row btn-group">
-            <button className="btn" onClick={goToPreviousPage}>Previous page</button>
-            <button className="btn" onClick={goToNextPage}>Next page</button>
+            <button className="btn" onClick={goToPreviousGlobalAnnouncementPage}>Previous page</button>
+            <button className="btn" onClick={goToNextGlobalAnnouncementPage}>Next page</button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -155,18 +186,56 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
           </table>
         </div>
 
-        <h3 className="text-2xl text-current font-bold">Categories</h3>
+        <div className="flex flex-row justify-between">
+          <h3 className="text-2xl text-current">Categories</h3>
+          <div className="flex flex-row btn-group">
+            <button className="btn" onClick={goToPreviousCategoryPage}>Previous page</button>
+            <button className="btn" onClick={goToNextCategoryPage}>Next page</button>
+          </div>
+        </div>
         <div className="overflow-x-auto">
-          {
-            initialCategories.categories.map(ic => {
-              return (
-                <div key={ic.id}>
-                  {ic.id}
-                </div>
-              )
-            })
-          }
           <table className="table w-full">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Posts count</th>
+                <th>Latest Post</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                categories.categories.map(c => {
+                  return (
+                    <tr key={c.id}>
+                      <td>
+                        <Link
+                          className="font-bold link link-hover"
+                          href={
+                            {
+                              pathname: '/forum/categories/[categoryRepresentativeId]',
+                              query: {
+                                categoryRepresentativeId: c.representative_id
+                              }
+                            }
+                          }>
+                          {c.name}
+                        </Link>
+                        <br />
+                        {'description goes here'}
+                      </td>
+                      <td>
+                        {c.post_count}
+                      </td>
+                      <td>
+                        {c.latest_post_id}
+                      </td>
+                    </tr>
+                  )
+                })
+              }
+            </tbody>
+          </table>
+          <table className='table w-full'>
             <tbody>
               <tr>
                 <td>Cy Ganderton</td>
