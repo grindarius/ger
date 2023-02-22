@@ -23,7 +23,7 @@ pub struct GetUsersListRequestQueries {
     params(GetUsersListRequestQueries)
 )]
 pub async fn handler(
-    queries: web::Query<GetUsersListRequestQueries>,
+    query: web::Query<GetUsersListRequestQueries>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
     Ok(HttpResponse::Ok().finish())
