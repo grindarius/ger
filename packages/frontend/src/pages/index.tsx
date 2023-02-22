@@ -10,8 +10,8 @@ export default function Home (): JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="hero min-h-screen bg-base-200">
-        <div className="hero-content text-center">
+      <main className="min-h-screen hero bg-base-200">
+        <div className="text-center hero-content">
           <div className="max-w-md">
             <h1 className="text-5xl font-bold">Hello there</h1>
             <p className="py-6">

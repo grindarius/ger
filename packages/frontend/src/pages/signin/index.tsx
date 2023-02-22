@@ -9,12 +9,12 @@ export default function Signin (): JSX.Element {
         <meta name="description" content="reg spelled backwards" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <main className="hero min-h-screen bg-base-200">
-        <div className="hero-content flex-col lg:flex-row-reverse">
+      <main className="min-h-screen hero bg-base-200">
+        <div className="flex-col lg:flex-row-reverse hero-content">
           <div className="text-center lg:text-left">
             <h1 className="text-5xl font-bold">Signin</h1>
           </div>
-          <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+          <div className="flex-shrink-0 w-full max-w-sm shadow-2xl card bg-base-100">
             <div className="card-body">
               <div className="form-control">
                 <label className="label">
@@ -31,7 +31,7 @@ export default function Signin (): JSX.Element {
                   <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
                 </label>
               </div>
-              <div className="form-control mt-6">
+              <div className="mt-6 form-control">
                 <button className="btn btn-primary">Login</button>
               </div>
             </div>
