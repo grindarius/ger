@@ -14,7 +14,7 @@ export default function Post (): JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main className="container mx-auto">
-        <h1 className="text-4xl text-current font-bold">How to surf the web.</h1>
+        <h1 className="text-4xl font-bold text-current">How to surf the web.</h1>
         hi this is our first blog post {postId}
       </main>
     </>

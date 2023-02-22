@@ -21,7 +21,7 @@ export default function Menu ({ children }: { children: ReactElement }): JSX.Ele
               </label>
             </div>
             <div className="flex-1">
-              <Link className="btn btn-ghost normal-case text-xl" href="/">ger</Link>
+              <Link className="text-xl normal-case btn btn-ghost" href="/">ger</Link>
             </div>
             <div className="flex-none">
               <button className="btn btn-square btn-ghost">
@@ -44,7 +44,7 @@ export default function Menu ({ children }: { children: ReactElement }): JSX.Ele
         </div>
         <div className="drawer-side">
           <label htmlFor="main-drawer" className="drawer-overlay"></label>
-          <ul className="menu p-4 w-80 bg-base-100 text-base-content">
+          <ul className="p-4 w-80 menu bg-base-100 text-base-content">
             <li>
               <Link href="/signin">Signin</Link>
             </li>

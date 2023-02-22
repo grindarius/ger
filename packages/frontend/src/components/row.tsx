@@ -32,7 +32,7 @@ export default function Row ({ name, username, postDate, users, views, replies, 
             users.map(user => {
               return (
                 <Link
-                  className="w-8 h-8 rounded-full ring-white ring-2 overflow-hidden"
+                  className="overflow-hidden w-8 h-8 rounded-full ring-2 ring-white"
                   key={user.userId}
                   href={{ pathname: '/forum/users/[username]', query: { username: user.username } }}
                   passHref
