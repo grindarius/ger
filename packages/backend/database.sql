@@ -366,6 +366,7 @@ create table forum_categories (
     forum_category_id text not null unique,
     forum_category_name text not null unique,
     forum_category_representative_id text not null unique,
+    forum_category_description text not null default '',
     user_id text not null,
     forum_category_color_theme text not null default '#000000',
     forum_category_created_timestamp timestamptz not null default now(),
