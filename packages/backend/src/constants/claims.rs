@@ -72,3 +72,15 @@ impl RefreshTokenClaims {
         })
     }
 }
+
+/// Get utc expires time from current time.
+pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
+    let current_time =
+        time::OffsetDateTime::now_utc() + time::Duration::minutes(valid_minutes as i64);
+
+    return usize::try_from(current_time.unix_timestamp()).map_err(|_| {
+        HttpError::InternalServerError {
+            cause: "cannot convert timestamp from type i64 to usize".to_string(),
+        }
+    });
+}
