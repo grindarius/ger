@@ -64,6 +64,7 @@ pub struct GetPostListResponseBodyInner {
     last_active_timestamp: time::OffsetDateTime,
 }
 
+/// Get a list of posts to be displayed in the forum's main page.
 #[utoipa::path(
     get,
     path = "/forum/posts",
@@ -79,7 +80,7 @@ pub struct GetPostListResponseBodyInner {
         ),
         (
             status = 400,
-            description = "input erorrs",
+            description = "input errors",
             body = FormattedErrorResponse,
             example = json!(HttpError::InputValidationError.get_error_struct())
         ),

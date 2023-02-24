@@ -76,7 +76,7 @@ pub struct GetPostRepliesResponseBodyInner {
         ),
         (
             status = 400,
-            description = "input erorrs",
+            description = "input errors",
             body = FormattedErrorResponse,
             example = json!(HttpError::InputValidationError.get_error_struct())
         ),
