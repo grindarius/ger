@@ -11,6 +11,14 @@ use crate::{
     shared_app_data::SharedAppData,
 };
 
+#[derive(Deserialize, ToSchema, TS)]
+#[serde(rename_all = "snake_case")]
+pub enum GetPostListRequestQueriesOrderBy {
+    LatestActivity,
+    Vote,
+    Time,
+}
+
 #[derive(Deserialize, ToSchema, IntoParams, TS)]
 #[into_params(parameter_in = Query)]
 #[ts(export)]
