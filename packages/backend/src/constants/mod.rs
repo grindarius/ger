@@ -1,16 +1,29 @@
-use std::{fmt::Display, str::FromStr};
-
 use argon2::{Algorithm as Argon2Algorithm, Argon2, Params, Version};
 use comrak::ComrakOptions;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
-use serde::{de, Deserialize, Deserializer};
 
-use crate::errors::HttpError;
-
+/// Any structs, parameters and functions that related to `jsonwebtoken`.
 pub mod claims;
+
+/// Any structs, parameters and functions that are related to extracting or manipulating requests.
+pub mod requests;
+
+/// Any structs, parameters and functions that are related to extracting or manipulating responses.
 pub mod responses;
-pub mod swagger;
+
+pub fn create_argon2_context<'key>(
+    pepper: &'key str,
+) -> Result<argon2::Argon2<'key>, argon2::Error> {
+    let context: Argon2 = Argon2::new_with_secret(
+        pepper.as_bytes(),
+        Argon2Algorithm::Argon2id,
+        Version::V0x13,
+        Params::new(20000u32, 3u32, 3u32, Some(64usize))?,
+    )?;
+
+    Ok(context)
+}
 
 lazy_static! {
     pub static ref HEADER: Header = Header::new(Algorithm::RS256);
@@ -19,25 +32,25 @@ lazy_static! {
         EncodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/access_token_private_key.pem"
         ))
-        .expect("cannot create access token private key in constants.rs")
+        .expect("cannot create access token private key in constants module")
     };
     pub static ref REFRESH_TOKEN_ENCODING_KEY: EncodingKey = {
         EncodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/refresh_token_private_key.pem"
         ))
-        .expect("cannot create refresh token private key in constants.rs")
+        .expect("cannot create refresh token private key in constants module")
     };
     pub static ref ACCESS_TOKEN_DECODING_KEY: DecodingKey = {
         DecodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/access_token_public_key.pem"
         ))
-        .expect("cannot create access token public key in constants.rs")
+        .expect("cannot create access token public key in constants module")
     };
     pub static ref REFRESH_TOKEN_DECODING_KEY: DecodingKey = {
         DecodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/refresh_token_public_key.pem"
         ))
-        .expect("cannot create refresh token public key in constants.rs")
+        .expect("cannot create refresh token public key in constants module")
     };
     pub static ref SWAGGER_API_KEY_NAME: String =
         dotenvy::var("GER_SWAGGER_API_KEY_NAME").expect("cannot load swagger api key name");
@@ -55,72 +68,6 @@ lazy_static! {
 
         options
     };
-}
-
-pub fn create_argon2_context<'key>(
-    pepper: &'key str,
-) -> Result<argon2::Argon2<'key>, argon2::Error> {
-    let context: Argon2 = Argon2::new_with_secret(
-        pepper.as_bytes(),
-        Argon2Algorithm::Argon2id,
-        Version::V0x13,
-        Params::new(20000u32, 3u32, 3u32, Some(64usize))?,
-    )?;
-
-    Ok(context)
-}
-
-/// Get utc expires time from current time.
-pub fn get_expires_timestamp(valid_minutes: u32) -> Result<usize, HttpError> {
-    let current_time =
-        time::OffsetDateTime::now_utc() + time::Duration::minutes(valid_minutes as i64);
-
-    return usize::try_from(current_time.unix_timestamp()).map_err(|_| {
-        HttpError::InternalServerError {
-            cause: "cannot convert timestamp from type i64 to usize".to_string(),
-        }
-    });
-}
-
-/// Deserialize a given string option as `None` when a given string is an empty string.
-///
-/// This is a workaround from [this issue](https://github.com/actix/actix-web/issues/1815)
-///
-/// Solution taken from [serde#1425](https://github.com/serde-rs/serde/issues/1425#issuecomment-439728211)
-pub fn empty_string_as_none<'de, D, T>(de: D) -> Result<Option<T>, D::Error>
-where
-    D: Deserializer<'de>,
-    T: FromStr,
-    T::Err: Display,
-{
-    let opt = Option::<String>::deserialize(de)?;
-    match opt.as_deref() {
-        None | Some("") => Ok(None),
-        Some(s) => FromStr::from_str(s).map_err(de::Error::custom).map(Some),
-    }
-}
-
-/// Sql number range used to query data as in parts
-pub struct SqlRange {
-    pub limit: i32,
-    pub offset: i32,
-}
-
-impl SqlRange {
-    /// Create `limit` and `offset` values used to query data from the database.
-    ///
-    /// # Panics
-    /// returns error when either `page` or `page_size` is less than zero.
-    pub fn from_page(page: i32, page_size: i32) -> Result<Self, HttpError> {
-        if !page.is_positive() || !page_size.is_positive() {
-            return Err(HttpError::InputValidationError);
-        }
-
-        Ok(Self {
-            limit: page_size,
-            offset: (page * page_size) - page_size,
-        })
-    }
 }
 
 /// difference between AD (Anno domini) year and BE (Bhuddist era) year.

@@ -16,6 +16,7 @@ impl Default for GetServerInformationResponse {
     }
 }
 
+/// General response for simple operations for most `post` events.
 #[derive(Serialize, ToSchema)]
 pub struct DefaultSuccessResponse {
     message: String,
