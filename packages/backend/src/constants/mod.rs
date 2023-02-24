@@ -32,25 +32,25 @@ lazy_static! {
         EncodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/access_token_private_key.pem"
         ))
-        .expect("cannot create access token private key in statics.rs")
+        .expect("cannot create access token private key in constants module")
     };
     pub static ref REFRESH_TOKEN_ENCODING_KEY: EncodingKey = {
         EncodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/refresh_token_private_key.pem"
         ))
-        .expect("cannot create refresh token private key in statics.rs")
+        .expect("cannot create refresh token private key in constants module")
     };
     pub static ref ACCESS_TOKEN_DECODING_KEY: DecodingKey = {
         DecodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/access_token_public_key.pem"
         ))
-        .expect("cannot create access token public key in statics.rs")
+        .expect("cannot create access token public key in constants module")
     };
     pub static ref REFRESH_TOKEN_DECODING_KEY: DecodingKey = {
         DecodingKey::from_rsa_pem(include_bytes!(
             "../../jsonwebtoken/refresh_token_public_key.pem"
         ))
-        .expect("cannot create refresh token public key in statics.rs")
+        .expect("cannot create refresh token public key in constants module")
     };
     pub static ref SWAGGER_API_KEY_NAME: String =
         dotenvy::var("GER_SWAGGER_API_KEY_NAME").expect("cannot load swagger api key name");

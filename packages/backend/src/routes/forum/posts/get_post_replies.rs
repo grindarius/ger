@@ -6,7 +6,7 @@ use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
-    constants::{SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
+    constants::{requests::SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
@@ -25,10 +25,16 @@ pub enum GetPostRepliesRequestQueriesOrderBy {
 #[into_params(parameter_in = Query)]
 pub struct GetPostRepliesRequestQueries {
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     page: Option<i32>,
     #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     page_size: Option<i32>,
     /// Which kind of sorting to apply to the request
     by: Option<GetPostRepliesRequestQueriesOrderBy>,

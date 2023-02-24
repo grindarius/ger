@@ -3,7 +3,7 @@ use serde::Deserialize;
 use utoipa::IntoParams;
 
 use crate::{
-    constants::swagger::AuthenticationHeaders, errors::HttpError,
+    constants::requests::AuthenticationHeaders, errors::HttpError,
     extractors::users::AuthenticatedUserClaims,
 };
 

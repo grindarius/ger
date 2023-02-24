@@ -5,8 +5,8 @@ use utoipa::ToSchema;
 
 use crate::{
     constants::{
-        claims::{AccessTokenClaims, RefreshTokenClaims},
-        create_argon2_context, get_expires_timestamp,
+        claims::{get_expires_timestamp, AccessTokenClaims, RefreshTokenClaims},
+        create_argon2_context,
         responses::DefaultSuccessResponse,
         ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_VALID_TIME_LENGTH,
         ARGON2_PEPPER_STRING, HEADER, ID_LENGTH, REFRESH_TOKEN_ENCODING_KEY,
@@ -27,7 +27,6 @@ pub struct SigninRequestBody {
 pub struct UserQuery {
     user_id: String,
     user_password: String,
-    #[fromrow(num)]
     user_role: Role,
 }
 

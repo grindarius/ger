@@ -3,10 +3,9 @@ use tokio_postgres::types::Type;
 
 use crate::{
     constants::{
-        claims::{AccessTokenClaims, RefreshTokenClaims},
-        get_expires_timestamp,
+        claims::{get_expires_timestamp, AccessTokenClaims, RefreshTokenClaims},
+        requests::AuthenticationHeaders,
         responses::DefaultSuccessResponse,
-        swagger::AuthenticationHeaders,
         ACCESS_TOKEN_DECODING_KEY, ACCESS_TOKEN_ENCODING_KEY, ACCESS_TOKEN_HEADER_NAME,
         ACCESS_TOKEN_VALID_TIME_LENGTH, HEADER, REFRESH_TOKEN_DECODING_KEY,
         REFRESH_TOKEN_ENCODING_KEY, REFRESH_TOKEN_HEADER_NAME, REFRESH_TOKEN_VALID_TIME_LENGTH,

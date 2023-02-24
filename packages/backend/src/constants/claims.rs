@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{constants::statics::JWT_TOKEN_AUDIENCE_NAME, database::Role, errors::HttpError};
+use crate::{constants::JWT_TOKEN_AUDIENCE_NAME, database::Role, errors::HttpError};
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct AccessTokenClaims {
