@@ -1,7 +1,8 @@
 use std::{fmt::Display, str::FromStr};
 
-use serde::{de, Deserialize, Deserializer};
-use utoipa::IntoParams;
+use serde::{de, Deserialize, Deserializer, Serialize};
+use ts_rs::TS;
+use utoipa::{IntoParams, ToSchema};
 
 use crate::errors::HttpError;
 
@@ -59,4 +60,16 @@ where
         None | Some("") => Ok(None),
         Some(s) => FromStr::from_str(s).map_err(de::Error::custom).map(Some),
     }
+}
+
+/// How to order the response that have return type as `Array`
+#[derive(Default, Serialize, Deserialize, ToSchema, TS)]
+#[serde(rename_all = "lowercase")]
+#[ts(export)]
+pub enum Order {
+    /// Least to most
+    #[default]
+    Asc,
+    /// Most to least
+    Desc,
 }

@@ -35,7 +35,7 @@ async fn main() -> std::io::Result<()> {
     let openapi = ApiDoc::openapi();
 
     tracing::info!("starting https server at http://127.0.0.1:5155");
-    tracing::info!("starting swagger ui at http://127.0.0.1:5155/swagger-doc/");
+    tracing::info!("starting swagger ui at http://127.0.0.1:5155/documentation/");
 
     HttpServer::new(move || {
         // cors config
@@ -149,7 +149,8 @@ async fn main() -> std::io::Result<()> {
                 web::get().to(crate::routes::forum::categories::get_categories_list::handler),
             )
             .service(
-                SwaggerUi::new("/swagger-doc/{_:.*}").url("/openapi/openapi.json", openapi.clone()),
+                SwaggerUi::new("/documentation/{_:.*}")
+                    .url("/openapi/openapi.json", openapi.clone()),
             )
     })
     .bind((

@@ -3,6 +3,8 @@ use comrak::ComrakOptions;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
 
+use self::requests::Order;
+
 /// Any structs, parameters and functions that related to `jsonwebtoken`.
 pub mod claims;
 
@@ -68,6 +70,7 @@ lazy_static! {
 
         options
     };
+    pub static ref DEFAULT_ORDER: Order = Order::default();
 }
 
 /// difference between AD (Anno domini) year and BE (Bhuddist era) year.

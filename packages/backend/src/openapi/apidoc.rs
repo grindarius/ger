@@ -21,8 +21,9 @@ use crate::openapi::security_addon::SecurityAddon;
         schemas(
             crate::errors::FormattedErrorResponse,
             crate::constants::responses::GetServerInformationResponse,
-            crate::routes::auth::signin::SigninRequestBody,
             crate::constants::responses::DefaultSuccessResponse,
+            crate::constants::requests::Order,
+            crate::routes::auth::signin::SigninRequestBody,
             crate::routes::students::signup::StudentSignupRequestBody,
             crate::routes::students::signup::StudentSignupRequestBodyInner,
             crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListRequestQueries,
@@ -36,6 +37,7 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListRequestQueries,
             crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListResponseBody,
             crate::routes::forum::posts::get_trending_posts_list::GetTrendingPostsListResponseBodyInner,
+            crate::routes::forum::posts::get_post_list::GetPostListRequestQueriesOrderBy,
             crate::routes::forum::posts::get_post_list::GetPostListRequestQueries,
             crate::routes::forum::posts::get_post_list::GetPostListResponseBody,
             crate::routes::forum::posts::get_post_list::GetPostListResponseBodyInner,
