@@ -18,7 +18,7 @@ export default function Row ({ id, name, username, createdTimestamp, replyCount,
 
   return (
     <tr>
-      <td>
+      <td style={ { width: '800px' } }>
         <Link className="font-bold link link-hover" href={{ pathname: '/forum/posts/[postId]', query: { postId: id } }}>{name}</Link>
         <div className="flex flex-row">
           <Link className="text-sm opacity-75 link link-hover" href={{ pathname: '/forum/users/[username]', query: { username } }}>
