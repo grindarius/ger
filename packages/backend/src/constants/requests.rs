@@ -1,4 +1,4 @@
-use std::{fmt, fmt::Debug, fmt::Display, str::FromStr};
+use std::{fmt::Display, str::FromStr};
 
 use serde::{de, Deserialize, Deserializer, Serialize};
 use ts_rs::TS;
@@ -63,18 +63,13 @@ where
 }
 
 /// How to order the response that have return type as `Array`
-#[derive(Debug, Serialize, Deserialize, ToSchema, TS)]
+#[derive(Default, Serialize, Deserialize, ToSchema, TS)]
 #[serde(rename_all = "lowercase")]
 #[ts(export)]
 pub enum Order {
     /// Least to most
+    #[default]
     Asc,
     /// Most to least
     Desc,
-}
-
-impl fmt::Display for Order {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
 }

@@ -2,24 +2,26 @@ use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
+use serde_variant::to_variant_name;
 use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
     constants::{
         requests::{Order, SqlRange},
-        DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+        DEFAULT_ORDER, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
     },
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
 
 /// Specify either how to sort the api by each order
-#[derive(Deserialize, Serialize, ToSchema, TS)]
+#[derive(Default, Deserialize, Serialize, ToSchema, TS)]
 #[serde(rename_all = "snake_case")]
 #[ts(export)]
 pub enum GetPostListRequestQueriesOrderBy {
     /// Sort with latest activity
+    #[default]
     LatestActivity,
     /// Sort with amount of votes
     Vote,
@@ -42,7 +44,7 @@ pub struct GetPostListRequestQueries {
     #[ts(optional)]
     pub category_based_announcement: Option<bool>,
     /// specify how to sort the response
-    #[param(default = json!(GetPostListRequestQueriesOrderBy::LatestActivity))]
+    #[param(default = json!(GetPostListRequestQueriesOrderBy::default()))]
     #[ts(optional)]
     pub by: Option<GetPostListRequestQueriesOrderBy>,
     /// specify how to order the response
@@ -134,13 +136,12 @@ pub async fn handler(
     query: web::Query<GetPostListRequestQueries>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
+    let default_by = GetPostListRequestQueriesOrderBy::default();
+
     let announcement = query.announcement.unwrap_or(false);
     let category_based_announcement = query.category_based_announcement.unwrap_or(false);
-    let by = query
-        .by
-        .as_ref()
-        .unwrap_or(&GetPostListRequestQueriesOrderBy::LatestActivity);
-    let order = query.order.as_ref().unwrap_or(&Order::Asc);
+    let by = query.by.as_ref().unwrap_or(&default_by);
+    let order = query.order.as_ref().unwrap_or(&DEFAULT_ORDER);
     let page = query.page.unwrap_or(DEFAULT_PAGE);
     let page_size = query.page_size.unwrap_or(DEFAULT_PAGE_SIZE);
 
@@ -186,7 +187,7 @@ pub async fn handler(
             GetPostListRequestQueriesOrderBy::Vote => "vote_count",
             GetPostListRequestQueriesOrderBy::View => "view_count",
         },
-        order.to_string(),
+        to_variant_name(order)?
     );
 
     let statement = client

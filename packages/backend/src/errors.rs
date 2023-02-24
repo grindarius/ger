@@ -4,6 +4,7 @@ use actix_web::{
 };
 use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use serde_variant::UnsupportedType;
 use utoipa::ToSchema;
 
 /// Error struct used to represent most catchable errors in the application
@@ -143,6 +144,14 @@ impl From<anyhow::Error> for HttpError {
 
 impl From<jsonwebtoken::errors::Error> for HttpError {
     fn from(error: jsonwebtoken::errors::Error) -> Self {
+        HttpError::InternalServerError {
+            cause: error.to_string(),
+        }
+    }
+}
+
+impl From<UnsupportedType> for HttpError {
+    fn from(error: UnsupportedType) -> Self {
         HttpError::InternalServerError {
             cause: error.to_string(),
         }
