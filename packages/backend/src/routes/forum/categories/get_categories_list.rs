@@ -7,7 +7,7 @@ use utoipa::{IntoParams, ToSchema};
 
 use crate::{
     constants::DEFAULT_PAGE,
-    constants::{SqlRange, DEFAULT_PAGE_SIZE},
+    constants::{requests::SqlRange, DEFAULT_PAGE_SIZE},
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
@@ -17,11 +17,17 @@ use crate::{
 #[ts(export)]
 pub struct GetCategoriesListRequestQueries {
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     #[ts(optional)]
     pub page: Option<i32>,
     #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     #[ts(optional)]
     pub page_size: Option<i32>,
 }

@@ -6,7 +6,7 @@ use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
-    constants::{SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
+    constants::{requests::SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
@@ -33,12 +33,18 @@ pub struct GetPostListRequestQueries {
     pub category_based_announcement: Option<bool>,
     /// page of the queried data
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     #[ts(optional)]
     pub page: Option<i32>,
     /// size of page for each query
     #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     #[ts(optional)]
     pub page_size: Option<i32>,
 }

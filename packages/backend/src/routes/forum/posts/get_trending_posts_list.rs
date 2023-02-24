@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
-    constants::{SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_TRENDING_WINDOW},
+    constants::{requests::SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_TRENDING_WINDOW},
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
@@ -16,15 +16,24 @@ pub struct GetTrendingPostsListRequestQueries {
     /// How big of a window to check for the trending posts. like "trending in the last 24
     /// hours".
     #[param(minimum = 1, default = json!(DEFAULT_TRENDING_WINDOW))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     pub hours: Option<i32>,
     /// which page of data to start query.
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     pub page: Option<i32>,
     /// How much of a post to query in one time.
     #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
-    #[serde(default, deserialize_with = "crate::constants::empty_string_as_none")]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
     pub page_size: Option<i32>,
 }
 

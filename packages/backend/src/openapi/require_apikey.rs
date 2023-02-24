@@ -1,6 +1,7 @@
-use crate::openapi::apikey_middleware::ApiKeyMiddleware;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use std::future::{self, Ready};
+
+use crate::openapi::apikey_middleware::ApiKeyMiddleware;
 
 pub struct RequireApiKey;
 

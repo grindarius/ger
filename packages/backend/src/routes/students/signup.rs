@@ -8,7 +8,7 @@ use utoipa::ToSchema;
 
 use crate::{
     constants::{
-        create_argon2_context, responses::DefaultSuccessResponse, swagger::AuthenticationHeaders,
+        create_argon2_context, requests::AuthenticationHeaders, responses::DefaultSuccessResponse,
         AD_BE_YEAR_DIFFERENCE, ARGON2_PEPPER_STRING, ID_LENGTH,
     },
     database::Role,
