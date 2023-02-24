@@ -30,6 +30,7 @@ module.exports = {
     'unused-imports'
   ],
   rules: {
+    'jsx-quotes': ['error', 'prefer-double'],
     '@typescript-eslint/no-unused-vars': ['error'],
     '@typescript-eslint/consistent-type-imports': ['error'],
     '@typescript-eslint/array-type': ['error', {
