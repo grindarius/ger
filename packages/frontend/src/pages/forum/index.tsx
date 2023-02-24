@@ -6,8 +6,24 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useState } from 'react'
 
+import Row from '@/components/row'
+import type { GetCategoriesListRequestQueries } from '@/types/GetCategoriesListRequestQueries'
+import type { GetCategoriesListResponseBody } from '@/types/GetCategoriesListResponseBody'
 import type { GetPostListRequestQueries } from '@/types/GetPostListRequestQueries'
 import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
+
+const fetchCategories = async (page: number): Promise<GetCategoriesListResponseBody> => {
+  const queries: GetCategoriesListRequestQueries = {
+    page
+  }
+
+  const searchParams = new URLSearchParams(queries as Record<string, string>)
+  const response = await ky.get('http://127.0.0.1:5155/forum/categories', {
+    searchParams
+  }).json<GetCategoriesListResponseBody>()
+
+  return response
+}
 
 const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody> => {
   const queries: GetPostListRequestQueries = {
@@ -25,39 +41,81 @@ const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody
   return response
 }
 
-export async function getServerSideProps (): Promise<GetServerSidePropsResult<{ response: GetPostListResponseBody }>> {
+export async function getServerSideProps (): Promise<GetServerSidePropsResult<ForumOptions>> {
   try {
-    const response = await fetchAnnouncements(1)
+    const initialAnnouncements = await fetchAnnouncements(1)
+    const initialCategories = await fetchCategories(1)
+
     return {
       props: {
-        response
+        initialAnnouncements,
+        initialCategories
       }
     }
   } catch (e) {
     return {
       props: {
-        response: {
+        initialAnnouncements: {
           posts: []
+        },
+        initialCategories: {
+          categories: []
         }
       }
     }
   }
 }
 
-function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Element {
-  const [page, setPage] = useState(1)
-  const [announcements, setAnnouncements] = useState(response)
+interface ForumOptions {
+  initialAnnouncements: GetPostListResponseBody
+  initialCategories: GetCategoriesListResponseBody
+}
+
+function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.Element {
+  const [announcementPage, setAnnouncementPage] = useState(1)
+  const [categoryPage, setCategoryPage] = useState(1)
+  const [announcements, setAnnouncements] = useState(initialAnnouncements)
+  const [categories, setCategories] = useState(initialCategories)
 
   dayjs.extend(relativeTime)
 
-  function goToPreviousPage (): void {
-    const nextPage = page - 1
+  function goToPreviousCategoryPage (): void {
+    const nextPage = categoryPage - 1
 
     if (nextPage <= 0) {
       return
     }
 
-    setPage(nextPage)
+    setCategoryPage(nextPage)
+    fetchCategories(nextPage)
+      .then(response => {
+        setCategories(response)
+      }).catch(e => {
+        console.error(e)
+        setCategories({ categories: [] })
+      })
+  }
+
+  function goToNextCategoryPage (): void {
+    const nextPage = categoryPage + 1
+    setCategoryPage(nextPage)
+    fetchCategories(nextPage)
+      .then(response => {
+        setCategories(response)
+      }).catch(e => {
+        console.error(e)
+        setCategories({ categories: [] })
+      })
+  }
+
+  function goToPreviousGlobalAnnouncementPage (): void {
+    const nextPage = announcementPage - 1
+
+    if (nextPage <= 0) {
+      return
+    }
+
+    setAnnouncementPage(nextPage)
     fetchAnnouncements(nextPage)
       .then(response => {
         setAnnouncements(response)
@@ -68,9 +126,9 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
       })
   }
 
-  function goToNextPage (): void {
-    const nextPage = page + 1
-    setPage(nextPage)
+  function goToNextGlobalAnnouncementPage (): void {
+    const nextPage = announcementPage + 1
+    setAnnouncementPage(nextPage)
     fetchAnnouncements(nextPage)
       .then(response => {
         setAnnouncements(response)
@@ -89,44 +147,38 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main className="container mx-auto">
-        <h1 className="text-4xl font-bold text-current">Forum</h1>
+        <h1 className="text-4xl text-current font-bold mb-4">Forum</h1>
         <div className="flex flex-row justify-between">
           <h3 className="text-2xl text-current">Global announcements</h3>
           <div className="flex flex-row btn-group">
-            <button className="btn" onClick={goToPreviousPage}>Previous page</button>
-            <button className="btn" onClick={goToNextPage}>Next page</button>
+            <button className="btn" onClick={goToPreviousGlobalAnnouncementPage}>Previous page</button>
+            <button className="btn" onClick={goToNextGlobalAnnouncementPage}>Next page</button>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mb-4">
           <table className="table w-full">
             <thead>
               <tr>
-                <td>Topic</td>
-                <td>Replies</td>
-                <td>Views</td>
-                <td>Activity</td>
+                <th>Topic</th>
+                <th>Replies</th>
+                <th>Views</th>
+                <th>Activity</th>
               </tr>
             </thead>
             <tbody>
               {
                 announcements.posts.map(a => {
                   return (
-                    <tr key={a.id}>
-                      <td>
-                        <Link className="font-bold link link-hover" href={{ pathname: '/forum/posts/[postId]', query: { postId: a.id } }}>{a.name}</Link>
-                        <div className="flex flex-row">
-                          <Link className="text-sm opacity-75 link link-hover" href={{ pathname: '/forum/users/[username]', query: { username: a.username } }}>
-                            {a.username}
-                          </Link>
-                          <p className="text-sm opacity-75">
-                             &nbsp;•&nbsp;{dayjs(a.created_timestamp).format('MMMM D, YYYY HH:mm')}
-                          </p>
-                        </div>
-                      </td>
-                      <td>{a.reply_count}</td>
-                      <td>{a.view_count}</td>
-                      <td>{dayjs(a.last_active_timestamp).fromNow()}</td>
-                    </tr>
+                    <Row
+                      key={a.id}
+                      id={a.id}
+                      name={a.name}
+                      username={a.username}
+                      createdTimestamp={a.created_timestamp}
+                      replyCount={a.reply_count}
+                      viewCount={a.view_count}
+                      lastActiveTimestamp={a.last_active_timestamp}
+                    />
                   )
                 })
               }
@@ -134,15 +186,63 @@ function Forum ({ response }: { response: GetPostListResponseBody }): JSX.Elemen
           </table>
         </div>
 
-        <h3 className="text-2xl font-bold text-current">Trending</h3>
+        <div className="flex flex-row justify-between">
+          <h3 className="text-2xl text-current">Categories</h3>
+          <div className="flex flex-row btn-group">
+            <button className="btn" onClick={goToPreviousCategoryPage}>Previous page</button>
+            <button className="btn" onClick={goToNextCategoryPage}>Next page</button>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
-            <tbody>
+            <thead>
               <tr>
-                <td>Cy Ganderton</td>
-                <td>Quality Control Specialist</td>
-                <td>Blue</td>
+                <th>Category</th>
+                <th>Posts count</th>
+                <th>Latest Post</th>
               </tr>
+            </thead>
+            <tbody>
+              {
+                categories.categories.map(c => {
+                  return (
+                    <tr key={c.id}>
+                      <td style={ { width: '800px' } }>
+                        <Link
+                          className="font-bold link link-hover"
+                          href={
+                            {
+                              pathname: '/forum/categories/[categoryRepresentativeId]',
+                              query: {
+                                categoryRepresentativeId: c.representative_id
+                              }
+                            }
+                          }>
+                          {c.name}
+                        </Link>
+                        <br />
+                        {'description goes here'}
+                      </td>
+                      <td>
+                        {c.post_count}
+                      </td>
+                      <td>
+                        <Link className="font-bold link link-hover" href={ { pathname: '/forum/posts/[postId]', query: { postId: c.latest_post_id } }}>
+                          {c.latest_post_name}
+                        </Link>
+                        <div className="flex flex-row">
+                          <Link className="text-sm opacity-75 link link-hover" href={{ pathname: '/forum/users/[username]', query: { username: c.latest_post_username } }}>
+                            {c.latest_post_username}
+                          </Link>
+                          <p className="text-sm opacity-75">
+                            &nbsp;•&nbsp;{dayjs(c.latest_post_created_timestamp).format('MMMM D, YYYY HH:mm')}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              }
             </tbody>
           </table>
         </div>
