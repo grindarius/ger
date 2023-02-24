@@ -147,7 +147,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main className="container mx-auto">
-        <h1 className="text-4xl text-current font-bold">Forum</h1>
+        <h1 className="text-4xl text-current font-bold mb-4">Forum</h1>
         <div className="flex flex-row justify-between">
           <h3 className="text-2xl text-current">Global announcements</h3>
           <div className="flex flex-row btn-group">
@@ -155,14 +155,14 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
             <button className="btn" onClick={goToNextGlobalAnnouncementPage}>Next page</button>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mb-4">
           <table className="table w-full">
             <thead>
               <tr>
-                <td>Topic</td>
-                <td>Replies</td>
-                <td>Views</td>
-                <td>Activity</td>
+                <th>Topic</th>
+                <th>Replies</th>
+                <th>Views</th>
+                <th>Activity</th>
               </tr>
             </thead>
             <tbody>
@@ -207,7 +207,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
                 categories.categories.map(c => {
                   return (
                     <tr key={c.id}>
-                      <td>
+                      <td style={ { width: '800px' } }>
                         <Link
                           className="font-bold link link-hover"
                           href={
@@ -227,21 +227,22 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
                         {c.post_count}
                       </td>
                       <td>
-                        {c.latest_post_id}
+                        <Link className="font-bold link link-hover" href={ { pathname: '/forum/posts/[postId]', query: { postId: c.latest_post_id } }}>
+                          {c.latest_post_name}
+                        </Link>
+                        <div className="flex flex-row">
+                          <Link className="text-sm opacity-75 link link-hover" href={{ pathname: '/forum/users/[username]', query: { username: c.latest_post_username } }}>
+                            {c.latest_post_username}
+                          </Link>
+                          <p className="text-sm opacity-75">
+                            &nbsp;•&nbsp;{dayjs(c.latest_post_created_timestamp).format('MMMM D, YYYY HH:mm')}
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   )
                 })
               }
-            </tbody>
-          </table>
-          <table className='table w-full'>
-            <tbody>
-              <tr>
-                <td>Cy Ganderton</td>
-                <td>Quality Control Specialist</td>
-                <td>Blue</td>
-              </tr>
             </tbody>
           </table>
         </div>
