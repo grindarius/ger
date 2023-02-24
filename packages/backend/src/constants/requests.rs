@@ -1,5 +1,9 @@
-use serde::Deserialize;
+use std::{fmt::Display, str::FromStr};
+
+use serde::{de, Deserialize, Deserializer};
 use utoipa::IntoParams;
+
+use crate::errors::HttpError;
 
 /// This struct has to be marked unused because it is just a template for access token and refresh
 /// token in the header. You would notice similar struct called [AuthenticatedClaims](crate::extractors::AuthenticatedClaims). The fact is
