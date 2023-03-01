@@ -14,7 +14,8 @@ import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
 
 const fetchCategories = async (page: number): Promise<GetCategoriesListResponseBody> => {
   const queries: GetCategoriesListRequestQueries = {
-    page
+    page,
+    page_size: 5
   }
 
   const searchParams = new URLSearchParams(queries as Record<string, string>)
@@ -29,7 +30,8 @@ const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody
   const queries: GetPostListRequestQueries = {
     announcement: true,
     category_based_announcement: false,
-    page
+    page,
+    page_size: 5
   }
 
   const searchParams = new URLSearchParams(queries as Record<string, string>)
