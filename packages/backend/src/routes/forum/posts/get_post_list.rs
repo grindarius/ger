@@ -2,9 +2,13 @@ use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use serde_variant::to_variant_name;
 use ts_rs::TS;
-use utoipa::{IntoParams, ToSchema};
+use utoipa::{
+    openapi::{RefOr, Schema},
+    IntoParams, Modify, ToSchema,
+};
 
 use crate::{
     constants::{
@@ -29,6 +33,27 @@ pub enum GetPostListRequestQueriesOrderBy {
     Time,
     /// Sort with amount of views
     View,
+}
+
+pub struct GetPostListRequestQueriesOrderByModifier;
+
+impl Modify for GetPostListRequestQueriesOrderByModifier {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.components.as_mut().map(|v| {
+            v.schemas
+                .get_mut("GetPostListRequestQueriesOrderBy")
+                .map(|z| {
+                    if let RefOr::T(schema) = z {
+                        if let Schema::Object(obj) = schema {
+                            obj.default = Some(json!(to_variant_name(
+                                &GetPostListRequestQueriesOrderBy::default()
+                            )
+                            .unwrap()))
+                        }
+                    }
+                })
+        });
+    }
 }
 
 #[derive(Deserialize, ToSchema, IntoParams, TS)]
