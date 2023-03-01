@@ -1,8 +1,13 @@
 use std::{fmt::Display, str::FromStr};
 
 use serde::{de, Deserialize, Deserializer, Serialize};
+use serde_json::json;
+use serde_variant::to_variant_name;
 use ts_rs::TS;
-use utoipa::{IntoParams, ToSchema};
+use utoipa::{
+    openapi::{RefOr, Schema},
+    IntoParams, Modify, ToSchema,
+};
 
 use crate::errors::HttpError;
 
@@ -72,4 +77,20 @@ pub enum Order {
     Asc,
     /// Most to least
     Desc,
+}
+
+pub struct OrderModifier;
+
+impl Modify for OrderModifier {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.components.as_mut().map(|v| {
+            v.schemas.get_mut("Order").map(|z| {
+                if let RefOr::T(schema) = z {
+                    if let Schema::Object(obj) = schema {
+                        obj.default = Some(json!(to_variant_name(&Order::default()).unwrap()))
+                    }
+                }
+            })
+        });
+    }
 }
