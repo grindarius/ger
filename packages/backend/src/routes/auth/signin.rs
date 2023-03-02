@@ -105,7 +105,7 @@ pub async fn handler(
         return Err(HttpError::IncorrectPassword);
     }
 
-    let new_session_id = nanoid::nanoid!(ID_LENGTH);
+    let new_session_id = randoid::randoid!(ID_LENGTH);
 
     let access_token_expires_timestamp = get_expires_timestamp(ACCESS_TOKEN_VALID_TIME_LENGTH)?;
     let access_token_claims = AccessTokenClaims::new(
@@ -217,7 +217,7 @@ mod tests {
                 )
                 "##,
                 &[
-                    &nanoid::nanoid!(ID_LENGTH),
+                    &randoid::randoid!(ID_LENGTH),
                     &username,
                     &email,
                     &hashed_password.to_string(),

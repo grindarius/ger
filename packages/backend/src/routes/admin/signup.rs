@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse};
 use argon2::{password_hash::SaltString, PasswordHasher};
-use nanoid::nanoid;
 use rand_core::OsRng;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -98,7 +97,7 @@ pub async fn handler(
         .execute(
             &statement,
             &[
-                &nanoid!(ID_LENGTH),
+                &randoid::randoid!(ID_LENGTH),
                 &body.username,
                 &body.email,
                 &password.to_string(),
