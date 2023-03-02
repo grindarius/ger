@@ -28,11 +28,11 @@ geo-types = { version = "0.7", features = ["serde"] }
 ger-from-row = { path = "../ger-from-row" }
 jsonwebtoken = { version = "8", features = ["use_pem"] }
 lazy_static = "1"
-nanoid = "0.4"
 opentelemetry = { version = "0.18", features = ["rt-tokio"] }
 opentelemetry-jaeger = { version = "0.17", features = ["rt-tokio"] }
 postgres-types = { version = "0.2", features = ["derive"] }
 rand_core = { version = "0.6", features = ["std"] }
+randoid = "^0"
 rust_decimal = { version = "1", features = ["db-tokio-postgres", "serde-with-str", "serde-with-float"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

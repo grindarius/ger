@@ -960,11 +960,11 @@ dependencies = [
  "ger-from-row",
  "jsonwebtoken",
  "lazy_static",
- "nanoid",
  "opentelemetry",
  "opentelemetry-jaeger",
  "postgres-types",
  "rand_core",
+ "randoid",
  "rust_decimal",
  "serde",
  "serde_json",
@@ -1340,15 +1340,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys 0.45.0",
-]
-
-[[package]]
-name = "nanoid"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ffa00dec017b5b1a8b7cf5e2c008bfda1aa7e0697ac1508b491fdf2622fb4d8"
-dependencies = [
- "rand",
 ]
 
 [[package]]
@@ -1875,6 +1866,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "randoid"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30811a3469feaee502fcce4ff19a2c922d82e7a7ccd9ae10aa9256e4b956c234"
+dependencies = [
+ "rand",
 ]
 
 [[package]]

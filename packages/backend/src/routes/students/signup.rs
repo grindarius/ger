@@ -235,7 +235,7 @@ pub async fn handler(
     for (i, student) in body.students.iter().enumerate() {
         let transaction = client.transaction().await?;
 
-        let new_student_id = nanoid::nanoid!(ID_LENGTH);
+        let new_student_id = randoid::randoid!(ID_LENGTH);
         let new_student_email = format!(
             "{}{}{}@gmail.com",
             &student.student_english_first_name,
@@ -270,7 +270,7 @@ pub async fn handler(
                 &insert_user_statement,
                 &[
                     &new_student_id,
-                    &nanoid::nanoid!(10),
+                    &randoid::randoid!(10),
                     &new_student_email,
                     &new_student_account_password.to_string(),
                     &Role::Student,
@@ -297,7 +297,7 @@ pub async fn handler(
             .execute(
                 &insert_student_name_statement,
                 &[
-                    &nanoid::nanoid!(ID_LENGTH),
+                    &randoid::randoid!(ID_LENGTH),
                     &new_student_id,
                     &"EN",
                     &student.student_english_first_name.trim(),
