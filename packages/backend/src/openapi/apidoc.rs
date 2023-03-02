@@ -1,4 +1,7 @@
-use crate::openapi::security_addon::SecurityAddon;
+use crate::{
+    constants::requests::OrderModifier, openapi::security_addon::SecurityAddon,
+    routes::forum::posts::get_post_list::GetPostListRequestQueriesOrderByModifier,
+};
 
 #[derive(utoipa::OpenApi)]
 #[openapi(
@@ -50,7 +53,11 @@ use crate::openapi::security_addon::SecurityAddon;
             crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBodyInner
         )
     ),
-    modifiers(&SecurityAddon),
+    modifiers(
+        &SecurityAddon,
+        &GetPostListRequestQueriesOrderByModifier,
+        &OrderModifier
+    ),
     tags(
         (
             name = "home"

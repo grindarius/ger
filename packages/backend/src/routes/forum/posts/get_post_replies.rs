@@ -2,8 +2,13 @@ use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use serde_variant::to_variant_name;
 use ts_rs::TS;
-use utoipa::{IntoParams, ToSchema};
+use utoipa::{
+    openapi::{RefOr, Schema},
+    IntoParams, Modify, ToSchema,
+};
 
 use crate::{
     constants::{requests::SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
@@ -12,13 +17,35 @@ use crate::{
 };
 
 /// Which order of the replies to be applied to.
-#[derive(Deserialize, ToSchema)]
+#[derive(Default, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum GetPostRepliesRequestQueriesOrderBy {
     /// orders the replies from least recent to most recent.
+    #[default]
     Time,
     /// orders the replies with most votes to least votes.
     Vote,
+}
+
+pub struct GetPostRepliesRequestQueriesOrderByModifier;
+
+impl Modify for GetPostRepliesRequestQueriesOrderByModifier {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.components.as_mut().map(|v| {
+            v.schemas
+                .get_mut("GetPostRepliesRequestQueriesOrderBy")
+                .map(|z| {
+                    if let RefOr::T(schema) = z {
+                        if let Schema::Object(obj) = schema {
+                            obj.default = Some(json!(to_variant_name(
+                                &GetPostRepliesRequestQueriesOrderBy::default()
+                            )
+                            .unwrap()))
+                        }
+                    }
+                })
+        });
+    }
 }
 
 #[derive(Deserialize, ToSchema, IntoParams)]
