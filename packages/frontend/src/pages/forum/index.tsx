@@ -4,7 +4,6 @@ import ky from 'ky-universal'
 import type { GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useState } from 'react'
 
 import Row from '@/components/row'
 import type { GetCategoriesListRequestQueries } from '@/types/GetCategoriesListRequestQueries'
@@ -14,7 +13,9 @@ import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
 
 const fetchCategories = async (page: number): Promise<GetCategoriesListResponseBody> => {
   const queries: GetCategoriesListRequestQueries = {
-    page
+    page,
+    // way more than the categories amount
+    page_size: 30
   }
 
   const searchParams = new URLSearchParams(queries as Record<string, string>)
@@ -29,7 +30,10 @@ const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody
   const queries: GetPostListRequestQueries = {
     announcement: true,
     category_based_announcement: false,
-    page
+    by: 'time',
+    order: 'desc',
+    page,
+    page_size: 5
   }
 
   const searchParams = new URLSearchParams(queries as Record<string, string>)
@@ -72,72 +76,7 @@ interface ForumOptions {
 }
 
 function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.Element {
-  const [announcementPage, setAnnouncementPage] = useState(1)
-  const [categoryPage, setCategoryPage] = useState(1)
-  const [announcements, setAnnouncements] = useState(initialAnnouncements)
-  const [categories, setCategories] = useState(initialCategories)
-
   dayjs.extend(relativeTime)
-
-  function goToPreviousCategoryPage (): void {
-    const nextPage = categoryPage - 1
-
-    if (nextPage <= 0) {
-      return
-    }
-
-    setCategoryPage(nextPage)
-    fetchCategories(nextPage)
-      .then(response => {
-        setCategories(response)
-      }).catch(e => {
-        console.error(e)
-        setCategories({ categories: [] })
-      })
-  }
-
-  function goToNextCategoryPage (): void {
-    const nextPage = categoryPage + 1
-    setCategoryPage(nextPage)
-    fetchCategories(nextPage)
-      .then(response => {
-        setCategories(response)
-      }).catch(e => {
-        console.error(e)
-        setCategories({ categories: [] })
-      })
-  }
-
-  function goToPreviousGlobalAnnouncementPage (): void {
-    const nextPage = announcementPage - 1
-
-    if (nextPage <= 0) {
-      return
-    }
-
-    setAnnouncementPage(nextPage)
-    fetchAnnouncements(nextPage)
-      .then(response => {
-        setAnnouncements(response)
-      })
-      .catch(e => {
-        console.error(e)
-        setAnnouncements({ posts: [] })
-      })
-  }
-
-  function goToNextGlobalAnnouncementPage (): void {
-    const nextPage = announcementPage + 1
-    setAnnouncementPage(nextPage)
-    fetchAnnouncements(nextPage)
-      .then(response => {
-        setAnnouncements(response)
-      })
-      .catch(e => {
-        console.error(e)
-        setAnnouncements({ posts: [] })
-      })
-  }
 
   return (
     <>
@@ -148,13 +87,8 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
       </Head>
       <main className="container mx-auto">
         <h1 className="text-4xl text-current font-bold mb-4">Forum</h1>
-        <div className="flex flex-row justify-between">
-          <h3 className="text-2xl text-current">Global announcements</h3>
-          <div className="flex flex-row btn-group">
-            <button className="btn" onClick={goToPreviousGlobalAnnouncementPage}>Previous page</button>
-            <button className="btn" onClick={goToNextGlobalAnnouncementPage}>Next page</button>
-          </div>
-        </div>
+
+        <h3 className="text-2xl text-current">Global announcements</h3>
         <div className="overflow-x-auto mb-4">
           <table className="table w-full">
             <thead>
@@ -167,7 +101,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
             </thead>
             <tbody>
               {
-                announcements.posts.map(a => {
+                initialAnnouncements.posts.map(a => {
                   return (
                     <Row
                       key={a.id}
@@ -186,13 +120,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
           </table>
         </div>
 
-        <div className="flex flex-row justify-between">
-          <h3 className="text-2xl text-current">Categories</h3>
-          <div className="flex flex-row btn-group">
-            <button className="btn" onClick={goToPreviousCategoryPage}>Previous page</button>
-            <button className="btn" onClick={goToNextCategoryPage}>Next page</button>
-          </div>
-        </div>
+        <h3 className="text-2xl text-current">Categories</h3>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
@@ -204,7 +132,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
             </thead>
             <tbody>
               {
-                categories.categories.map(c => {
+                initialCategories.categories.map(c => {
                   return (
                     <tr key={c.id}>
                       <td style={ { width: '800px' } }>
@@ -221,7 +149,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
                           {c.name}
                         </Link>
                         <br />
-                        {'description goes here'}
+                        { c.description }
                       </td>
                       <td>
                         {c.post_count}
