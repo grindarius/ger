@@ -78,7 +78,7 @@ pub struct GetPostListRequestQueries {
     #[ts(optional)]
     pub order: Option<Order>,
     /// specify the category of the data that you would like to query.
-    #[param(example = json!([ "TftrScyl5wnThVDGo7LI95lERNb-ZC_T" ]), default = json!([]))]
+    #[param(example = json!([ "TftrScyl5wnThVDGo7LI95lERNb-ZC_T" ]))]
     #[ts(optional)]
     pub categories: Option<Vec<String>>,
     /// page of the queried data
