@@ -99,26 +99,6 @@ pub struct GetPostListRequestQueries {
     pub page_size: Option<i32>,
 }
 
-pub struct GetPostListRequestQueriesModifier;
-
-impl Modify for GetPostListRequestQueriesModifier {
-    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
-        openapi.components.as_mut().map(|v| {
-            v.schemas.get_mut("GetPostListRequestQueries").map(|z| {
-                if let RefOr::T(schema) = z {
-                    if let Schema::Object(o) = schema {
-                        if let Some(category) = o.properties.get_mut("categories") {
-                            if let RefOr::T(category_schema) = category {
-                                println!("{:#?}", category_schema)
-                            }
-                        }
-                    }
-                }
-            })
-        });
-    }
-}
-
 #[derive(Serialize, ToSchema, TS)]
 #[ts(export)]
 pub struct GetPostListResponseBody {
