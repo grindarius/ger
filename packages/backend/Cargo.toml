@@ -47,5 +47,5 @@ tracing-bunyan-formatter = "0.3"
 tracing-opentelemetry = "0.18"
 tracing-subscriber = { version = "0.3", features = ["json", "registry", "env-filter"] }
 ts-rs = "6.2"
-utoipa = { version = "3", features = ["time", "decimal", "actix_extras"] }
+utoipa = { version = "3", features = ["time", "decimal", "actix_extras", "debug"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }

@@ -6,7 +6,7 @@ use serde_json::json;
 use serde_variant::to_variant_name;
 use ts_rs::TS;
 use utoipa::{
-    openapi::{RefOr, Schema},
+    openapi::{Object, RefOr, Schema},
     IntoParams, Modify, ToSchema,
 };
 
@@ -60,7 +60,8 @@ impl Modify for GetPostListRequestQueriesOrderByModifier {
 #[into_params(parameter_in = Query)]
 #[ts(export)]
 pub struct GetPostListRequestQueries {
-    /// get list of global announcements
+    /// get list of global announcements. If this value is `true`, this will ignore any other
+    /// fields.
     #[param(default = json!(false))]
     #[ts(optional)]
     pub announcement: Option<bool>,
@@ -73,9 +74,13 @@ pub struct GetPostListRequestQueries {
     #[ts(optional)]
     pub by: Option<GetPostListRequestQueriesOrderBy>,
     /// specify how to order the response
-    #[param(default = json!(Order::Asc))]
+    #[param(default = json!(GetPostListRequestQueriesOrderBy::default()))]
     #[ts(optional)]
     pub order: Option<Order>,
+    /// specify the category of the data that you would like to query.
+    #[param(example = json!([ "TftrScyl5wnThVDGo7LI95lERNb-ZC_T" ]), default = json!([]))]
+    #[ts(optional)]
+    pub categories: Option<Vec<String>>,
     /// page of the queried data
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
     #[serde(
@@ -92,6 +97,26 @@ pub struct GetPostListRequestQueries {
     )]
     #[ts(optional)]
     pub page_size: Option<i32>,
+}
+
+pub struct GetPostListRequestQueriesModifier;
+
+impl Modify for GetPostListRequestQueriesModifier {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.components.as_mut().map(|v| {
+            v.schemas.get_mut("GetPostListRequestQueries").map(|z| {
+                if let RefOr::T(schema) = z {
+                    if let Schema::Object(o) = schema {
+                        if let Some(category) = o.properties.get_mut("categories") {
+                            if let RefOr::T(category_schema) = category {
+                                println!("{:#?}", category_schema)
+                            }
+                        }
+                    }
+                }
+            })
+        });
+    }
 }
 
 #[derive(Serialize, ToSchema, TS)]
