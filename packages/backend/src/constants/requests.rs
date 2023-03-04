@@ -53,7 +53,7 @@ impl SqlRange {
 ///
 /// This is a workaround from [this issue](https://github.com/actix/actix-web/issues/1815)
 ///
-/// Solution taken from [serde#1425](https://github.com/serde-rs/serde/issues/1425#issuecomment-439728211)
+/// Solution taken from [serde-rs/serde#1425](https://github.com/serde-rs/serde/issues/1425#issuecomment-439728211)
 pub fn empty_string_as_none<'de, D, T>(de: D) -> Result<Option<T>, D::Error>
 where
     D: Deserializer<'de>,
