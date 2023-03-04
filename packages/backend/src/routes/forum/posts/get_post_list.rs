@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse};
 use ger_from_row::FromRow;
-use postgres_types::Type;
+use postgres_types::{ToSql, Type};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_variant::to_variant_name;
@@ -60,7 +60,8 @@ impl Modify for GetPostListRequestQueriesOrderByModifier {
 #[into_params(parameter_in = Query)]
 #[ts(export)]
 pub struct GetPostListRequestQueries {
-    /// get list of global announcements
+    /// get list of global announcements. If this value is `true`, this will ignore any other
+    /// fields.
     #[param(default = json!(false))]
     #[ts(optional)]
     pub announcement: Option<bool>,
@@ -73,9 +74,17 @@ pub struct GetPostListRequestQueries {
     #[ts(optional)]
     pub by: Option<GetPostListRequestQueriesOrderBy>,
     /// specify how to order the response
-    #[param(default = json!(Order::Asc))]
+    #[param(default = json!(GetPostListRequestQueriesOrderBy::default()))]
     #[ts(optional)]
     pub order: Option<Order>,
+    /// specify the `category_id` of the post that you would like to query.
+    #[param(example = json!("TftrScyl5wnThVDGo7LI95lERNb-ZC_T"), default = json!(""))]
+    #[serde(
+        default,
+        deserialize_with = "crate::constants::requests::empty_string_as_none"
+    )]
+    #[ts(optional)]
+    pub category: Option<String>,
     /// page of the queried data
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
     #[serde(
@@ -163,6 +172,7 @@ pub async fn handler(
 ) -> Result<HttpResponse, HttpError> {
     let default_by = GetPostListRequestQueriesOrderBy::default();
 
+    let category = &query.category;
     let announcement = query.announcement.unwrap_or(false);
     let category_based_announcement = query.category_based_announcement.unwrap_or(false);
     let by = query.by.as_ref().unwrap_or(&default_by);
@@ -196,7 +206,7 @@ pub async fn handler(
         inner join forum_post_replies on forum_posts.forum_post_id = forum_post_replies.forum_post_id
         where
             forum_posts.forum_post_is_global_announcement = $1 and
-            forum_posts.forum_post_is_category_based_announcement = $2
+            forum_posts.forum_post_is_category_based_announcement = $2 {}
         group by
             forum_posts.forum_post_id,
             users.user_username,
@@ -205,6 +215,11 @@ pub async fn handler(
         limit $3
         offset $4
         "##,
+        match category {
+            // this has to be $5 so we do not need to change anything prior
+            Some(_) => "and forum_posts.forum_category_id = $5",
+            None => "",
+        },
         match by {
             GetPostListRequestQueriesOrderBy::Time => "forum_posts.forum_post_created_timestamp",
             GetPostListRequestQueriesOrderBy::LatestActivity =>
@@ -222,10 +237,21 @@ pub async fn handler(
         )
         .await?;
 
+    let query_params: &[&(dyn ToSql + Sync)] = &[
+        &announcement,
+        &category_based_announcement,
+        &limit,
+        &offset,
+        &category,
+    ];
+
     let posts = client
         .query(
             &statement,
-            &[&announcement, &category_based_announcement, &limit, &offset],
+            match category {
+                Some(_) => query_params,
+                None => &query_params[0..4],
+            },
         )
         .await?;
 
