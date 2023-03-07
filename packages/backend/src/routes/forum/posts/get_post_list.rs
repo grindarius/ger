@@ -13,14 +13,14 @@ use utoipa::{
 use crate::{
     constants::{
         requests::{Order, SqlRange},
-        DEFAULT_ORDER, DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+        DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
     },
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
 
 /// Specify either how to sort the api by each order
-#[derive(Default, Deserialize, Serialize, ToSchema, TS)]
+#[derive(Default, Deserialize, Serialize, ToSchema, TS, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 #[ts(export)]
 pub enum GetPostListRequestQueriesOrderBy {
@@ -74,17 +74,22 @@ pub struct GetPostListRequestQueries {
     #[ts(optional)]
     pub by: Option<GetPostListRequestQueriesOrderBy>,
     /// specify how to order the response
-    #[param(default = json!(GetPostListRequestQueriesOrderBy::default()))]
+    #[param(default = json!(Order::default()))]
     #[ts(optional)]
     pub order: Option<Order>,
-    /// specify the `category_id` of the post that you would like to query.
-    #[param(example = json!("TftrScyl5wnThVDGo7LI95lERNb-ZC_T"), default = json!(""))]
+    /// specify the `category_representative_id` of the post that you would like to query.
+    #[param(example = json!("uncategorized"), default = json!(""))]
     #[serde(
         default,
         deserialize_with = "crate::constants::requests::empty_string_as_none"
     )]
     #[ts(optional)]
-    pub category: Option<String>,
+    pub category_representative_id: Option<String>,
+    /// specify only active or inactive posts. If not specified, will take both active and inactive
+    /// posts.
+    #[param(default = json!(true))]
+    #[ts(optional)]
+    pub active: Option<bool>,
     /// page of the queried data
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
     #[serde(
@@ -132,7 +137,7 @@ pub struct GetPostListResponseBodyInner {
     last_active_timestamp: time::OffsetDateTime,
 }
 
-/// Get a list of posts to be displayed in the forum's main page.
+/// Get a list of posts to be displayed in many forum pages.
 #[utoipa::path(
     get,
     path = "/forum/posts",
@@ -170,13 +175,12 @@ pub async fn handler(
     query: web::Query<GetPostListRequestQueries>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
-    let default_by = GetPostListRequestQueriesOrderBy::default();
-
-    let category = &query.category;
+    let category = query.category_representative_id.clone();
     let announcement = query.announcement.unwrap_or(false);
     let category_based_announcement = query.category_based_announcement.unwrap_or(false);
-    let by = query.by.as_ref().unwrap_or(&default_by);
-    let order = query.order.as_ref().unwrap_or(&DEFAULT_ORDER);
+    let by = query.by.unwrap_or_default();
+    let active = query.active;
+    let order = query.order.unwrap_or_default();
     let page = query.page.unwrap_or(DEFAULT_PAGE);
     let page_size = query.page_size.unwrap_or(DEFAULT_PAGE_SIZE);
 
@@ -206,18 +210,24 @@ pub async fn handler(
         inner join forum_post_replies on forum_posts.forum_post_id = forum_post_replies.forum_post_id
         where
             forum_posts.forum_post_is_global_announcement = $1 and
-            forum_posts.forum_post_is_category_based_announcement = $2 {}
+            forum_posts.forum_post_is_category_based_announcement = $2
+            {}
+            {}
         group by
             forum_posts.forum_post_id,
             users.user_username,
             forum_categories.forum_category_representative_id
-        order by {} {}
+        order by
+            {} {}
         limit $3
         offset $4
         "##,
         match category {
-            // this has to be $5 so we do not need to change anything prior
-            Some(_) => "and forum_posts.forum_category_id = $5",
+            Some(_) => "and forum_categories.forum_category_representative_id = $5",
+            None => "",
+        },
+        match active {
+            Some(_) => "and forum_posts.forum_post_is_active = $6",
             None => "",
         },
         match by {
@@ -227,33 +237,33 @@ pub async fn handler(
             GetPostListRequestQueriesOrderBy::Vote => "vote_count",
             GetPostListRequestQueriesOrderBy::View => "view_count",
         },
-        to_variant_name(order)?
+        to_variant_name(&order)?
     );
 
     let statement = client
         .prepare_typed_cached(
             &statement_query_string,
-            &[Type::BOOL, Type::BOOL, Type::INT4, Type::INT4],
+            &[
+                Type::BOOL,
+                Type::BOOL,
+                Type::INT4,
+                Type::INT4,
+                Type::TEXT,
+                Type::BOOL,
+            ],
         )
         .await?;
 
-    let query_params: &[&(dyn ToSql + Sync)] = &[
+    let query_params: [&(dyn ToSql + Sync); 6] = [
         &announcement,
         &category_based_announcement,
         &limit,
         &offset,
         &category,
+        &active,
     ];
 
-    let posts = client
-        .query(
-            &statement,
-            match category {
-                Some(_) => query_params,
-                None => &query_params[0..4],
-            },
-        )
-        .await?;
+    let posts = client.query(&statement, &query_params).await?;
 
     let posts = posts
         .iter()
