@@ -10,7 +10,7 @@ export function generateForumPostReplies (users: Array<Users>, posts: Array<Foru
   const postReplies = posts.map(p => {
     const replyCreatedTimestamp = faker.date.between(p.forum_post_created_timestamp, new Date()).toISOString()
 
-    return Array.from({ length: faker.datatype.number({ min: 0, max: 10 }) }, () => {
+    return Array.from({ length: faker.datatype.number({ min: 2, max: 10 }) }, () => {
       const reply: ForumPostReplies = {
         forum_post_reply_id: nanoid(NANOID_LENGTH),
         forum_post_id: p.forum_post_id,

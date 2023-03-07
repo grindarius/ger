@@ -55,6 +55,15 @@ export function generateForumCategories (users: Array<Users>): Array<ForumCatego
       user_id: faker.helpers.arrayElement(admins).user_id,
       forum_category_color_theme: faker.color.rgb({ prefix: '#' }),
       forum_category_created_timestamp: faker.date.past(10).toISOString()
+    },
+    {
+      forum_category_id: nanoid(NANOID_LENGTH),
+      forum_category_name: 'Global announcements',
+      forum_category_representative_id: slug('Global announcements'),
+      forum_category_description: 'all global announcements ever created',
+      user_id: faker.helpers.arrayElement(admins).user_id,
+      forum_category_color_theme: faker.color.rgb({ prefix: '#' }),
+      forum_category_created_timestamp: faker.date.past(10).toISOString()
     }
   ]
 }
