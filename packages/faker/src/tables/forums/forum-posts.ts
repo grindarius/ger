@@ -34,7 +34,7 @@ function generateNormalPosts (
       forum_post_created_timestamp: createdTimestamp.toISOString(),
       forum_post_last_active_timestamp: lastActiveDate.toISOString(),
       forum_post_is_category_based_announcement: false,
-      forum_post_deactivated_timestamp: !isActive ? faker.date.between(lastActiveDate, new Date()).toISOString() : null,
+      forum_post_deactivated_timestamp: !isActive ? lastActiveDate.toISOString() : null,
       forum_post_is_global_announcement: false
     }
 
