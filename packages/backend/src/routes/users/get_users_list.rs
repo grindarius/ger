@@ -1,23 +1,25 @@
 use actix_web::{web, HttpResponse};
 use serde::Deserialize;
+use ts_rs::TS;
 use utoipa::{IntoParams, ToSchema};
 
-use crate::{errors::HttpError, shared_app_data::SharedAppData};
+use crate::{
+    constants::{DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
+    errors::HttpError,
+    shared_app_data::SharedAppData,
+};
 
-#[derive(Deserialize, IntoParams, ToSchema)]
+#[derive(Deserialize, IntoParams, ToSchema, TS)]
+#[ts(export)]
 #[into_params(parameter_in = Query)]
 pub struct GetUsersListRequestQueries {
-    #[param(minimum = 1, default = json!(crate::constants::DEFAULT_PAGE))]
-    #[serde(
-        default,
-        deserialize_with = "crate::constants::requests::empty_string_as_none"
-    )]
+    #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
+    #[serde(deserialize_with = "crate::constants::requests::deserialize_page")]
+    #[ts(optional)]
     pub page: Option<i32>,
-    #[param(minimum = 1, default = json!(crate::constants::DEFAULT_PAGE_SIZE))]
-    #[serde(
-        default,
-        deserialize_with = "crate::constants::requests::empty_string_as_none"
-    )]
+    #[param(minimum = 1, maximum = 100, default = json!(DEFAULT_PAGE_SIZE))]
+    #[serde(deserialize_with = "crate::constants::requests::deserialize_page_size")]
+    #[ts(optional)]
     pub page_size: Option<i32>,
 }
 

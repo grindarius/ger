@@ -11,6 +11,8 @@ use crate::{constants::COMRAK_OPTIONS, errors::HttpError, shared_app_data::Share
 #[derive(Deserialize, ToSchema, IntoParams)]
 #[into_params(parameter_in = Path)]
 pub struct GetPostRequestParams {
+    /// Post's id in `nanoid` format.
+    #[param(example = json!("jQeNUrf5-dSIgjHmZK8w9tFLz9Q9MDv4"))]
     pub post_id: String,
 }
 
