@@ -1,6 +1,4 @@
-use std::{fmt::Display, str::FromStr};
-
-use serde::{de, Deserialize, Deserializer, Serialize};
+use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::json;
 use serde_variant::to_variant_name;
 use ts_rs::TS;
@@ -10,6 +8,8 @@ use utoipa::{
 };
 
 use crate::errors::HttpError;
+
+use super::{DEFAULT_PAGE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE};
 
 /// This struct has to be marked unused because it is just a template for access token and refresh
 /// token in the header. You would notice similar struct called [AuthenticatedClaims](crate::extractors::AuthenticatedClaims). The fact is
@@ -53,22 +53,52 @@ impl SqlRange {
 ///
 /// This is a workaround from [this issue](https://github.com/actix/actix-web/issues/1815)
 ///
-/// Solution taken from [serde-rs/serde#1425](https://github.com/serde-rs/serde/issues/1425#issuecomment-439728211)
+/// Solution taken from [serde-rs/serde#1425](https://github.com/serde-rs/serde/issues/1425#issuecomment-462282398)
+///
+/// Code take from [ruma-serde](https://github.com/ruma/ruma/blob/56801780b659be609bbcb9ce3701ed2676130304/crates/ruma-serde/src/strings.rs#L10-L32)
 pub fn empty_string_as_none<'de, D, T>(de: D) -> Result<Option<T>, D::Error>
 where
     D: Deserializer<'de>,
-    T: FromStr,
-    T::Err: Display,
+    T: Deserialize<'de>,
 {
     let opt = Option::<String>::deserialize(de)?;
     match opt.as_deref() {
         None | Some("") => Ok(None),
-        Some(s) => FromStr::from_str(s).map_err(de::Error::custom).map(Some),
+        Some(s) => T::deserialize(s.into_deserializer()).map(Some),
     }
 }
 
+/// Deserialize `page` property in any query parameter struct
+pub fn deserialize_page<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let number = i32::deserialize(deserializer)?;
+
+    if !number.is_positive() {
+        return Ok(Some(DEFAULT_PAGE));
+    }
+
+    return Ok(Some(number));
+}
+
+/// Deserialize `page_size` property in any query parameter struct. The number is being returned in
+/// `Option<i32>` because
+pub fn deserialize_page_size<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let number = i32::deserialize(deserializer)?;
+
+    if !number.is_positive() || number > MAX_PAGE_SIZE {
+        return Ok(Some(DEFAULT_PAGE_SIZE));
+    }
+
+    Ok(Some(number))
+}
+
 /// How to order the response that have return type as `Array`
-#[derive(Default, Serialize, Deserialize, ToSchema, TS)]
+#[derive(Default, Serialize, Deserialize, ToSchema, TS, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 #[ts(export)]
 pub enum Order {
