@@ -16,7 +16,7 @@ pub struct GetPostRequestParams {
     pub post_id: String,
 }
 
-#[derive(Serialize, ToSchema, FromRow, TS)]
+#[derive(Serialize, ToSchema, TS)]
 #[ts(export)]
 pub struct GetPostResponseBody {
     id: String,
@@ -29,6 +29,7 @@ pub struct GetPostResponseBody {
     #[ts(type = "string")]
     created_timestamp: time::OffsetDateTime,
     category_id: String,
+    category_name: String,
     category_representative_id: String,
     view_count: i64,
     vote_count: i64,
@@ -44,7 +45,8 @@ impl Default for GetPostResponseBody {
             content: "<p>go on gooogle.com</p>".to_string(),
             created_timestamp: time::OffsetDateTime::from_unix_timestamp(1_546_600_000).unwrap(),
             category_id: "EmYYiZHI_P2ZdyH34p_S3t5Lwq8eENJX".to_string(),
-            category_representative_id: "homework".to_string(),
+            category_name: "Homeworks".to_string(),
+            category_representative_id: "homeworks".to_string(),
             view_count: 15,
             vote_count: 30,
         }
@@ -60,7 +62,7 @@ impl Default for GetPostResponseBody {
     responses(
         (
             status = 200,
-            description = "successfully get list of forums",
+            description = "successfully get post data",
             body = GetPostResponseBody,
             example = json!(GetPostResponseBody::default())
         ),
@@ -107,6 +109,7 @@ pub async fn handler(
                 forum_posts.forum_post_content as content,
                 forum_posts.forum_post_created_timestamp as created_timestamp,
                 forum_posts.forum_category_id as category_id,
+                forum_categories.forum_category_name as category_name,
                 forum_categories.forum_category_representative_id as category_representative_id,
                 count(distinct forum_post_views.user_id) as view_count,
                 sum(forum_post_votes.forum_post_vote_increment) as vote_count
@@ -126,7 +129,15 @@ pub async fn handler(
         )
         .await?;
 
-    let row = client.query_opt(&statement, &[&params.post_id]).await?;
+    let row = client
+        .query_opt(&statement, &[&params.post_id])
+        .await
+        .map_err(|e| {
+            tracing::error!("{}", e);
+            HttpError::InternalServerError {
+                cause: e.to_string(),
+            }
+        })?;
 
     if let Some(r) = row {
         let raw_content = r.try_get::<&str, String>("content")?;
@@ -138,6 +149,7 @@ pub async fn handler(
             username: r.try_get::<&str, String>("username")?,
             name: r.try_get::<&str, String>("name")?,
             category_id: r.try_get::<&str, String>("category_id")?,
+            category_name: r.try_get::<&str, String>("category_name")?,
             category_representative_id: r.try_get::<&str, String>("category_representative_id")?,
             content: parsed_content,
             created_timestamp: r.try_get::<&str, time::OffsetDateTime>("created_timestamp")?,
