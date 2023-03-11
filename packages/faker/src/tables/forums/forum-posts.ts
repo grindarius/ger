@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid'
 import { faker } from '@faker-js/faker'
 
 import type { ForumCategories, ForumPosts, Users } from '../../database.js'
-import { NANOID_LENGTH } from '../../generals.js'
+import { generateMarkdownContent, NANOID_LENGTH } from '../../generals.js'
 
 export function generateForumPosts (users: Array<Users>, categories: Array<ForumCategories>): Array<ForumPosts> {
   const normalPosts = generateNormalPosts(users, categories)
@@ -29,7 +29,7 @@ function generateNormalPosts (
         forum_post_name: faker.commerce.productName(),
         user_id: faker.helpers.arrayElement(users).user_id,
         forum_category_id: c.forum_category_id,
-        forum_post_content: faker.lorem.paragraph(100).replaceAll(',', ''),
+        forum_post_content: generateMarkdownContent() + faker.lorem.paragraph(100).replaceAll(',', ''),
         forum_post_is_active: isActive,
         forum_post_created_timestamp: createdTimestamp.toISOString(),
         forum_post_last_active_timestamp: lastActiveDate.toISOString(),

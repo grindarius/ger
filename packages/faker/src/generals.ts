@@ -114,3 +114,83 @@ export async function insert<T extends object> (contents: Array<T>, tableName: s
     await pool.query(`insert into "${tableName}" (${columnString}) values (${columnValues})`, rowData)
   }
 }
+
+export function generateMarkdownContent (): string {
+  const headers = Array.from({ length: 6 }, (_, i) => `${' '.padStart(i + 1, '#')} H${i + 1}` + '\n')
+  const emphasises = `*italics* and _italics_
+    **strong emphasis** and __strong emphasis__
+    **combined _emphasis_**
+    ~~strikethrough~~
+    `
+
+  const lists = Array.from({ length: 3 }, (_, i) => faker.helpers.fake(`${i + 1}. {{commerce.productName}}`) + '\n')
+  const links = `[inline link](https://google.com)
+    [inline with title](https://google.com "Google's Homepage")
+    [reference link](reddit)
+    or use [twitter]
+
+    [reddit]: https://reddit.com
+    [twitter]: https://twitter.com
+    `
+  const inlineCode = 'inline `code` with `backticks`'
+  const codeLang = '```javascript\n' +
+    'function add(one, other) {\n' +
+    '  return one + other\n' +
+    '}\n' +
+    '```\n\n' +
+    '```\n' +
+    '$ exec "$SHELL"\n' +
+    '```\n\n'
+
+  const images = '![inline image](https://imgur.com/HFD0Sy0 "look ka tis")'
+
+  const footnotes = 'simple footnotes[^1]\n\n\n[^1]: mi refrences.'
+
+  const tables = `
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+`
+
+  const blockquotes = '> quotes this text pls\n\n' +
+    'break\n\n' +
+    '> another quotes\n\n'
+
+  const inlineHTML = `
+<dl>
+  <dt>Definition list</dt>
+  <dd> lollllll</dd>
+
+  <dt>Definition list</dt>
+  <dd> lollllll</dd>
+</dl>
+`
+
+  const rules = '---\n\n' +
+    '***\n\n' +
+    '___\n\n'
+
+  return [
+    headers,
+    emphasises,
+    lists,
+    links,
+    inlineCode,
+    codeLang,
+    images,
+    footnotes,
+    tables,
+    blockquotes,
+    inlineHTML,
+    rules
+  ].join('\n')
+}
+
+export function generateShortBlockquote (): string {
+  const blockquote = faker.helpers.fake('> {{lorem.paragraph(20)}}')
+  const normalReply = faker.lorem.paragraph(10)
+
+  return [blockquote, normalReply].join('\n\n')
+}
