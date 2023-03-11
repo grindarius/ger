@@ -70,7 +70,6 @@ lazy_static! {
 
         options
     };
-    pub static ref DEFAULT_ORDER: Order = Order::default();
 }
 
 /// difference between AD (Anno domini) year and BE (Bhuddist era) year.
@@ -102,6 +101,9 @@ pub const DEFAULT_PAGE: i32 = 1;
 
 /// Default page size when page size is missing
 pub const DEFAULT_PAGE_SIZE: i32 = 10;
+
+/// Default max page size
+pub const MAX_PAGE_SIZE: i32 = 100;
 
 /// Default trending window for
 /// [get_trending_posts_list](crate::routes::forum::get_trending_posts_list::handler)

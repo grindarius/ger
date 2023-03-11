@@ -29,6 +29,7 @@ const fetchCategories = async (page: number): Promise<GetCategoriesListResponseB
 const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody> => {
   const queries: GetPostListRequestQueries = {
     announcement: true,
+    active: true,
     category_based_announcement: false,
     by: 'time',
     order: 'desc',
@@ -112,6 +113,7 @@ function Forum ({ initialAnnouncements, initialCategories }: ForumOptions): JSX.
                       replyCount={a.reply_count}
                       viewCount={a.view_count}
                       lastActiveTimestamp={a.last_active_timestamp}
+                      isActive={a.is_active}
                     />
                   )
                 })

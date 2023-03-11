@@ -148,6 +148,10 @@ async fn main() -> std::io::Result<()> {
                 "/forum/categories",
                 web::get().to(crate::routes::forum::categories::get_categories_list::handler),
             )
+            .route(
+                "/forum/categories/{category_representative_id}",
+                web::get().to(crate::routes::forum::categories::get_category::handler),
+            )
             .service(
                 SwaggerUi::new("/documentation/{_:.*}")
                     .url("/openapi/openapi.json", openapi.clone()),

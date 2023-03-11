@@ -18,7 +18,8 @@ use crate::{
         crate::routes::forum::posts::get_trending_posts_list::handler,
         crate::routes::forum::posts::get_post_list::handler,
         crate::routes::forum::posts::get_post_replies::handler,
-        crate::routes::forum::categories::get_categories_list::handler
+        crate::routes::forum::categories::get_categories_list::handler,
+        crate::routes::forum::categories::get_category::handler
     ),
     components(
         schemas(
@@ -50,7 +51,9 @@ use crate::{
             crate::routes::forum::posts::get_post_replies::GetPostRepliesResponseBodyInner,
             crate::routes::forum::categories::get_categories_list::GetCategoriesListRequestQueries,
             crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBody,
-            crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBodyInner
+            crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBodyInner,
+            crate::routes::forum::categories::get_category::GetCategoryRequestParams,
+            crate::routes::forum::categories::get_category::GetCategoryResponseBody
         )
     ),
     modifiers(

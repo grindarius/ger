@@ -22,6 +22,8 @@ pub enum HttpError {
     UserNotFound,
     #[display(fmt = "post not found")]
     PostNotFound,
+    #[display(fmt = "category not found")]
+    CategoryNotFound,
     #[display(fmt = "password is incorrect")]
     IncorrectPassword,
     #[display(fmt = "incoming data is empty")]
@@ -49,6 +51,7 @@ impl HttpError {
             HttpError::InternalServerError { .. } => "internal server error".to_string(),
             HttpError::UserNotFound => "user not found".to_string(),
             HttpError::PostNotFound => "post not found".to_string(),
+            HttpError::CategoryNotFound => "category not found".to_string(),
             HttpError::IncorrectPassword => "incorrect password".to_string(),
             HttpError::NoData => "no data".to_string(),
             HttpError::Forbidden => "forbidden".to_string(),
@@ -76,6 +79,7 @@ impl HttpError {
             HttpError::InternalServerError { .. } => StatusCode::INTERNAL_SERVER_ERROR,
             HttpError::UserNotFound => StatusCode::NOT_FOUND,
             HttpError::PostNotFound => StatusCode::NOT_FOUND,
+            HttpError::CategoryNotFound => StatusCode::NOT_FOUND,
             HttpError::IncorrectPassword => StatusCode::BAD_REQUEST,
             HttpError::NoData => StatusCode::BAD_REQUEST,
             HttpError::Forbidden => StatusCode::FORBIDDEN,

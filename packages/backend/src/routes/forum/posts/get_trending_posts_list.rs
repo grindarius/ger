@@ -29,7 +29,7 @@ pub struct GetTrendingPostsListRequestQueries {
     )]
     pub page: Option<i32>,
     /// How much of a post to query in one time.
-    #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
+    #[param(minimum = 1, maximum = 100, default = json!(DEFAULT_PAGE_SIZE))]
     #[serde(
         default,
         deserialize_with = "crate::constants::requests::empty_string_as_none"

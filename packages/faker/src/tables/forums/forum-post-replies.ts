@@ -10,7 +10,7 @@ export function generateForumPostReplies (users: Array<Users>, posts: Array<Foru
   const postReplies = posts.map(p => {
     const replyCreatedTimestamp = faker.date.between(p.forum_post_created_timestamp, new Date()).toISOString()
 
-    return Array.from({ length: faker.datatype.number({ min: 0, max: 10 }) }, () => {
+    return Array.from({ length: faker.datatype.number({ min: 2, max: 10 }) }, () => {
       const reply: ForumPostReplies = {
         forum_post_reply_id: nanoid(NANOID_LENGTH),
         forum_post_id: p.forum_post_id,
@@ -32,16 +32,25 @@ export function generateForumPostReplies (users: Array<Users>, posts: Array<Foru
       return dayjs(b.forum_post_reply_created_timestamp).unix() - dayjs(a.forum_post_reply_created_timestamp).unix()
     })
 
-    if (latestPostTime.length !== 0) {
-      if (latestPostTime[0] == null) {
-        return p
-      }
-
-      const postWithNewLastUpdatedTimestamp: ForumPosts = { ...p, forum_post_last_active_timestamp: latestPostTime[0].forum_post_reply_created_timestamp }
-      return postWithNewLastUpdatedTimestamp
+    // If the post does not have any comments, return normal `post`
+    if (latestPostTime[0] == null) {
+      return p
     }
 
-    return p
+    // update the post with new latest updated time
+    let updatedPost: ForumPosts = { ...p, forum_post_last_active_timestamp: latestPostTime[0].forum_post_reply_created_timestamp }
+
+    // if the post is locked, update locked timestamp with latest post.
+    if (!p.forum_post_is_active) {
+      updatedPost = {
+        ...updatedPost,
+        forum_post_deactivated_timestamp: dayjs(latestPostTime[0].forum_post_reply_created_timestamp)
+          .add(faker.datatype.number({ min: 1, max: 10 }), 'minutes')
+          .toISOString()
+      }
+    }
+
+    return updatedPost
   })
 
   return [postsWithUpdatedLastActiveTimestamp, postReplies]

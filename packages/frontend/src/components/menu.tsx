@@ -41,6 +41,12 @@ export default function Menu ({ children }: { children: ReactElement }): JSX.Ele
             </div>
           </div>
           { children }
+          <footer className="footer footer-center p-10 text-natural-content">
+            <div>
+              <p>Copyright © 2023 - All rights reserved by <a className="link link-hover" href="https://github.com/grindarius">grindarius</a></p>
+            </div>
+            <div></div>
+          </footer>
         </div>
         <div className="drawer-side">
           <label htmlFor="main-drawer" className="drawer-overlay"></label>

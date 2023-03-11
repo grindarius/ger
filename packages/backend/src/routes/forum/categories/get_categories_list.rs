@@ -17,17 +17,11 @@ use crate::{
 #[ts(export)]
 pub struct GetCategoriesListRequestQueries {
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
-    #[serde(
-        default,
-        deserialize_with = "crate::constants::requests::empty_string_as_none"
-    )]
+    #[serde(deserialize_with = "crate::constants::requests::deserialize_page")]
     #[ts(optional)]
     pub page: Option<i32>,
-    #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
-    #[serde(
-        default,
-        deserialize_with = "crate::constants::requests::empty_string_as_none"
-    )]
+    #[param(minimum = 1, maximum = 100, default = json!(DEFAULT_PAGE_SIZE))]
+    #[serde(deserialize_with = "crate::constants::requests::deserialize_page_size")]
     #[ts(optional)]
     pub page_size: Option<i32>,
 }
@@ -75,8 +69,10 @@ pub async fn handler(
     query: web::Query<GetCategoriesListRequestQueries>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
-    let page = query.page.unwrap_or(DEFAULT_PAGE);
-    let page_size = query.page_size.unwrap_or(DEFAULT_PAGE_SIZE);
+    // Safe unwrap for both variables thanks to the custom deserializer
+    let page = query.page.unwrap();
+    let page_size = query.page_size.unwrap();
+
     let SqlRange { limit, offset } = SqlRange::from_page(page, page_size)?;
 
     let client = data.pool.get().await?;
