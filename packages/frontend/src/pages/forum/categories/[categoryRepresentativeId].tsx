@@ -1,6 +1,9 @@
 import ky from 'ky-universal'
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
+import type { ParsedUrlQuery } from 'querystring'
+import { useState } from 'react'
 
 import Row from '@/components/row'
 import type { GetCategoryResponseBody } from '@/types/GetCategoryResponseBody'
@@ -31,7 +34,7 @@ async function getCategoryAnnouncements (categoryRepresentativeId: string): Prom
     announcement: false,
     category_based_announcement: true,
     order: 'desc',
-    by: 'time'
+    by: 'latest_activity'
   }
 
   const searchParams = new URLSearchParams(queries as Record<string, string>)
@@ -57,7 +60,7 @@ async function getPostsByCategory (categoryRepresentativeId: string, page: numbe
     category_representative_id: categoryRepresentativeId,
     announcement: false,
     order: 'desc',
-    by: 'time',
+    by: 'latest_activity',
     category_based_announcement: false
   }
 
@@ -78,10 +81,13 @@ async function getPostsByCategory (categoryRepresentativeId: string, page: numbe
 }
 
 export async function getServerSideProps (
-  context: GetServerSidePropsContext<{ categoryRepresentativeId: string }>
+  context: GetServerSidePropsContext<{ categoryRepresentativeId: string, page?: string }>
 ): Promise<GetServerSidePropsResult<CategoryOptions>> {
-  const initialPosts = await getPostsByCategory(context.params?.categoryRepresentativeId ?? '', 1)
-  const metadata = await getCategoryMetadata(context.params?.categoryRepresentativeId ?? '')
+  const id = context?.params?.categoryRepresentativeId ?? ''
+  const page = context?.params?.page == null ? 1 : Number(context?.params?.page)
+
+  const initialPosts = await getPostsByCategory(id, page)
+  const metadata = await getCategoryMetadata(id)
 
   return {
     props: {
@@ -96,8 +102,58 @@ interface CategoryOptions {
   metadata: GetCategoryResponseBody
 }
 
+function getStringParam (query: ParsedUrlQuery, keyName: string): string {
+  if (query?.[keyName] == null) {
+    return ''
+  }
+
+  if (Array.isArray(query[keyName])) {
+    const firstString = query?.[keyName]?.[0]
+    return firstString ?? ''
+  }
+
+  return query?.[keyName] as string ?? ''
+}
+
 function Category ({ initialPosts, metadata }: CategoryOptions): JSX.Element {
   const headTitle = `${metadata.name} • ger`
+  const router = useRouter()
+  const initialPage = router.query?.['page'] == null ? 1 : Number(router.query?.['page'])
+  const representativeId = getStringParam(router.query, 'categoryRepresentativeId')
+
+  const [page, setPage] = useState<number>(initialPage)
+  const [posts, setPosts] = useState<GetPostListResponseBody>(initialPosts)
+
+  const nextPage = (): void => {
+    const next = page + 1
+    setPage(next)
+    getPostsByCategory(representativeId, next).then(p => {
+      setPosts(p)
+      // eslint-disable-next-line
+      router.push(new URL(`/forum/categories/${representativeId}?page=${next}`, 'http://localhost:3000'), undefined, { shallow: true })
+    }).catch(e => {
+      console.error(e)
+      setPosts({ posts: [] })
+    })
+  }
+
+  const previousPage = (): void => {
+    const prev = page - 1
+
+    if (prev <= 0) {
+      return
+    }
+
+    setPage(prev)
+    getPostsByCategory(representativeId, prev).then(p => {
+      setPosts(p)
+      // eslint-disable-next-line
+      router.push(new URL(`/forum/categories/${representativeId}?page=${prev}`, 'http://localhost:3000'), undefined, { shallow: true })
+    }).catch(e => {
+      console.error(e)
+      setPosts({ posts: [] })
+    })
+  }
 
   return (
     <>
@@ -110,7 +166,7 @@ function Category ({ initialPosts, metadata }: CategoryOptions): JSX.Element {
         <h3 className="text-4xl text-current font-bold mb-4">
           {metadata.name}
         </h3>
-        <h3 className="text-xl text-current">
+        <h3 className="text-2xl text-current">
           {metadata.description}
         </h3>
         <div className="overflow-x-auto mb-4">
@@ -125,7 +181,7 @@ function Category ({ initialPosts, metadata }: CategoryOptions): JSX.Element {
             </thead>
             <tbody>
               {
-                initialPosts.posts.map(a => {
+                posts.posts.map(a => {
                   return (
                     <Row
                       key={a.id}
@@ -136,12 +192,18 @@ function Category ({ initialPosts, metadata }: CategoryOptions): JSX.Element {
                       replyCount={a.reply_count}
                       viewCount={a.view_count}
                       lastActiveTimestamp={a.last_active_timestamp}
+                      isActive={a.is_active}
                     />
                   )
                 })
               }
             </tbody>
           </table>
+        </div>
+
+        <div className="btn-group w-full justify-center">
+          <button className="btn" onClick={previousPage}>Previous</button>
+          <button className="btn" onClick={nextPage}>Next</button>
         </div>
       </main>
     </>
