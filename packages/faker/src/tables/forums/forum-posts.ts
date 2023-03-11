@@ -6,8 +6,8 @@ import { faker } from '@faker-js/faker'
 import type { ForumCategories, ForumPosts, Users } from '../../database.js'
 import { NANOID_LENGTH } from '../../generals.js'
 
-export function generateForumPosts (users: Array<Users>, categories: Array<ForumCategories>, amount = 200): Array<ForumPosts> {
-  const normalPosts = generateNormalPosts(users, categories, amount)
+export function generateForumPosts (users: Array<Users>, categories: Array<ForumCategories>): Array<ForumPosts> {
+  const normalPosts = generateNormalPosts(users, categories)
   const categoryBased = generateCategoryBasedAnnouncements(users, categories)
   const globalAnnouncements = generateGlobalAnnouncements(users, categories)
 
@@ -16,30 +16,31 @@ export function generateForumPosts (users: Array<Users>, categories: Array<Forum
 
 function generateNormalPosts (
   users: Array<Users>,
-  categories: Array<ForumCategories>,
-  amount = 200
+  categories: Array<ForumCategories>
 ): Array<ForumPosts> {
-  return Array.from({ length: amount }, () => {
-    const createdTimestamp = faker.date.between(dayjs().subtract(8, 'years').toDate(), new Date())
-    const isActive = faker.datatype.boolean()
-    const lastActiveDate = faker.date.between(createdTimestamp, new Date())
+  return categories.map(c => {
+    return Array.from({ length: faker.datatype.number({ min: 50, max: 100 }) }, () => {
+      const createdTimestamp = faker.date.between(dayjs().subtract(8, 'years').toDate(), new Date())
+      const isActive = faker.datatype.boolean()
+      const lastActiveDate = faker.date.between(createdTimestamp, new Date())
 
-    const post: ForumPosts = {
-      forum_post_id: nanoid(NANOID_LENGTH),
-      forum_post_name: faker.commerce.productName(),
-      user_id: faker.helpers.arrayElement(users).user_id,
-      forum_category_id: faker.helpers.arrayElement(categories).forum_category_id,
-      forum_post_content: faker.lorem.paragraph(100).replaceAll(',', ''),
-      forum_post_is_active: isActive,
-      forum_post_created_timestamp: createdTimestamp.toISOString(),
-      forum_post_last_active_timestamp: lastActiveDate.toISOString(),
-      forum_post_is_category_based_announcement: false,
-      forum_post_deactivated_timestamp: !isActive ? lastActiveDate.toISOString() : null,
-      forum_post_is_global_announcement: false
-    }
+      const post: ForumPosts = {
+        forum_post_id: nanoid(NANOID_LENGTH),
+        forum_post_name: faker.commerce.productName(),
+        user_id: faker.helpers.arrayElement(users).user_id,
+        forum_category_id: c.forum_category_id,
+        forum_post_content: faker.lorem.paragraph(100).replaceAll(',', ''),
+        forum_post_is_active: isActive,
+        forum_post_created_timestamp: createdTimestamp.toISOString(),
+        forum_post_last_active_timestamp: lastActiveDate.toISOString(),
+        forum_post_is_category_based_announcement: false,
+        forum_post_deactivated_timestamp: !isActive ? lastActiveDate.toISOString() : null,
+        forum_post_is_global_announcement: false
+      }
 
-    return post
-  })
+      return post
+    })
+  }).flat()
 }
 
 function generateCategoryBasedAnnouncements (
