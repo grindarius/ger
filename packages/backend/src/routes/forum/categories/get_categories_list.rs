@@ -69,8 +69,10 @@ pub async fn handler(
     query: web::Query<GetCategoriesListRequestQueries>,
     data: web::Data<SharedAppData>,
 ) -> Result<HttpResponse, HttpError> {
-    let page = query.page;
-    let page_size = query.page_size;
+    // Safe unwrap for both variables thanks to the custom deserializer
+    let page = query.page.unwrap();
+    let page_size = query.page_size.unwrap();
+
     let SqlRange { limit, offset } = SqlRange::from_page(page, page_size)?;
 
     let client = data.pool.get().await?;

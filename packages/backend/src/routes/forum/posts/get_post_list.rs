@@ -126,6 +126,10 @@ pub struct GetPostListResponseBodyInner {
     vote_count: i64,
     #[ts(type = "number")]
     reply_count: i64,
+    is_active: bool,
+    #[serde(with = "time::serde::rfc3339::option")]
+    #[ts(type = "string")]
+    deactivated_timestamp: Option<time::OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339")]
     #[ts(type = "string")]
     last_active_timestamp: time::OffsetDateTime,
@@ -175,8 +179,10 @@ pub async fn handler(
     let by = query.by.unwrap_or_default();
     let active = query.active;
     let order = query.order.unwrap_or_default();
-    let page = query.page;
-    let page_size = query.page_size;
+
+    // Safe unwrap for both of the query params because the deserializer does not emit `None`
+    let page = query.page.unwrap();
+    let page_size = query.page_size.unwrap();
 
     let SqlRange { limit, offset } = SqlRange::from_page(page, page_size)?;
 
@@ -195,7 +201,9 @@ pub async fn handler(
             sum(forum_post_votes.forum_post_vote_increment) as vote_count,
             forum_posts.forum_post_created_timestamp as created_timestamp,
             forum_posts.forum_post_last_active_timestamp as last_active_timestamp,
-            count(distinct forum_post_replies.forum_post_reply_id) as reply_count
+            count(distinct forum_post_replies.forum_post_reply_id) as reply_count,
+            forum_posts.forum_post_is_active as is_active,
+            forum_posts.forum_post_deactivated_timestamp as deactivated_timestamp
         from forum_posts
         inner join users on forum_posts.user_id = users.user_id
         inner join forum_post_views on forum_posts.forum_post_id = forum_post_views.forum_post_id
