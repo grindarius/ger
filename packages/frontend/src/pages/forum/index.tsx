@@ -11,7 +11,7 @@ import type { GetCategoriesListResponseBody } from '@/types/GetCategoriesListRes
 import type { GetPostListRequestQueries } from '@/types/GetPostListRequestQueries'
 import type { GetPostListResponseBody } from '@/types/GetPostListResponseBody'
 
-const fetchCategories = async (page: number): Promise<GetCategoriesListResponseBody> => {
+async function fetchCategories (page: number): Promise<GetCategoriesListResponseBody> {
   const queries: GetCategoriesListRequestQueries = {
     page,
     // way more than the categories amount
@@ -26,7 +26,7 @@ const fetchCategories = async (page: number): Promise<GetCategoriesListResponseB
   return response
 }
 
-const fetchAnnouncements = async (page: number): Promise<GetPostListResponseBody> => {
+async function fetchAnnouncements (page: number): Promise<GetPostListResponseBody> {
   const queries: GetPostListRequestQueries = {
     announcement: true,
     active: true,
