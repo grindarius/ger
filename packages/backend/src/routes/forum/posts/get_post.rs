@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse};
 use comrak::markdown_to_html;
-use ger_from_row::FromRow;
 use postgres_types::Type;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
