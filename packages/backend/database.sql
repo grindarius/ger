@@ -411,7 +411,7 @@ create table forum_post_replies (
 create table forum_post_reply_votes (
     forum_post_reply_id text not null,
     user_id text not null,
-    forum_post_reply_vote_voted_timestamp timestamptz not null default now(),
+    forum_post_reply_vote_created_timestamp timestamptz not null default now(),
     forum_post_reply_vote_increment smallint not null,
     primary key (forum_post_reply_id, user_id),
     foreign key (user_id) references users(user_id),
@@ -430,7 +430,7 @@ create table forum_post_views (
 create table forum_post_votes (
     forum_post_id text not null,
     user_id text not null,
-    forum_post_vote_voted_timestamp timestamptz not null default now(),
+    forum_post_vote_created_timestamp timestamptz not null default now(),
     -- either 1 or -1 for upvote or downvote.
     forum_post_vote_increment smallint not null,
     primary key (forum_post_id, user_id),
