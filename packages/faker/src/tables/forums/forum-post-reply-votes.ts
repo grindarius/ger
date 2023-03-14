@@ -10,7 +10,7 @@ export function generateForumPostReplyVotes (users: Array<Users>, replies: Array
       const vote: ForumPostReplyVotes = {
         forum_post_reply_id: r.forum_post_reply_id,
         user_id: u.user_id,
-        forum_post_reply_vote_voted_timestamp: faker.date.between(r.forum_post_reply_created_timestamp, new Date()).toISOString(),
+        forum_post_reply_vote_created_timestamp: faker.date.between(r.forum_post_reply_created_timestamp, new Date()).toISOString(),
         forum_post_reply_vote_increment: faker.datatype.boolean() ? 1 : -1
       }
 

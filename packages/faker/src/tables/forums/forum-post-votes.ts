@@ -21,7 +21,7 @@ export function generateForumPostVotes (
       const pv: ForumPostVotes = {
         forum_post_id: p.forum_post_id,
         user_id: u.user_id,
-        forum_post_vote_voted_timestamp: faker.date.between(p.forum_post_created_timestamp, deactivatedDate).toISOString(),
+        forum_post_vote_created_timestamp: faker.date.between(p.forum_post_created_timestamp, deactivatedDate).toISOString(),
         forum_post_vote_increment: faker.datatype.boolean() ? 1 : -1
       }
 
