@@ -11,14 +11,18 @@ use utoipa::{
 };
 
 use crate::{
-    constants::{requests::SqlRange, DEFAULT_PAGE, DEFAULT_PAGE_SIZE},
+    constants::{
+        requests::{Order, SqlRange},
+        DEFAULT_PAGE, DEFAULT_PAGE_SIZE,
+    },
     errors::HttpError,
     shared_app_data::SharedAppData,
 };
 
 /// Which order of the replies to be applied to.
-#[derive(Default, Serialize, Deserialize, ToSchema)]
+#[derive(Default, Serialize, Deserialize, ToSchema, TS, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
+#[ts(export)]
 pub enum GetPostRepliesRequestQueriesOrderBy {
     /// orders the replies from least recent to most recent.
     #[default]
@@ -48,23 +52,28 @@ impl Modify for GetPostRepliesRequestQueriesOrderByModifier {
     }
 }
 
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, ToSchema, IntoParams, TS)]
 #[into_params(parameter_in = Query)]
+#[ts(export)]
 pub struct GetPostRepliesRequestQueries {
+    /// page of the queried data. If less than `1`, will default to `1`
     #[param(minimum = 1, default = json!(DEFAULT_PAGE))]
-    #[serde(
-        default,
-        deserialize_with = "crate::constants::requests::empty_string_as_none"
-    )]
-    page: Option<i32>,
-    #[param(minimum = 1, default = json!(DEFAULT_PAGE_SIZE))]
-    #[serde(
-        default,
-        deserialize_with = "crate::constants::requests::empty_string_as_none"
-    )]
-    page_size: Option<i32>,
-    /// Which kind of sorting to apply to the request
+    #[serde(deserialize_with = "crate::constants::requests::deserialize_page")]
+    #[ts(optional)]
+    pub page: Option<i32>,
+    /// size of page for each query. will use default page size if it is out of bounds.
+    #[param(minimum = 1, maximum = 100, default = json!(DEFAULT_PAGE_SIZE))]
+    #[serde(deserialize_with = "crate::constants::requests::deserialize_page_size")]
+    #[ts(optional)]
+    pub page_size: Option<i32>,
+    /// Which kind of sorting to apply to the response.
+    #[param(default = json!(GetPostRepliesRequestQueriesOrderBy::default()))]
+    #[ts(optional)]
     by: Option<GetPostRepliesRequestQueriesOrderBy>,
+    /// Specify the order of the data that you wanted to query.
+    #[param(default = json!(Order::default()))]
+    #[ts(optional)]
+    order: Option<Order>,
 }
 
 #[derive(Deserialize, ToSchema, IntoParams)]
@@ -90,6 +99,9 @@ pub struct GetPostRepliesResponseBodyInner {
     #[serde(with = "time::serde::rfc3339")]
     #[ts(type = "string")]
     created_timestamp: time::OffsetDateTime,
+    #[schema(value_type = String)]
+    #[serde(serialize_with = "crate::constants::responses::serialize_bigint_to_string")]
+    #[ts(type = "string")]
     vote_count: i64,
 }
 
@@ -134,10 +146,8 @@ pub async fn handler(
 ) -> Result<HttpResponse, HttpError> {
     let page = query.page.unwrap_or(DEFAULT_PAGE);
     let page_size = query.page_size.unwrap_or(DEFAULT_PAGE_SIZE);
-    let by = query
-        .by
-        .as_ref()
-        .unwrap_or(&GetPostRepliesRequestQueriesOrderBy::Time);
+    let by = query.by.unwrap_or_default();
+    let order = query.order.unwrap_or_default();
     let SqlRange { limit, offset } = SqlRange::from_page(page, page_size)?;
 
     let client = data.pool.get().await?;
@@ -159,15 +169,16 @@ pub async fn handler(
             forum_post_replies.forum_post_reply_id,
             users.user_username
         order by
-            {}
+            {} {}
         limit $2
         offset $3
         "##,
         match by {
-            &GetPostRepliesRequestQueriesOrderBy::Time =>
-                "forum_post_replies.forum_post_reply_created_timestamp asc",
-            &GetPostRepliesRequestQueriesOrderBy::Vote => "vote_count desc",
-        }
+            GetPostRepliesRequestQueriesOrderBy::Time =>
+                "forum_post_replies.forum_post_reply_created_timestamp",
+            GetPostRepliesRequestQueriesOrderBy::Vote => "vote_count",
+        },
+        to_variant_name(&order).unwrap()
     );
 
     let statement = client
