@@ -1,6 +1,10 @@
 use crate::{
-    constants::requests::OrderModifier, openapi::security_addon::SecurityAddon,
-    routes::forum::posts::get_post_list::GetPostListRequestQueriesOrderByModifier,
+    constants::requests::OrderModifier,
+    openapi::security_addon::SecurityAddon,
+    routes::forum::posts::{
+        get_post_list::GetPostListRequestQueriesOrderByModifier,
+        get_post_replies::GetPostRepliesRequestQueriesOrderByModifier,
+    },
 };
 
 #[derive(utoipa::OpenApi)]
@@ -49,6 +53,7 @@ use crate::{
             crate::routes::forum::posts::get_post_replies::GetPostRepliesRequestQueries,
             crate::routes::forum::posts::get_post_replies::GetPostRepliesResponseBody,
             crate::routes::forum::posts::get_post_replies::GetPostRepliesResponseBodyInner,
+            crate::routes::forum::posts::get_post_replies::GetPostRepliesRequestQueriesOrderBy,
             crate::routes::forum::categories::get_categories_list::GetCategoriesListRequestQueries,
             crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBody,
             crate::routes::forum::categories::get_categories_list::GetCategoriesListResponseBodyInner,
@@ -59,6 +64,7 @@ use crate::{
     modifiers(
         &SecurityAddon,
         &GetPostListRequestQueriesOrderByModifier,
+        &GetPostRepliesRequestQueriesOrderByModifier,
         &OrderModifier
     ),
     tags(
